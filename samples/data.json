@@ -1,0 +1,18 @@
+{
+  "agent_applicant": {
+    "agent_name": "Rick P Cline Agency Inc",
+    "agent_number": "RPC-001",
+    "agent_phone": "303-555-1212",
+    "applicant_name": "ACME Plumbing LLC",
+    "mailing_address": "123 Main St, Denver, CO 80202",
+    "applicant_phone": "720-555-2020",
+    "web_address": "www.acmeplumb.com",
+    "policy_from": "2026-01-01",
+    "policy_to": "2027-01-01",
+    "business_structure": "LLC",
+    "locations": [
+      "123 Main St, Denver, CO 80202",
+      "Warehouse: 45 Elm Ave, Aurora, CO 80012"
+    ]
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "meta": {
+    "form": "contractor_supp",
+    "version": "1.0.0"
+  },
+  "sections": [
+    "agent_applicant",
+    "experience_licensing",
+    "work_mix",
+    "residential_multi",
+    "sub_controls",
+    "remodel_wrap_safety",
+    "ops_exposures",
+    "prof_equip_env",
+    "employment_corp",
+    "grade_terrain_special",
+    "supervision_realestate",
+    "special_hazards",
+    "trades",
+    "revenue",
+    "largest_jobs",
+    "corporate_history"
+  ]
+}

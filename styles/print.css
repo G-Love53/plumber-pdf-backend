@@ -1,0 +1,22 @@
+
+@page { size: Letter; margin: 0.5in; }
+:root{ --ink:#111; --muted:#555; --border:#1f2937; --soft:#e5e7eb; --accent:#111827; --bg:#fff; }
+*{box-sizing:border-box}
+html,body{background:var(--bg); color:var(--ink); font-family: Arial, Helvetica, sans-serif; font-size:11px; line-height:1.25; margin:0; padding:0}
+.page{page-break-after: always; padding:0.1in}
+.header{ display:grid; grid-template-columns: 1fr auto; align-items:center; gap:8px; margin-bottom:8px; padding-bottom:6px; border-bottom:2px solid var(--border); }
+.h-title{font-size:16px; font-weight:bold; letter-spacing:.3px}
+.h-meta{font-size:10px; color:var(--muted); text-align:right}
+.section{margin:8px 0 10px 0; border:1px solid var(--border); border-radius:6px; overflow:hidden}
+.sec-head{background:#f3f4f6; padding:6px 8px; font-weight:bold; font-size:11px; border-bottom:1px solid var(--border)}
+.sec-body{padding:6px 8px}
+.grid{display:grid; grid-template-columns: repeat(12, 1fr); gap:6px}
+.col-12{grid-column: span 12} .col-8{grid-column: span 8} .col-6{grid-column: span 6} .col-4{grid-column: span 4} .col-3{grid-column: span 3}
+.label{font-size:9px; color:var(--muted); margin-bottom:2px}
+.input{border:1px solid var(--soft); padding:6px; min-height:26px; border-radius:4px; word-break: break-word;}
+.yesno{display:flex; gap:10px; align-items:center}
+.box{display:inline-block; width:11px; height:11px; border:1px solid var(--ink); margin-right:4px; vertical-align:middle}
+.checked{background:#111}
+.table{width:100%; border-collapse:collapse; font-size:10px}
+.table th, .table td{border:1px solid var(--border); padding:4px 6px; vertical-align:top}
+.footer{margin-top:8px; border-top:1px solid var(--border); padding-top:6px; font-size:9px; color:var(--muted); display:flex; justify-content:space-between}
