@@ -50,10 +50,12 @@ app.post('/pdf/contractor-supp', async (req, res) => {
     });
     await browser.close();
 
+    const filename = `${SEGMENT}-contractor-supplemental.pdf`;
     res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', 'inline; filename=\"contractor-supplemental.pdf\"');
+    res.setHeader('Content-Disposition', `inline; filename="${filename}"`);
     res.send(pdfBuffer);
-  } catch (err) {
+  } 
+    catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Render failed', detail: String(err) });
   }
@@ -61,4 +63,4 @@ app.post('/pdf/contractor-supp', async (req, res) => {
 
 // Port binding for Render/Heroku
 const PORT = process.env.PORT || 10000;
-app.listen(PORT, () => console.log(`contractor-supp-pdf listening on ${PORT}`));
+app.listen(PORT, () => console.log(`${SERVICE_NAME} listening on ${PORT}`));
