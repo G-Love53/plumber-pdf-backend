@@ -7,12 +7,12 @@ import puppeteer from 'puppeteer';
 const SERVICE_NAME = 'plumber-supp-pdf';
 const SEGMENT = 'plumber';
 const BRAND = 'PlumberInsuranceDirect';
-const SITE_URL = 'https://www.plumberinsurancedirect.com';
+const SITE_URL = 'https://www.plumberinsurancedirect.com'; // or apex if you prefer
 
 const app = express();
 app.use(express.json({ limit: '4mb' }));
 
-// CORS lock-down to THIS SEGMENT ONLY
+// CORS lock-down for this segment only
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', SITE_URL);
   res.setHeader('Access-Control-Allow-Methods', 'POST,GET,OPTIONS');
@@ -26,10 +26,11 @@ app.get('/healthz', (_req, res) =>
   res.status(200).json({ ok: true, service: SERVICE_NAME, segment: SEGMENT })
 );
 
-// Main PDF Route
+// Render Contractor Supplemental to PDF
 app.post('/pdf/contractor-supp', async (req, res) => {
   try {
     const data = req.body && Object.keys(req.body).length ? req.body : {};
+
     const tplPath = path.join(process.cwd(), 'templates', 'contractor-supp.ejs');
     const cssPath = path.join(process.cwd(), 'styles', 'print.css');
 
@@ -54,7 +55,6 @@ app.post('/pdf/contractor-supp', async (req, res) => {
 
     await browser.close();
 
-    // Brand the PDF filename (optional but recommended)
     const filename = `${SEGMENT}-contractor-supplemental.pdf`;
 
     res.setHeader('Content-Type', 'application/pdf');
@@ -67,7 +67,6 @@ app.post('/pdf/contractor-supp', async (req, res) => {
   }
 });
 
-// Port binding for Render/Heroku
+// Port binding for Render
 const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => console.log(`${SERVICE_NAME} listening on ${PORT}`));
-
