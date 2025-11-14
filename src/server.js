@@ -4,11 +4,25 @@ import fs from 'fs';
 import path from 'path';
 import puppeteer from 'puppeteer';
 
+const SERVICE_NAME = 'plumber-supp-pdf';
+const SEGMENT = 'plumber';
+const BRAND = 'PlumberInsuranceDirect';
+const SITE_URL = 'https://www.plumberinsurancedirect.com'; // or apex if you prefer
+
 const app = express();
 app.use(express.json({ limit: '4mb' }));
 
-// Health check
-app.get('/healthz', (_req, res) => res.status(200).json({ ok: true, service: 'contractor-supp-pdf' }));
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', SITE_URL);
+  res.setHeader('Access-Control-Allow-Methods', 'POST,GET,OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  if (req.method === 'OPTIONS') return res.sendStatus(200);
+  next();
+});
+
+app.get('/healthz', (_req, res) =>
+  res.status(200).json({ ok: true, service: SERVICE_NAME, segment: SEGMENT })
+);
 
 // Render Contractor Supplemental to PDF
 app.post('/pdf/contractor-supp', async (req, res) => {
