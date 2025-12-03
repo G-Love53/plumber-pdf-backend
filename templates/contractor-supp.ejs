@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8"/>
-  <title>Contractor Supplemental Application</title>
+  <title>Contractor Supplemental Application - Plumber</title>
 </head>
 <body>
   <% function yn(v){ return (String(v||'').toLowerCase()==='yes' || v===true) } %>
@@ -11,7 +11,7 @@
 
   <div class="page">
     <div class="header">
-      <div class="h-title">Contractor Supplemental Application</div>
+      <div class="h-title">Contractor Supplemental Application - Plumber</div>
       <div class="h-meta">Prepared: <%= new Date().toLocaleDateString() %></div>
     </div>
 
@@ -21,7 +21,7 @@
         <div class="col-6"><div class="label">Agent Name</div><div class="input"><%= fmt(data.agent_applicant?.agent_name) %></div></div>
         <div class="col-3"><div class="label">Agent Number</div><div class="input"><%= fmt(data.agent_applicant?.agent_number) %></div></div>
         <div class="col-3"><div class="label">Agent Phone</div><div class="input"><%= fmt(data.agent_applicant?.agent_phone) %></div></div>
-        <div class="col-6"><div class="label">Applicant’s Name</div><div class="input"><%= fmt(data.agent_applicant?.applicant_name) %></div></div>
+        <div class="col-6"><div class="label">Applicant's Name</div><div class="input"><%= fmt(data.agent_applicant?.applicant_name) %></div></div>
         <div class="col-6"><div class="label">Mailing Address</div><div class="input"><%= fmt(data.agent_applicant?.mailing_address) %></div></div>
         <div class="col-6"><div class="label">Phone Number</div><div class="input"><%= fmt(data.agent_applicant?.applicant_phone) %></div></div>
         <div class="col-6"><div class="label">Web Address</div><div class="input"><%= fmt(data.agent_applicant?.web_address) %></div></div>
@@ -57,11 +57,36 @@
       </div>
     </div>
 
-    <div class="footer"><div>Contractor Supplemental • Page 1</div><div>© Commercial Insurance Direct LLC</div></div>
+    <div class="footer"><div>Contractor Supplemental - Plumber • Page 1</div><div>© Commercial Insurance Direct LLC</div></div>
   </div>
 
   <div class="page">
-    <div class="header"><div class="h-title">Residential / Tract / Apartments</div></div>
+    <div class="header"><div class="h-title">Plumbing-Specific Operations</div></div>
+    
+    <div class="section">
+      <div class="sec-head">Core Plumbing Operations</div>
+      <div class="sec-body grid">
+        <div class="col-4"><div class="label">% Residential Plumbing</div><div class="input"><%= fmt(data.pct_residential) %></div></div>
+        <div class="col-4"><div class="label">% Commercial Plumbing</div><div class="input"><%= fmt(data.pct_commercial) %></div></div>
+        <div class="col-4"><div class="label">% Industrial Plumbing</div><div class="input"><%= fmt(data.pct_industrial) %></div></div>
+        <div class="col-6"><div class="label">Perform any gas line work or hook-ups?</div><div class="input"><%= yn(data.gas_line_work) ? 'Yes' : 'No' %></div></div>
+        <div class="col-6"><div class="label">Any boiler work? (install, inspection, service, cleaning or repair)</div><div class="input"><%= yn(data.boiler_work) ? 'Yes' : 'No' %></div></div>
+        <div class="col-12"><div class="label">If any INDUSTRIAL plumbing, what type of clients?</div><div class="input"><%= fmt(data.industrial_plumbing_clients) %></div></div>
+        <div class="col-6"><div class="label">High-pressure steam pipe installation, service or repair?</div><div class="input"><%= yn(data.high_pressure_steam_work) ? 'Yes' : 'No' %></div></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="sec-head">Gas Line Work Follow-up (if applicable)</div>
+      <div class="sec-body grid">
+        <div class="col-6"><div class="label">Any boiler work related to gas line installations?</div><div class="input"><%= yn(data.boiler_work_gas) ? 'Yes' : 'No' %></div></div>
+        <div class="col-6"><div class="label">Welding operations?</div><div class="input"><%= yn(data.welding_operations_gas) ? 'Yes' : 'No' %></div></div>
+        <div class="col-6"><div class="label">High-pressure steam pipe work related to gas lines?</div><div class="input"><%= yn(data.high_pressure_steam_gas) ? 'Yes' : 'No' %></div></div>
+        <div class="col-6"><div class="label">Work on or install Air Conditioning Units?</div><div class="input"><%= yn(data.ac_unit_work) ? 'Yes' : 'No' %></div></div>
+        <div class="col-6"><div class="label">Work on or install Refrigeration Equipment?</div><div class="input"><%= yn(data.refrigeration_work) ? 'Yes' : 'No' %></div></div>
+      </div>
+    </div>
+
     <div class="section">
       <div class="sec-head">Residential / Tract / Apartments</div>
       <div class="sec-body grid">
@@ -76,6 +101,12 @@
       </div>
     </div>
 
+    <div class="footer"><div>Contractor Supplemental - Plumber • Page 2</div><div>© Commercial Insurance Direct LLC</div></div>
+  </div>
+
+  <div class="page">
+    <div class="header"><div class="h-title">Subcontractor Controls & Remodeling</div></div>
+    
     <div class="section">
       <div class="sec-head">Subcontractor Controls</div>
       <div class="sec-body grid">
@@ -107,7 +138,7 @@
       </div>
     </div>
 
-    <div class="footer"><div>Contractor Supplemental • Page 2</div><div>© Commercial Insurance Direct LLC</div></div>
+    <div class="footer"><div>Contractor Supplemental - Plumber • Page 3</div><div>© Commercial Insurance Direct LLC</div></div>
   </div>
 
   <div class="page">
@@ -154,7 +185,16 @@
       </div>
     </div>
 
-    <div class="footer"><div>Contractor Supplemental • Page 3</div><div>© Commercial Insurance Direct LLC</div></div>
+    <div class="section">
+      <div class="sec-head">Cross-Trade Operations</div>
+      <div class="sec-body grid">
+        <div class="col-6"><div class="label">Do you perform Roofing (new roofs or re-roofing)?</div><div class="input"><%= yn(data.roofing_operations) ? 'Yes' : 'No' %></div></div>
+        <div class="col-6"><div class="label">Any HVAC operations?</div><div class="input"><%= yn(data.hvac_operations) ? 'Yes' : 'No' %></div></div>
+        <div class="col-12"><div class="label">Any specific Additional Insureds requiring to be specifically named on the policy?</div><div class="input"><%= fmt(data.specific_additional_insureds) %></div></div>
+      </div>
+    </div>
+
+    <div class="footer"><div>Contractor Supplemental - Plumber • Page 4</div><div>© Commercial Insurance Direct LLC</div></div>
   </div>
 
   <div class="page">
@@ -238,12 +278,12 @@
         <div class="col-6"><div class="label">Exposure to flammables/explosives/chemicals</div><div class="input"><%= yn(data.corporate_history?.flammables_exposure) ? 'Yes' : 'No' %></div></div>
         <div class="col-6"><div class="label">Active in joint ventures</div><div class="input"><%= yn(data.corporate_history?.joint_ventures) ? 'Yes' : 'No' %></div></div>
         <div class="col-6"><div class="label">Bankruptcies/tax/credit liens (5 yrs)</div><div class="input"><%= yn(data.corporate_history?.bankruptcy_tax_liens_5yrs) ? 'Yes' : 'No' %></div></div>
-        <div class="col-12"><div class="label">Explain all “Yes” responses</div><div class="input"><%= fmt(data.corporate_history?.corp_history_explain) %></div></div>
+        <div class="col-12"><div class="label">Explain all "Yes" responses</div><div class="input"><%= fmt(data.corporate_history?.corp_history_explain) %></div></div>
         <div class="col-12"><div class="label">Additional Info</div><div class="input"><%= fmt(data.corporate_history?.additional_info) %></div></div>
       </div>
     </div>
 
-    <div class="footer"><div>Contractor Supplemental • Page 4</div><div>© Commercial Insurance Direct LLC</div></div>
+    <div class="footer"><div>Contractor Supplemental - Plumber • Page 5</div><div>© Commercial Insurance Direct LLC</div></div>
   </div>
 </body>
 </html>
