@@ -1,72 +1,95 @@
-import express from 'express';
-import ejs from 'ejs';
-import fs from 'fs';
-import path from 'path';
-import puppeteer from 'puppeteer';
+// src/server.js - LAYER 1: Plumber PDF Microservice (Rendering Only)
+import express from "express";
+import path from "path";
+import { fileURLToPath } from "url";
+import { renderPdf } from "./pdf.js";
 
-const SERVICE_NAME = 'plumber-supp-pdf';
-const SEGMENT = 'plumber';
-const BRAND = 'PlumberInsuranceDirect';
-const SITE_URL = 'https://www.plumberinsurancedirect.com'; // or apex if you prefer
+const __filename = fileURLToPath(import.meta.url);
+const __dirname  = path.dirname(__filename);
 
-const app = express();
-app.use(express.json({ limit: '4mb' }));
+const APP = express();
+APP.use(express.json({ limit: "20mb" }));
 
-// CORS lock-down for this segment only
-app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', SITE_URL);
-  res.setHeader('Access-Control-Allow-Methods', 'POST,GET,OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  if (req.method === 'OPTIONS') return res.sendStatus(200);
+// CORS - allow CID API to call us
+const allowed = (process.env.CORS_ORIGINS || "")
+  .split(",")
+  .map(s => s.trim())
+  .filter(Boolean);
+
+APP.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (!allowed.length || (origin && allowed.includes(origin))) {
+    res.setHeader("Access-Control-Allow-Origin", origin || "*");
+  }
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-API-Key");
+  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+  if (req.method === "OPTIONS") return res.sendStatus(204);
   next();
 });
 
+const TPL_DIR = path.join(__dirname, "..", "templates");
+
 // Health check
-app.get('/healthz', (_req, res) =>
-  res.status(200).json({ ok: true, service: SERVICE_NAME, segment: SEGMENT })
-);
+APP.get("/healthz", (_req, res) => res.status(200).json({ ok: true, service: "plumber-pdf-backend" }));
 
-// Render Contractor Supplemental to PDF
-app.post('/pdf/contractor-supp', async (req, res) => {
+// Single PDF endpoint - CID API calls this for each segment
+APP.post("/render-pdf", async (req, res) => {
   try {
-    const data = req.body && Object.keys(req.body).length ? req.body : {};
+    const { segment, data } = req.body;
+    
+    if (!segment) {
+      return res.status(400).json({ ok: false, error: "Missing segment name" });
+    }
 
-    const tplPath = path.join(process.cwd(), 'templates', 'contractor-supp.ejs');
-    const cssPath = path.join(process.cwd(), 'styles', 'print.css');
+    // Map segment names to template paths
+    const TEMPLATE_MAP = {
+      PlumberSupp: "PlumberSupp",
+      PlumberAccord125: "PlumberAccord125", 
+      PlumberAccord126: "PlumberAccord126",
+      Contractor_FieldNames: "Contractor_FieldNames",
+    };
 
-    const html = await ejs.renderFile(tplPath, { data }, { async: false });
-    const css = fs.readFileSync(cssPath, 'utf8');
-    const finalHTML = html.replace('</head>', `<style>${css}</style></head>`);
+    const templateName = TEMPLATE_MAP[segment];
+    if (!templateName) {
+      return res.status(400).json({ ok: false, error: `Unknown segment: ${segment}` });
+    }
 
-    const browser = await puppeteer.launch({
-      headless: 'new',
-      args: ['--no-sandbox', '--disable-setuid-sandbox']
-    });
+    const htmlPath = path.join(TPL_DIR, templateName, "index.ejs");
+    const cssPath = path.join(TPL_DIR, templateName, "styles.css");
 
-    const page = await browser.newPage();
-    await page.setContent(finalHTML, { waitUntil: 'networkidle0' });
-    await page.emulateMediaType('screen');
+    // Render PDF
+    const buffer = await renderPdf({ htmlPath, cssPath, data: data || {} });
 
-    const pdfBuffer = await page.pdf({
-      format: 'Letter',
-      margin: { top: '0.5in', right: '0.5in', bottom: '0.5in', left: '0.5in' },
-      printBackground: true
-    });
-
-    await browser.close();
-
-    const filename = `${SEGMENT}-contractor-supplemental.pdf`;
-
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `inline; filename="${filename}"`);
-    res.send(pdfBuffer);
+    // Return PDF buffer
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", `inline; filename="${segment}.pdf"`);
+    res.send(buffer);
 
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Render failed', detail: String(err) });
+    console.error("PDF render error:", err);
+    res.status(500).json({ 
+      ok: false, 
+      error: "PDF_RENDER_FAILED",
+      detail: String(err?.message || err)
+    });
   }
 });
 
-// Port binding for Render
+// Start server
 const PORT = process.env.PORT || 10000;
-app.listen(PORT, () => console.log(`${SERVICE_NAME} listening on ${PORT}`));
+const server = APP.listen(PORT, () => {
+  console.log(`Plumber PDF backend listening on ${PORT}`);
+});
+
+// Graceful shutdown
+function shutdown(signal) {
+  console.log(`Received ${signal}, shutting down...`);
+  server.close(() => {
+    console.log("Server closed.");
+    process.exit(0);
+  });
+  setTimeout(() => process.exit(0), 5000).unref();
+}
+
+process.on("SIGTERM", () => shutdown("SIGTERM"));
+process.on("SIGINT", () => shutdown("SIGINT"));
