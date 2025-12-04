@@ -1,0 +1,181 @@
+/* ===== ACORD 125 — clean WC-style print CSS ===== */
+
+/* --- Print page setup --- */
+@media print {
+  @page { size: Letter; margin: 0.25in; }
+  .page { page-break-after: always; }
+  .page:last-child { page-break-after: auto; }
+}
+
+
+/* --- Global reset --- */
+* { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+html, body { margin: 0; padding: 0; }
+body { font-family: Arial, Helvetica, sans-serif; color:#000; font-size:8pt; line-height:1.15; }
+
+/* --- Page box (WC-style) --- */
+.page{
+  width:100%;
+  min-height:10.5in;
+  padding:0.125in;
+  padding-bottom: 0.35in; /* you can tweak this */
+  margin:0;
+  background:#fff;
+  position:relative;
+}
+
+/* --- Header bar --- */
+.headerbar{
+  display:flex; align-items:center;
+  border:2pt solid #000; background:#fff;
+  margin-bottom:2pt; height:40px;
+  break-inside:avoid; page-break-inside:avoid;
+}
+.headerbar .acord,
+.headerbar .formno{
+  background:#000; color:#fff; font-weight:700; font-size:16pt;
+  width:60px; height:100%; display:flex; align-items:center; justify-content:center;
+}
+.headerbar .acord{ width:80px; }
+.headerbar .title{ flex:1; font-weight:700; font-size:12pt; text-align:center; padding:0 10px; }
+
+/* --- Section bars --- */
+.subbar{
+  background:#e6e6e6; border:1pt solid #000;
+  font-weight:700; font-size:8pt; padding:3pt 6pt;
+  margin:6pt 0 2pt;
+  break-inside:avoid; page-break-inside:avoid;
+}
+
+/* --- Blocks / rows / cells (20-col grid like WC) --- */
+.block{ 
+  border:1pt solid #000; 
+  border-top:none; 
+  margin:0 0 2pt 0; 
+}
+
+/* Every row = 20-column grid (this is the missing piece) */
+.block .row{
+  display:grid;
+  grid-template-columns: repeat(20, 1fr);
+  border-top:1pt solid #000;
+}
+.block .row:first-child{ border-top:none; }
+
+/* Cells stay flex for vertical centering — leave as-is */
+.cell{
+  display:flex;
+  align-items:center;
+  padding:3pt 4pt;
+  min-height:14pt;
+  border-left:1pt solid #000;
+  overflow-wrap: break-word;
+  background:transparent;
+}
+.cell:first-child{ border-left:none; }
+
+
+/* Default: all rows are 20-col grid */
+.block .row {
+  display: grid;
+  grid-template-columns: repeat(20, 1fr);
+  border-top: 1pt solid #000;
+}
+.block .row:first-child{ border-top:none; }
+
+.cell{
+  display:flex; align-items:center;
+  padding:3pt 4pt; min-height:14pt;
+  border-left:1pt solid #000;
+  overflow-wrap: break-word;
+  background:transparent;
+}
+.cell:first-child{ border-left:none; }
+.cell.small{ font-size:7pt; }
+.cell.legal{ font-size:6pt; line-height:1.2;white-space: normal; }
+.cell.wrap{ align-items:flex-start; white-space:normal; }
+.label{ background:#f5f5f5; font-weight:700; font-size:6.8pt; letter-spacing:.2pt; white-space:nowrap; }
+.center{ justify-content:center; text-align:center; }
+.right{ justify-content:flex-end; text-align:right; }
+.cell { min-width: 0; }           /* prevent grid overflow pushing rows */
+
+/* --- Width utilities (map to 20-col grid) --- */
+.w5  { grid-column:span 1 } .w10 { grid-column:span 2 } .w15 { grid-column:span 3 } .w20 { grid-column:span 4 }
+.w25 { grid-column:span 5 } .w30 { grid-column:span 6 } .w35 { grid-column:span 7 } .w40 { grid-column:span 8 }
+.w45 { grid-column:span 9 } .w50 { grid-column:span 10} .w55 { grid-column:span 11} .w60 { grid-column:span 12}
+.w65 { grid-column:span 13} .w70 { grid-column:span 14} .w75 { grid-column:span 15} .w80 { grid-column:span 16}
+.w85 { grid-column:span 17} .w90 { grid-column:span 18} .w95 { grid-column:span 19} .w100{ grid-column:span 20}
+
+/* Width utilities missing for LOB rows */
+.w8 { grid-column: span 2; }  /* ~8% => 2 of 20 columns */
+.w9 { grid-column: span 1; }  /* last premium column: 1 of 20 */
+
+
+/* FRAUD block: render as simple lines inside a single cell */
+.block.fraud-block .cell { align-items: flex-start; }
+
+.fraud-list {
+  font-size: 6.6pt;
+  line-height: 1.22;
+  white-space: normal;            /* ensure normal flow */
+}
+
+.fraud-line {
+  display: flex;
+  align-items: flex-start;        /* keep the label/top aligned */
+  gap: 6pt;
+  margin-bottom: 3pt;
+  break-inside: avoid;
+}
+
+.fraud-line .jur {
+  font-weight: 700;
+  white-space: nowrap;            /* state code never wraps */
+  flex: 0 0 auto;
+}
+
+.fraud-line .txt {
+  flex: 1 1 auto;                 /* fill the rest of the width */
+  white-space: normal;
+  word-break: normal;
+  overflow-wrap: break-word;      /* wrap on words, not every char */
+  hyphens: auto;                  /* allow clean hyphenation if needed */
+}
+
+@media print {
+  .block.fraud-block { break-inside: auto; page-break-inside: auto; }
+  .fraud-line { break-inside: avoid; page-break-inside: avoid; }
+}
+
+
+/* --- Checks, helpers --- */
+.check{ display:inline-block; width:11pt; height:11pt; line-height:11pt; border:1pt solid #000; text-align:center; font-weight:700; font-size:9pt; margin:0 6pt 0 8pt; vertical-align:middle; transform:translateY(1px); }
+.check-xs{ width:9pt; height:9pt; line-height:9pt; font-size:8pt; }
+.tight .cell{ min-height:12pt; padding:2pt 3pt; }
+.num{ text-align:right; white-space:nowrap; font-variant-numeric:tabular-nums; }
+.no-break, .block .row.no-break, .headerbar, .subbar{ break-inside:avoid; page-break-inside:avoid; }
+
+/* --- 125: lock footer + reserve space --- */
+.page{
+  position: relative;
+  /* reserve a little more room than the footer height */
+  padding-bottom: 0.55in;       /* was ~0.35in */
+}
+
+.footnote{
+  position: absolute;
+  left: 0.125in; right: 0.125in;
+  bottom: 0.125in;              /* keep inside printable area */
+  border-top: 1px solid #000;
+  padding-top: 2pt;
+  font-size: 7pt;
+  height: 0.30in;               /* fixed height so the space above is predictable */
+}
+
+/* if a long block sits just above the footer, don't split it */
+.no-break, .block, .row{ break-inside: avoid; page-break-inside: avoid; }
+
+
+
+/* --- Screen nicety --- */
+@media screen{ .page{ margin-bottom:20px; box-shadow:0 0 10px rgba(0,0,0,.08); } }
