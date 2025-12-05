@@ -1,5 +1,5 @@
 // src/pdf.js - PDF rendering with Puppeteer
-import puppeteer from "puppeteer";
+import puppeteer from "puppeteer-core";
 import ejs from "ejs";
 import fs from "fs/promises";
 
