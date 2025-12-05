@@ -1,17 +1,21 @@
 {
-  "name": "contractor-supp-pdf-service",
+  "name": "pdf-backend",
   "version": "1.0.0",
-  "private": true,
+  "description": "Cloud service for rendering HTML templates into PDFs and emailing via Gmail",
   "type": "module",
-  "engines": {
-    "node": ">=18"
-  },
+  "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js"
   },
   "dependencies": {
-    "express": "^4.19.2",
+    "dayjs": "^1.11.11",
     "ejs": "^3.1.10",
-    "puppeteer": "^23.7.1"
-  }
+    "express": "^4.19.2",
+    "nodemailer": "^6.9.7",
+    "puppeteer-core": "22.6.4"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "license": "ISC"
 }
