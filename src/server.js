@@ -58,7 +58,7 @@ APP.use((req, res, next) => {
 });
 
 /* --------------------------------- dirs ----------------------------------- */
-const TPL_DIR = path.join(__dirname, "..", "templates");
+const TPL_DIR = path.join(__dirname, "..", "Templates");
 const MAP_DIR = path.join(__dirname, "..", "mapping");
 
 /* -------------------------------- routes ---------------------------------- */
