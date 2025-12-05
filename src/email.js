@@ -13,7 +13,7 @@ import nodemailer from "nodemailer";
  */
 export async function sendWithGmail({ to, cc, subject, formData, html, attachments }) {
   const user = process.env.GMAIL_USER;
-  const pass = process.env.GMAIL_PASS;
+  const pass = process.env.GMAIL_APP_PASSWORD;
 
   if (!user || !pass) {
     throw new Error("GMAIL_USER and GMAIL_PASS environment variables required");
