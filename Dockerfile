@@ -1,5 +1,4 @@
 FROM node:20-bullseye
-
 # Install Chrome dependencies AND unzip
 RUN apt-get update && apt-get install -y \
     fonts-noto fonts-noto-cjk fonts-noto-color-emoji \
@@ -26,10 +25,8 @@ RUN mkdir -p /app/chrome && \
     rm chrome-linux64.zip && \
     chmod +x chrome-linux64/chrome
 
-# Copy application files
-COPY src ./src
-COPY templates ./templates
-COPY mapping ./mapping
+# Copy everything else (avoids case sensitivity issues)
+COPY . .
 
 # Set environment variables
 ENV NODE_ENV=production
@@ -37,5 +34,4 @@ ENV PUPPETEER_SKIP_DOWNLOAD=true
 ENV PUPPETEER_EXECUTABLE_PATH=/app/chrome/chrome-linux64/chrome
 
 EXPOSE 10000
-
 CMD ["npm", "start"]
