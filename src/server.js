@@ -18,8 +18,7 @@ const enrichFormData = (d) => d || {};
 const FILENAME_MAP = {
   PlumberAccord125: "ACORD-125.pdf",
   PlumberAccord126: "ACORD-126.pdf",
-  PlumberSupp:      "Plumber-Contractor-Supplemental.pdf",
-  Contractor_FieldNames: "Contractor-Field-Names.pdf",
+  PlumberSupp:      "Plumber-Contractor-Supplemental.pdf"
 };
 
 // allow friendlier names from callers
