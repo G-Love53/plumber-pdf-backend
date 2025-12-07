@@ -1,4 +1,4 @@
-/* ===== Roofing Supplemental Application - Berkley Style (COMPACT) ===== */
+/* ===== Contractor Supplemental Application - Professional Style ===== */
 
 @media print {
   @page { 
@@ -21,8 +21,8 @@
 
 body {
   font-family: Arial, Helvetica, sans-serif;
-  font-size: 9pt;  /* Reduced from 10pt */
-  line-height: 1.2; /* Reduced from 1.3 */
+  font-size: 9pt;
+  line-height: 1.2;
   color: #000;
   background: #fff;
   padding: 0;
@@ -31,127 +31,123 @@ body {
 
 /* Header Info Section */
 .header-info {
-  margin-bottom: 10pt; /* Reduced from 16pt */
-  font-size: 8pt; /* Reduced from 9pt */
+  margin-bottom: 10pt;
+  font-size: 10pt;
+  border-bottom: 2pt solid #000;
+  padding-bottom: 8pt;
 }
 
 .header-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 16pt;
-  margin-bottom: 3pt; /* Reduced from 4pt */
+  margin-bottom: 3pt;
 }
 
 .header-col {
-  padding: 1pt 0; /* Reduced from 2pt */
-}
-
-/* Title */
-h1 {
-  font-size: 14pt; /* Reduced from 16pt */
-  font-weight: 700;
-  text-align: center;
-  margin: 0 0 6pt; /* Reduced from 8pt */
-  padding: 0;
-  border: none;
-}
-
-.subheader {
-  text-align: center;
-  font-size: 8pt; /* Reduced from 8.5pt */
-  line-height: 1.3;
-  margin: 0 0 12pt; /* Reduced from 16pt */
-  color: #000;
+  padding: 1pt 0;
 }
 
 /* Section Headers */
 h2 {
-  font-size: 9pt; /* Reduced from 10pt */
+  font-size: 10pt;
   font-weight: 700;
   text-transform: uppercase;
-  background: #fff;
+  background: #e8e8e8;
   color: #000;
-  padding: 4pt 0; /* Reduced from 6pt */
-  margin: 10pt 0 6pt; /* Reduced */
+  padding: 5pt 8pt;
+  margin: 12pt 0 8pt;
   border-top: 1pt solid #000;
   border-bottom: 1pt solid #000;
   page-break-after: avoid;
 }
 
 h3 {
-  font-size: 8.5pt; /* Reduced from 9pt */
+  font-size: 9pt;
   font-weight: 700;
-  margin: 8pt 0 4pt; /* Reduced */
+  margin: 10pt 0 6pt;
+  padding: 3pt 0;
+  border-bottom: 1pt solid #ccc;
+  page-break-after: avoid;
 }
 
 /* Form Sections */
 .form-section {
-  margin: 0 0 8pt; /* Reduced from 12pt */
+  margin: 0 0 8pt;
 }
 
 .form-row {
-  margin: 5pt 0; /* Reduced from 8pt */
+  margin: 5pt 0;
   page-break-inside: avoid;
 }
 
 .form-row.cols-2 {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12pt; /* Reduced from 16pt */
+  gap: 12pt;
 }
 
 .form-row.cols-3 {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
-  gap: 10pt; /* Reduced from 12pt */
+  gap: 10pt;
 }
 
 .form-label {
-  font-weight: 400;
-  font-size: 8pt; /* Reduced from 9pt */
-  margin-bottom: 1pt; /* Reduced from 2pt */
+  font-weight: 600;
+  font-size: 8pt;
+  margin-bottom: 2pt;
   color: #000;
 }
 
 .form-value {
-  font-size: 9pt; /* Reduced from 10pt */
+  font-size: 9pt;
   border-bottom: 1pt solid #000;
-  min-height: 14pt; /* Reduced from 16pt */
-  padding: 1pt 3pt; /* Reduced */
-  line-height: 1.2;
+  min-height: 14pt;
+  padding: 2pt 4pt;
+  line-height: 1.3;
+  background: #fff;
 }
 
 .form-value.yesno {
   border-bottom: none;
-  padding: 1pt 0; /* Reduced */
+  padding: 1pt 0;
 }
 
 .yesno-line {
-  margin: 3pt 0; /* Reduced from 4pt */
+  margin: 3pt 0;
 }
 
 .form-row.indent {
-  margin-left: 16pt; /* Reduced from 20pt */
+  margin-left: 16pt;
+}
+
+/* Trade-Specific Section Styling */
+.trade-specific {
+  background: #f9f9f9;
+  padding: 8pt;
+  border: 1pt solid #ddd;
+  border-radius: 4pt;
 }
 
 /* Checkboxes */
 .checkbox {
   display: inline-block;
-  width: 11pt; /* Reduced from 12pt */
+  width: 11pt;
   height: 11pt;
   line-height: 11pt;
   border: 1pt solid #000;
   text-align: center;
   font-weight: 700;
-  font-size: 8pt; /* Reduced from 9pt */
-  margin-right: 5pt; /* Reduced from 6pt */
+  font-size: 8pt;
+  margin-right: 5pt;
   vertical-align: middle;
   background: #fff;
 }
 
 .checkbox-item {
   display: inline-block;
-  margin-right: 10pt; /* Reduced from 12pt */
+  margin-right: 10pt;
   white-space: nowrap;
 }
 
@@ -159,7 +155,7 @@ h3 {
 table {
   width: 100%;
   border-collapse: collapse;
-  margin: 6pt 0; /* Reduced from 8pt */
+  margin: 8pt 0;
   page-break-inside: avoid;
 }
 
@@ -170,16 +166,17 @@ table {
 .data-table th,
 .data-table td {
   border: 1pt solid #000;
-  padding: 4pt 6pt; /* Reduced from 6pt 8pt */
+  padding: 4pt 6pt;
   text-align: left;
-  font-size: 8pt; /* Reduced from 9pt */
+  font-size: 8pt;
 }
 
 .data-table th {
-  background: #f0f0f0;
+  background: #e8e8e8;
   font-weight: 700;
   text-align: center;
-  line-height: 1.1;
+  line-height: 1.2;
+  text-transform: uppercase;
 }
 
 .data-table td {
@@ -190,21 +187,11 @@ table {
   background: #fafafa;
 }
 
-/* Material Table */
-.material-table {
-  border: 1pt solid #000;
-}
-
-.material-table td {
-  border: 1pt solid #000;
-  padding: 4pt 6pt; /* Reduced */
-  font-size: 8pt;
-}
-
 /* Financial Table */
 .financial-table {
   border: 1pt solid #000;
   margin: 6pt 0;
+  width: 70%;
 }
 
 .financial-table td {
@@ -214,151 +201,29 @@ table {
   background: #fff;
 }
 
-/* Sales Table */
-.sales-table {
-  border: 1pt solid #000;
-  width: 60%;
-}
-
-.sales-table td {
-  border: 1pt solid #000;
-  padding: 4pt 6pt;
-  font-size: 8pt;
-}
-
-/* Certificate Table */
-.certificate-table {
-  border: 1pt solid #000;
-}
-
-.certificate-table th,
-.certificate-table td {
-  border: 1pt solid #000;
-  padding: 5pt 6pt; /* Reduced */
-  font-size: 8pt;
-  text-align: left;
-}
-
-.certificate-table th {
-  background: #f0f0f0;
-  font-weight: 700;
-  text-align: center;
-}
-
-.certificate-table .checkbox-cell {
-  text-align: center;
-}
-
-/* Jobs Table */
-.jobs-table {
-  border: 1pt solid #000;
-}
-
-.jobs-table th,
-.jobs-table td {
-  border: 1pt solid #000;
-  padding: 5pt 6pt;
-  font-size: 8pt;
-}
-
-.jobs-table th {
-  background: #f0f0f0;
-  font-weight: 700;
-  text-align: center;
-}
-
-.jobs-table td {
-  min-height: 40pt; /* Reduced from 50pt */
-  vertical-align: top;
-}
-
-/* Signature Table */
-.signature-table {
-  width: 100%;
-  border: none;
-  margin-top: 20pt; /* Reduced from 30pt */
-}
-
-.signature-table td {
-  border: none;
-  padding: 3pt 6pt; /* Reduced */
-  vertical-align: bottom;
-}
-
-.signature-name {
-  font-size: 9pt;
-  padding-bottom: 1pt;
-}
-
-.signature-line {
-  border-bottom: 1pt solid #000;
-  min-height: 16pt; /* Reduced from 20pt */
-  font-size: 7.5pt; /* Reduced from 8pt */
-  padding-top: 16pt; /* Reduced from 20pt */
+.financial-table td:first-child {
+  background: #f8f8f8;
+  font-weight: 600;
 }
 
 /* Comments Box */
 .comments-box {
-  min-height: 60pt; /* Reduced from 80pt */
+  min-height: 50pt;
   border: 1pt solid #000;
-  padding: 6pt; /* Reduced from 8pt */
+  padding: 6pt;
   background: #fff;
+  line-height: 1.4;
 }
 
-/* Notice Section */
-.notice-section {
-  margin: 10pt 0; /* Reduced from 16pt */
-  page-break-inside: avoid;
-}
-
-.notice-section p {
-  margin: 6pt 0; /* Reduced from 8pt */
-  font-size: 8pt; /* Reduced from 9pt */
-  line-height: 1.3;
-  text-align: justify;
-}
-
-/* Fraud Section */
-.fraud-section {
-  margin: 8pt 0; /* Reduced from 12pt */
-  font-size: 7.5pt; /* Reduced from 8.5pt */
-  line-height: 1.3;
-}
-
-.fraud-section p {
-  margin: 5pt 0; /* Reduced from 8pt */
-  text-align: justify;
-}
-
-.fraud-section p strong {
-  font-weight: 700;
-}
-
-/* Signature Section */
-.signature-section {
-  margin: 20pt 0; /* Reduced from 30pt */
-  page-break-inside: avoid;
-}
-
-.signature-text {
-  margin: 12pt 0; /* Reduced from 16pt */
-  font-size: 8pt; /* Reduced from 9pt */
-  line-height: 1.3;
-  text-align: justify;
-  padding: 8pt; /* Reduced from 12pt */
-  border: 1pt solid #000;
-  background: #f9f9f9;
-}
-
-/* Page Footer - FIXED TO PREVENT DUPLICATION */
+/* Page Footer */
 .page-footer {
-  margin-top: 20pt; /* Reduced from 40pt */
-  padding-top: 6pt; /* Reduced from 8pt */
+  margin-top: 20pt;
+  padding-top: 8pt;
   border-top: 1pt solid #000;
-  font-size: 7.5pt; /* Reduced from 8pt */
+  font-size: 7.5pt;
   text-align: center;
-  color: #000;
-  page-break-after: avoid; /* Changed from always */
+  color: #666;
+  page-break-after: avoid;
 }
 
 /* Page Break */
@@ -380,7 +245,15 @@ h2, h3, .form-label {
 }
 
 table {
+  page-break-inside: auto;
+}
+
+tr {
   page-break-inside: avoid;
+}
+
+thead {
+  display: table-header-group;
 }
 
 /* Print Optimizations */
@@ -408,6 +281,15 @@ table {
     page-break-after: avoid;
     page-break-inside: avoid;
   }
+  
+  /* Hide all footers except last */
+  .page-footer {
+    display: none !important;
+  }
+  
+  .page-footer:last-of-type {
+    display: block !important;
+  }
 }
 
 /* Additional Refinements */
@@ -425,113 +307,14 @@ em {
 }
 
 p {
-  margin: 4pt 0; /* Reduced from 6pt */
+  margin: 4pt 0;
 }
 
 ul, ol {
-  margin: 4pt 0; /* Reduced from 6pt */
-  padding-left: 16pt; /* Reduced from 20pt */
+  margin: 4pt 0;
+  padding-left: 16pt;
 }
 
 li {
-  margin: 2pt 0; /* Reduced from 3pt */
-}
-/* === PACK-TIGHT PATCH === */
-
-/* Allow tables to split across pages (keep rows intact, repeat headers) */
-table { page-break-inside: auto; break-inside: auto; }
-tr { page-break-inside: avoid; break-inside: avoid; }
-thead { display: table-header-group; }
-tfoot { display: table-footer-group; }
-
-/* Headings shouldn't cause big blanks if they fall at the page bottom */
-h2 { page-break-after: avoid; margin-top: 8pt; margin-bottom: 4pt; }
-
-/* Trim tall minimums that push content down */
-.jobs-table td { min-height: 30pt; }       /* was 40pt */
-.comments-box  { min-height: 40pt; }       /* was 60pt */
-
-/* Let sections split (we'll keep rows/tables intact) */
-.form-section { page-break-inside: auto; }
-
-/* Footers: smaller buffer so they don't reserve too much space */
-.page-footer { margin-top: 10pt; }         /* was 20pt */
-
-/* Slightly tighter page margins to reclaim space */
-@media print {
-  @page { margin: 0.35in; }                /* was 0.4in */
-}
-/* === Show ONLY the final footer; remove all forced breaks === */
-@media print {
-  /* Hide all footers... */
-  .page-footer { display: none !important; }
-
-  /* ...but show the last one (your page 6 footer) */
-  .page-footer:last-of-type { display: block !important; }
-
-  /* Disable all hard page breaks so content flows */
-  .page-break { display: none !important; }
-}
-/* === STEP 1: BERKLEY-STYLE HEADERS === */
-h2 {
-  background: #e8e8e8 !important;  /* Gray background like Berkley */
-  padding: 4pt 6pt !important;       /* Horizontal padding */
-  font-size: 9pt !important;         /* Slightly smaller */
-}
-
-.data-table th,
-.certificate-table th,
-.jobs-table th {
-  background: #e8e8e8 !important;   /* Match headers */
-  font-size: 7.5pt !important;      /* Smaller for tables */
-  text-transform: uppercase;
-}
-/* === STEP 2: TABLE REFINEMENTS === */
-.financial-table {
-  width: 70% !important;            /* Don't stretch full width */
-}
-
-.financial-table td:first-child {
-  background: #f8f8f8 !important;   /* Light gray for labels */
-}
-/* === STEP 3: CHECKBOX SIZING === */
-.checkbox {
-  width: 10pt !important;
-  height: 10pt !important;
-  line-height: 9pt !important;
-  font-size: 7pt !important;
-}
-
-/* Tighten table spacing for cleaner look */
-.data-table td,
-.data-table th,
-.financial-table td,
-.jobs-table td,
-.certificate-table td {
-  padding: 3pt 5pt !important;      /* Tighter padding (was 4pt 6pt) */
-}
-
-/* Alternating row colors for better readability */
-.data-table tbody tr:nth-child(even) td {
-  background: #fafafa !important;
-}
-/* === STEP 1: BERKLEY-STYLE HEADERS (TEST) === */
-h2 {
-  background: #e8e8e8 !important;  /* Professional gray like Berkley */
-  padding: 4pt 6pt !important;       /* Add horizontal padding */
-  font-size: 9pt !important;         /* Consistent size */
-  text-transform: uppercase !important;
-  font-weight: 700 !important;
-}
-
-/* Apply same gray to all table headers */
-.data-table th,
-.certificate-table th,
-.jobs-table th,
-.financial-table th,
-.material-table th {
-  background: #e8e8e8 !important;   /* Match section headers */
-  font-size: 7.5pt !important;      /* Slightly smaller for tables */
-  text-transform: uppercase !important;
-  font-weight: 700 !important;
+  margin: 2pt 0;
 }
