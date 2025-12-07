@@ -27,8 +27,7 @@ const TEMPLATE_ALIASES = {
   Accord126: "PlumberAccord126",
   PlumberAccord125: "PlumberAccord125",
   PlumberAccord126: "PlumberAccord126",
-  PlumberSupp: "PlumberSupp",
-  Contractor_FieldNames: "Contractor_FieldNames",
+  PlumberSupp: "PlumberSupp"
 };
 const resolveTemplate = (name) => TEMPLATE_ALIASES[name] || name;
 
