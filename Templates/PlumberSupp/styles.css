@@ -1,175 +1,397 @@
-/* Letter page setup */
-@page {
-  size: Letter;
-  margin: 0.5in;
+/* ===== Contractor Supplemental Application - Professional Style (TIGHTER VERSION) ===== */
+
+@media print {
+  @page { 
+    size: Letter; 
+    margin: 0.4in; 
+  }
+  .page-break { 
+    page-break-before: always; 
+    break-before: page; 
+  }
 }
 
 * {
   box-sizing: border-box;
-}
-
-html, body {
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
   margin: 0;
   padding: 0;
 }
 
 body {
-  font-family: Helvetica, Arial, sans-serif;
-  font-size: 9pt;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 8.5pt; /* Slightly reduced base font size */
+  line-height: 1.2;
   color: #000;
+  background: #fff;
+  padding: 0;
+  margin: 0;
 }
 
-/* Each logical PDF page */
-.page {
-  padding: 12pt 24pt 18pt;
-  page-break-after: always;
+/* Header Info Section */
+.header-info {
+  margin-bottom: 8pt; /* Reduced margin */
+  font-size: 9pt; /* Reduced font size */
+  border-bottom: 1.5pt solid #000; /* Thinned border */
+  padding-bottom: 6pt; /* Reduced padding */
 }
 
-/* Header / footer */
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  border-bottom: 1pt solid #000;
-  padding-bottom: 4pt;
-  margin-bottom: 6pt;
+.header-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12pt; /* Reduced gap */
+  margin-bottom: 2pt; /* Reduced margin */
 }
 
-.h-title {
-  font-size: 11pt;
-  font-weight: 700;
-  text-transform: uppercase;
+.header-col {
+  padding: 1pt 0;
 }
 
-.h-meta {
-  font-size: 8pt;
-  text-align: right;
-}
-
-.footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-top: 1pt solid #000;
-  padding-top: 3pt;
-  margin-top: 6pt;
-  font-size: 8pt;
-}
-
-/* Sections */
-.section {
-  margin: 0 0 4pt;
-}
-
-.sec-head {
+/* Section Headers */
+h2 {
   font-size: 10pt;
   font-weight: 700;
   text-transform: uppercase;
   background: #e8e8e8;
   color: #000;
-  padding: 3pt 6pt;
-  margin: 6pt 0 4pt;
+  padding: 4pt 8pt;
+  margin: 6pt 0 4pt; /* Reduced vertical margin */
   border-top: 1pt solid #000;
   border-bottom: 1pt solid #000;
+  page-break-after: avoid;
 }
 
-.sec-body {
+h3 {
   font-size: 9pt;
+  font-weight: 700;
+  margin: 6pt 0 3pt; /* Reduced vertical margin */
+  padding: 1pt 0; /* Reduced padding */
+  border-bottom: 0.5pt solid #ccc; /* Thinned border */
+  page-break-after: avoid;
 }
 
-/* Grid layout */
-.grid {
-  display: flex;
-  flex-wrap: wrap;
-  margin: 0 -4pt;
+/* Form Sections */
+.form-section {
+  margin: 0 0 4pt; /* Reduced margin */
 }
 
-[class^="col-"] {
-  padding: 0 4pt;
-  margin-bottom: 3pt;
+.form-row {
+  margin: 3pt 0; /* Reduced margin */
+  page-break-inside: avoid;
 }
 
-.col-12 { width: 100%; }
-.col-9  { width: 75%; }
-.col-8  { width: 66.666%; }
-.col-6  { width: 50%; }
-.col-4  { width: 33.333%; }
-.col-3  { width: 25%; }
-.col-2  { width: 16.666%; }
+.form-row.cols-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10pt; /* Reduced gap */
+}
 
-/* Labels / values */
-.label {
-  font-size: 8pt;
+.form-row.cols-3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8pt; /* Reduced gap */
+}
+
+.form-label {
   font-weight: 600;
-  margin-bottom: 1pt;
+  font-size: 7.5pt; /* Slightly reduced font size */
+  margin-bottom: 1pt; /* Reduced margin */
+  color: #000;
 }
 
-.input {
-  font-size: 9pt;
+.form-value {
+  font-size: 8.5pt; /* Reduced font size */
   border-bottom: 1pt solid #000;
-  min-height: 11pt;        /* tightened from 14pt */
-  padding: 1pt 3pt;
-  line-height: 1.25;
-  white-space: pre-wrap;
-  word-wrap: break-word;
+  min-height: 12pt; /* Reduced minimum height */
+  padding: 1pt 4pt; /* Reduced vertical padding */
+  line-height: 1.3;
+  background: #fff;
 }
 
-/* Generic tables */
-.table {
+.form-value.yesno {
+  border-bottom: none;
+  padding: 1pt 0;
+}
+
+.yesno-line {
+  margin: 2pt 0; /* Reduced margin */
+}
+
+.form-row.indent {
+  margin-left: 12pt; /* Reduced indent */
+}
+
+/* Trade-Specific Section Styling */
+.trade-specific {
+  background: #f9f9f9;
+  padding: 6pt; /* Reduced padding */
+  border: 1pt solid #ddd;
+  border-radius: 4pt;
+}
+
+/* Checkboxes */
+.checkbox {
+  display: inline-block;
+  width: 10pt; /* Slightly smaller checkbox */
+  height: 10pt;
+  line-height: 10pt;
+  border: 1pt solid #000;
+  text-align: center;
+  font-weight: 700;
+  font-size: 7pt; /* Smaller font inside box */
+  margin-right: 4pt; /* Reduced margin */
+  vertical-align: middle;
+  background: #fff;
+}
+
+.checkbox-item {
+  display: inline-block;
+  margin-right: 8pt; /* Reduced margin */
+  white-space: nowrap;
+}
+
+/* Tables */
+table {
   width: 100%;
   border-collapse: collapse;
-  margin: 4pt 0;
-  font-size: 9pt;
+  margin: 4pt 0; /* Reduced margin */
+  page-break-inside: avoid;
 }
 
-.table th,
-.table td {
+.data-table {
   border: 1pt solid #000;
-  padding: 3pt 4pt;
+}
+
+.data-table th,
+.data-table td {
+  border: 1pt solid #000;
+  padding: 3pt 5pt; /* Reduced padding */
   text-align: left;
+  font-size: 8pt;
 }
 
-/* Financial / revenue table (full width to remove blank band) */
+.data-table th {
+  background: #e8e8e8;
+  font-weight: 700;
+  text-align: center;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.data-table td {
+  background: #fff;
+}
+
+.data-table tbody tr:nth-child(even) td {
+  background: #fafafa;
+}
+
+/* Financial Table */
 .financial-table {
-  width: 100%;              /* was narrower – now fills page */
-  border-collapse: collapse;
   border: 1pt solid #000;
-  margin: 6pt 0;
-  table-layout: fixed;      /* keeps columns even */
+  margin: 4pt 0; /* Reduced margin */
+  width: 70%;
 }
 
-.financial-table th,
 .financial-table td {
   border: 1pt solid #000;
-  padding: 3pt 4pt;
-  text-align: left;
+  padding: 3pt 5pt; /* Reduced padding */
+  font-size: 8pt;
+  background: #fff;
 }
 
-/* Checkbox boxes drawn in EJS via class="box"/"box checked" */
-.box {
-  display: inline-block;
-  vertical-align: middle;
-  width: 8pt;
-  height: 8pt;
+.financial-table td:first-child {
+  background: #f8f8f8;
+  font-weight: 600;
+}
+
+/* Comments Box */
+.comments-box {
+  min-height: 30pt; /* Reduced minimum height */
   border: 1pt solid #000;
-  margin-right: 3pt;
+  padding: 4pt; /* Reduced padding */
+  background: #fff;
+  line-height: 1.3; /* Reduced line height */
 }
 
-.box.checked::after {
-  content: "X";
-  font-size: 7pt;
-  line-height: 8pt;
-  display: block;
+/* Notice Section */
+.notice-section {
+  margin: 8pt 0; /* Reduced margin */
+  page-break-inside: avoid;
+}
+
+.notice-section h3 {
+  font-size: 9pt;
+  font-weight: 700;
+  margin: 0 0 6pt; /* Reduced margin */
   text-align: center;
+  border-bottom: none; /* Removed redundant border */
 }
 
-/* Small helper text */
-.small-note {
-  font-size: 7pt;
-  color: #444;
+.notice-section p {
+  margin: 4pt 0; /* Reduced margin */
+  font-size: 8pt;
+  line-height: 1.3;
+  text-align: justify;
 }
 
-/* Ensure last element on page doesn’t get huge gap before footer */
-.section:last-child {
-  margin-bottom: 2pt;
+/* Fraud Section */
+.fraud-section {
+  margin: 6pt 0; /* Reduced margin */
+  font-size: 7.2pt; /* Reduced font size for legal text */
+  line-height: 1.3;
+}
+
+.fraud-section p {
+  margin: 3pt 0; /* Reduced margin */
+  text-align: justify;
+}
+
+.fraud-section p strong {
+  font-weight: 700;
+}
+
+/* Signature Section */
+.signature-section {
+  margin: 10pt 0; /* Reduced margin */
+  page-break-inside: avoid;
+}
+
+.signature-text {
+  margin: 8pt 0; /* Reduced margin */
+  font-size: 8pt;
+  line-height: 1.3;
+  text-align: justify;
+  padding: 6pt; /* Reduced padding */
+  border: 1pt solid #000;
+  background: #f9f9f9;
+}
+
+.signature-table {
+  width: 100%;
+  border: none;
+  margin-top: 10pt; /* Reduced margin */
+}
+
+.signature-table td {
+  border: none;
+  padding: 2pt 6pt; /* Reduced padding */
+  vertical-align: bottom;
+}
+
+.signature-name {
+  font-size: 8.5pt; /* Reduced font size */
+  padding-bottom: 1pt;
+}
+
+.signature-line {
+  border-bottom: 1pt solid #000;
+  min-height: 14pt; /* Reduced minimum height */
+  font-size: 7.5pt;
+  padding-top: 10pt; /* Reduced padding */
+}
+
+/* Page Footer */
+.page-footer {
+  margin-top: 10pt; /* Reduced margin */
+  padding-top: 4pt; /* Reduced padding */
+  border-top: 1pt solid #000;
+  font-size: 7.5pt;
+  text-align: center;
+  color: #666;
+  page-break-after: avoid;
+}
+
+/* Page Break */
+.page-break {
+  page-break-before: always;
+  break-before: page;
+  margin: 0;
+  padding: 0;
+  height: 0;
+}
+
+/* Prevent orphans */
+h2, h3, .form-label {
+  page-break-after: avoid;
+}
+
+.form-row {
+  page-break-inside: avoid;
+}
+
+table {
+  page-break-inside: auto;
+}
+
+tr {
+  page-break-inside: avoid;
+}
+
+thead {
+  display: table-header-group;
+}
+
+/* Print Optimizations */
+@media print {
+  body {
+    background: #fff;
+    padding: 0;
+  }
+  
+  /* Ensure checkboxes print */
+  .checkbox {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    color-adjust: exact;
+  }
+  
+  /* Ensure borders print */
+  table, th, td {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  
+  /* Prevent footer duplication */
+  .page-footer {
+    page-break-after: avoid;
+    page-break-inside: avoid;
+  }
+  
+  /* Hide all footers except last */
+  .page-footer {
+    display: none !important;
+  }
+  
+  .page-footer:last-of-type {
+    display: block !important;
+  }
+}
+
+/* Additional Refinements */
+strong {
+  font-weight: 700;
+}
+
+em {
+  font-style: italic;
+}
+
+.form-value {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+p {
+  margin: 3pt 0; /* Reduced margin */
+}
+
+ul, ol {
+  margin: 3pt 0; /* Reduced margin */
+  padding-left: 14pt; /* Reduced padding */
+}
+
+li {
+  margin: 1pt 0; /* Reduced margin */
 }
