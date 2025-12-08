@@ -880,21 +880,44 @@ const segmentName = data.segment || "Plumber";
   I understand that this is an application for insurance only and that completion and submission of this application does not bind coverage with any insurer.
 </div>
 
+<h2>Application Must Be Signed By Applicant</h2>
+
+<div class="signature-text">
+  I have reviewed this application for accuracy before signing it.
+  As a condition precedent to coverage, I hereby state that the information contained herein is true, accurate and complete and that no material facts have been omitted, misrepresented or misstated.
+  I know of no other claims or lawsuits against the applicant and I know of no other events, incidents or occurrences which might reasonably lead to a claim or lawsuit against the applicant.
+  I understand that this is an application for insurance only and that completion and submission of this application does not bind coverage with any insurer.
+</div>
+
 <div class="signature-section">
   <table class="signature-table">
-    <tr>
+    <tr style="height: 40pt;">
       <td style="width: 25%;">
-        <div class="signature-name">Rick Cline</div>
+        <div class="signature-line"><%= data.producer_signature || '' %></div>
       </td>
-      <td style="width: 25%;"></td>
-      <td style="width: 25%;"></td>
-      <td style="width: 25%;"></td>
+      <td style="width: 25%;">
+        <div class="signature-line"><%= data.producer_date || '' %></div>
+      </td>
+      <td style="width: 25%;">
+        <div class="signature-line"><%= data.applicant_signature || '' %></div>
+      </td>
+      <td style="width: 25%;">
+        <div class="signature-line"><%= data.applicant_date || '' %></div>
+      </td>
     </tr>
-    <tr>
-      <td><div class="signature-line">Producer's Signature</div></td>
-      <td><div class="signature-line">Date</div></td>
-      <td><div class="signature-line">Applicant's Signature</div></td>
-      <td><div class="signature-line">Date</div></td>
+    <tr style="vertical-align: top;">
+      <td style="width: 25%;">
+        <div class="signature-label">Producer's Signature</div>
+      </td>
+      <td style="width: 25%;">
+        <div class="signature-label">Date</div>
+      </td>
+      <td style="width: 25%;">
+        <div class="signature-label">Applicant's Signature</div>
+      </td>
+      <td style="width: 25%;">
+        <div class="signature-label">Date</div>
+      </td>
     </tr>
   </table>
 </div>
