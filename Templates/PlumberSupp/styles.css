@@ -1,11 +1,9 @@
-/* ===== Roofing Supplemental Application - Berkley Style (COMPACT) ===== 
-   NOTE: This CSS is copied from your proven "Roofer" style to ensure max fidelity and compactness.
-*/
+/* ===== Contractor Supplemental Application - Plumber (FINAL COMPACT STYLES) ===== */
 
 @media print {
   @page { 
     size: Letter; 
-    margin: 0.35in; /* Aggressive margin reduction for maximum space */
+    margin: 0.35in !important; /* Forces minimal page margins */
   }
   .page-break { 
     page-break-before: always; 
@@ -23,7 +21,7 @@
 
 body {
   font-family: Arial, Helvetica, sans-serif;
-  font-size: 9pt;  /* Using this compact size for base text */
+  font-size: 8.5pt;  /* Tighter base font */
   line-height: 1.2; 
   color: #000;
   background: #fff;
@@ -33,235 +31,122 @@ body {
 
 /* Header Info Section */
 .header-info {
-  margin-bottom: 10pt; 
+  margin-bottom: 8pt; 
   font-size: 8pt; 
 }
 
 .header-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 16pt;
-  margin-bottom: 3pt;
+  gap: 12pt; 
+  margin-bottom: 2pt;
 }
 
-.header-col {
-  padding: 1pt 0;
-}
-
-/* Section Headers */
+/* Section Headers - FORCING ROOFER LOOK */
 h2 {
-  font-size: 9pt; 
-  font-weight: 700;
-  text-transform: uppercase;
-  background: #e8e8e8 !important; /* Forces the gray background */
-  color: #000;
-  padding: 4pt 6pt !important;
-  margin: 10pt 0 6pt;
-  border-top: 1pt solid #000;
-  border-bottom: 1pt solid #000;
+  font-size: 9pt !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  background: #e8e8e8 !important; /* Gray background enforced */
+  color: #000 !important;
+  padding: 4pt 6pt !important; /* Compact padding enforced */
+  margin: 6pt 0 4pt !important; /* Compact margins enforced */
+  border-top: 1pt solid #000 !important;
+  border-bottom: 1pt solid #000 !important;
   page-break-after: avoid;
 }
 
 h3 {
-  font-size: 8.5pt; 
-  font-weight: 700;
-  margin: 8pt 0 4pt;
-  border-bottom: 0.5pt solid #ccc;
+  font-size: 8.5pt !important; 
+  font-weight: 700 !important;
+  margin: 6pt 0 2pt !important; /* Compact margins enforced */
   padding: 1pt 0;
+  border-bottom: 0.5pt solid #ccc;
   page-break-after: avoid;
 }
 
-/* Form Sections */
+/* Form Rows & Fields - AGGRESSIVE COMPACTION */
 .form-section {
-  margin: 0 0 8pt;
+  margin: 0 0 4pt !important;
 }
 
 .form-row {
-  margin: 5pt 0; /* Tighter than the old Plumber form */
+  margin: 3pt 0 !important; /* Aggressive margin reduction */
   page-break-inside: avoid;
 }
 
-.form-row.cols-2 {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12pt; 
-}
-
-.form-row.cols-3 {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 10pt; 
-}
-
 .form-label {
-  font-weight: 400; /* Lighter font weight */
-  font-size: 8pt; 
-  margin-bottom: 1pt; 
-  color: #000;
+  font-weight: 600; /* Keeping weight high for visibility */
+  font-size: 7.5pt !important;
+  margin-bottom: 1pt !important;
 }
 
 .form-value {
-  font-size: 9pt; 
-  border-bottom: 1pt solid #000;
-  min-height: 14pt; /* Keeps a minimal but visible line */
-  padding: 1pt 3pt; 
+  font-size: 8.5pt !important;
+  border-bottom: 1pt solid #000 !important;
+  min-height: 12pt !important; /* CRUCIAL: Minimizes empty field height */
+  padding: 1pt 4pt !important;
   line-height: 1.2;
-}
-
-.form-value.yesno {
-  border-bottom: none;
-  padding: 1pt 0; 
-}
-
-.yesno-line {
-  margin: 3pt 0;
-}
-
-.form-row.indent {
-  margin-left: 16pt;
-}
-
-/* Trade-Specific Section Styling */
-.trade-specific {
-  background: #f9f9f9;
-  padding: 6pt;
-  border: 1pt solid #ddd;
-  border-radius: 4pt;
 }
 
 /* Checkboxes */
 .checkbox {
-  display: inline-block;
-  width: 11pt;
-  height: 11pt;
-  line-height: 11pt;
-  border: 1pt solid #000;
-  text-align: center;
-  font-weight: 700;
-  font-size: 8pt; 
-  margin-right: 5pt;
-  vertical-align: middle;
-  background: #fff;
+  width: 10pt !important;
+  height: 10pt !important;
+  line-height: 9pt !important;
+  font-size: 7pt !important;
+  margin-right: 4pt !important;
 }
-
 .checkbox-item {
-  display: inline-block;
-  margin-right: 10pt; 
-  white-space: nowrap;
+  margin-right: 8pt !important;
 }
 
-/* Tables */
+/* Tables - ENFORCING COMPACTNESS & STYLE */
 table {
-  width: 100%;
-  border-collapse: collapse;
-  margin: 6pt 0; 
-  page-break-inside: avoid;
+  margin: 4pt 0 !important;
+  page-break-inside: auto; /* Allow tables to flow over pages */
 }
 
 .data-table th,
 .data-table td {
-  border: 1pt solid #000;
-  padding: 4pt 6pt; 
-  text-align: left;
-  font-size: 8pt; 
+  border: 1pt solid #000 !important;
+  padding: 3pt 5pt !important; /* Tighter padding */
+  font-size: 7.5pt !important;
 }
 
 .data-table th {
-  background: #e8e8e8 !important; /* Forces gray header */
-  font-weight: 700;
-  text-align: center;
-  line-height: 1.1;
-  text-transform: uppercase;
-}
-
-.data-table td {
-  background: #fff;
+  background: #e8e8e8 !important; /* Gray header enforced */
 }
 
 .data-table tbody tr:nth-child(even) td {
-  background: #fafafa;
+  background: #fafafa !important;
 }
 
-/* Financial/Revenue Tables (Tighter Padding) */
-.financial-table, .sales-table {
-  width: 70%;
-  border: 1pt solid #000;
-  margin: 6pt 0;
-}
-
-.financial-table td, .sales-table td {
-  border: 1pt solid #000;
-  padding: 4pt 6pt;
-  font-size: 8pt;
-}
-
-/* Comments Box */
 .comments-box {
-  min-height: 40pt; /* Keeps minimal height for visibility */
-  border: 1pt solid #000;
-  padding: 6pt;
-  line-height: 1.3;
+  min-height: 30pt !important; /* Reduces vertical gap for blank comments */
+  padding: 4pt !important;
 }
 
-/* Legal/Fraud Sections (Crucial for page length) */
+/* Signature and Legal - Tighter margins */
 .notice-section, .fraud-section {
-  margin: 8pt 0; 
-  page-break-inside: avoid;
+  margin: 6pt 0 !important;
 }
-
-.notice-section p, .fraud-section p {
-  margin: 4pt 0; 
-  font-size: 7.5pt; /* Smaller legal text */
-  line-height: 1.3;
-  text-align: justify;
-}
-
-/* Signature Section */
 .signature-section {
-  margin: 15pt 0; 
-  page-break-inside: avoid;
+  margin: 10pt 0 !important;
 }
-
 .signature-text {
-  margin: 10pt 0;
-  font-size: 8pt;
-  line-height: 1.3;
-  padding: 8pt;
-  border: 1pt solid #000;
-  background: #f9f9f9;
+  margin: 8pt 0 !important;
 }
-
-.signature-table {
-  margin-top: 15pt;
-}
-
-.signature-line {
-  min-height: 14pt;
-  padding-top: 12pt;
-}
-
-/* Page Footer */
 .page-footer {
-  margin-top: 10pt;
-  padding-top: 5pt;
-  border-top: 1pt solid #000;
-  font-size: 7pt; 
-  text-align: center;
-  color: #666;
-  /* Ensure only the last footer displays correctly */
-  display: none !important;
-}
-.page-footer:last-of-type {
-  display: block !important;
+  margin-top: 8pt !important;
 }
 
 /* Print Overrides */
 @media print {
-  /* Allow rows, but not whole sections, to break */
-  .form-row { page-break-inside: avoid; }
-  table { page-break-inside: auto; }
-  tr { page-break-inside: avoid; }
+  /* Hide all footers except last (proven Roofer technique) */
+  .page-footer { display: none !important; }
+  .page-footer:last-of-type { display: block !important; }
 
-  /* Tighter page margins for more content */
-  @page { margin: 0.35in; }
+  /* Disable page break element (proven Roofer technique) */
+  .page-break { display: none !important; }
 }
