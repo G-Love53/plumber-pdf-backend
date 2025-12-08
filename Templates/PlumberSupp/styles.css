@@ -55,8 +55,8 @@ h2 {
   text-transform: uppercase;
   background: #e8e8e8;
   color: #000;
-  padding: 5pt 8pt;
-  margin: 12pt 0 8pt;
+  padding: 4pt 8pt;
+  margin: 8pt 0 6pt;
   border-top: 1pt solid #000;
   border-bottom: 1pt solid #000;
   page-break-after: avoid;
@@ -65,19 +65,19 @@ h2 {
 h3 {
   font-size: 9pt;
   font-weight: 700;
-  margin: 10pt 0 6pt;
-  padding: 3pt 0;
+  margin: 8pt 0 4pt;
+  padding: 2pt 0;
   border-bottom: 1pt solid #ccc;
   page-break-after: avoid;
 }
 
 /* Form Sections */
 .form-section {
-  margin: 0 0 8pt;
+  margin: 0 0 6pt;
 }
 
 .form-row {
-  margin: 5pt 0;
+  margin: 4pt 0;
   page-break-inside: avoid;
 }
 
@@ -155,7 +155,7 @@ h3 {
 table {
   width: 100%;
   border-collapse: collapse;
-  margin: 8pt 0;
+  margin: 6pt 0;
   page-break-inside: avoid;
 }
 
@@ -208,17 +208,93 @@ table {
 
 /* Comments Box */
 .comments-box {
-  min-height: 50pt;
+  min-height: 40pt;
   border: 1pt solid #000;
   padding: 6pt;
   background: #fff;
   line-height: 1.4;
 }
 
+/* Notice Section */
+.notice-section {
+  margin: 12pt 0;
+  page-break-inside: avoid;
+}
+
+.notice-section h3 {
+  font-size: 9pt;
+  font-weight: 700;
+  margin: 0 0 8pt;
+  text-align: center;
+}
+
+.notice-section p {
+  margin: 6pt 0;
+  font-size: 8pt;
+  line-height: 1.3;
+  text-align: justify;
+}
+
+/* Fraud Section */
+.fraud-section {
+  margin: 8pt 0;
+  font-size: 7.5pt;
+  line-height: 1.3;
+}
+
+.fraud-section p {
+  margin: 5pt 0;
+  text-align: justify;
+}
+
+.fraud-section p strong {
+  font-weight: 700;
+}
+
+/* Signature Section */
+.signature-section {
+  margin: 20pt 0;
+  page-break-inside: avoid;
+}
+
+.signature-text {
+  margin: 12pt 0;
+  font-size: 8pt;
+  line-height: 1.3;
+  text-align: justify;
+  padding: 8pt;
+  border: 1pt solid #000;
+  background: #f9f9f9;
+}
+
+.signature-table {
+  width: 100%;
+  border: none;
+  margin-top: 20pt;
+}
+
+.signature-table td {
+  border: none;
+  padding: 3pt 6pt;
+  vertical-align: bottom;
+}
+
+.signature-name {
+  font-size: 9pt;
+  padding-bottom: 1pt;
+}
+
+.signature-line {
+  border-bottom: 1pt solid #000;
+  min-height: 16pt;
+  font-size: 7.5pt;
+  padding-top: 16pt;
+}
+
 /* Page Footer */
 .page-footer {
-  margin-top: 20pt;
-  padding-top: 8pt;
+  margin-top: 15pt;
+  padding-top: 6pt;
   border-top: 1pt solid #000;
   font-size: 7.5pt;
   text-align: center;
