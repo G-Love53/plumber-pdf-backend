@@ -131,11 +131,36 @@ table {
 .notice-section, .fraud-section {
   margin: 6pt 0 !important;
 }
+/* Signature Section - Refined for Lines and Labels */
 .signature-section {
-  margin: 10pt 0 !important;
+  margin: 10pt 0 !important; /* Retain compact margin for the whole section */
+  page-break-inside: avoid;
 }
+
 .signature-text {
-  margin: 8pt 0 !important;
+  margin: 8pt 0 !important; /* Retain compact margin for the text block */
+  /* Add other text styles if needed, like padding/border */
+}
+
+/* New element styles needed for the final line and label layout */
+.signature-table {
+  width: 100%;
+  border: none;
+  margin-top: 10pt !important;
+}
+
+.signature-line {
+  border-bottom: 1pt solid #000 !important; /* CRUCIAL: Ensures the visible line */
+  min-height: 12pt !important; /* Ensure line height is small */
+  padding: 0 4pt; /* Minimal internal padding */
+  text-align: center;
+}
+
+.signature-label {
+    font-size: 7pt;
+    font-weight: 600;
+    margin-top: 2pt;
+    text-align: center; /* Centers the label text below the line */
 }
 .page-footer {
   margin-top: 8pt !important;
