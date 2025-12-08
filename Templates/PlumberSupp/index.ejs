@@ -5,11 +5,16 @@
 /* This file must be paired with the custom styles.css file.                 */
 /* ========================================================================= */
 const segmentName = data.segment || "Plumber";
+// Define ck helper for checkboxes if not already injected by the backend (safer to rely on injected helpers)
+const ck = typeof helpers === 'object' && helpers.ck ? helpers.ck : ((v) => {
+  const s = String(v ?? "").trim().toLowerCase();
+  return (s === 'yes' || s === 'y' || s === 'true' || s === 'x') ? "✓" : "";
+});
 %>
 <!doctype html>
 <html>
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-utf-8" />
   <title>Contractor Supplemental Application - <%= segmentName %></title>
   <style><%= styles %></style>
 </head>
@@ -621,39 +626,39 @@ const segmentName = data.segment || "Plumber";
     <tbody>
       <tr>
         <td>Use cranes</td>
-        <td><%= data.cranes_used || "" %></td>
+        <td><span class="checkbox-box"><%= data.cranes_used || "" %></span></td>
         <td>Use tower cranes</td>
-        <td><%= data.tower_cranes || "" %></td>
+        <td><span class="checkbox-box"><%= data.tower_cranes || "" %></span></td>
       </tr>
       <tr>
         <td>Boom length (ft)</td>
-        <td><%= data.crane_boom_length || "" %></td>
+        <td><span class="checkbox-box"><%= data.crane_boom_length || "" %></span></td>
         <td>EIFS</td>
-        <td><%= data.eifs || data.cranes_eifs_blasting || "" %></td>
+        <td><span class="checkbox-box"><%= data.eifs || data.cranes_eifs_blasting || "" %></span></td>
       </tr>
       <tr>
         <td>Demolition (beyond interior)</td>
-        <td><%= data.demolition || "" %></td>
+        <td><span class="checkbox-box"><%= data.demolition || "" %></span></td>
         <td>Structural alterations</td>
-        <td><%= data.structural_alterations || "" %></td>
+        <td><span class="checkbox-box"><%= data.structural_alterations || "" %></span></td>
       </tr>
       <tr>
         <td>Blasting</td>
-        <td><%= data.blasting || "" %></td>
+        <td><span class="checkbox-box"><%= data.blasting || "" %></span></td>
         <td>Foundation repair</td>
-        <td><%= data.foundation_repair || "" %></td>
+        <td><span class="checkbox-box"><%= data.foundation_repair || "" %></span></td>
       </tr>
       <tr>
         <td>Shoring/underpinning</td>
-        <td><%= data.shoring_underpinning || "" %></td>
+        <td><span class="checkbox-box"><%= data.shoring_underpinning || "" %></span></td>
         <td>Pile driving</td>
-        <td><%= data.pile_driving || "" %></td>
+        <td><span class="checkbox-box"><%= data.pile_driving || "" %></span></td>
       </tr>
       <tr>
         <td>Caisson/cofferdam</td>
-        <td><%= data.caisson_cofferdam || "" %></td>
+        <td><span class="checkbox-box"><%= data.caisson_cofferdam || "" %></span></td>
         <td>Other special hazards</td>
-        <td><%= data.other_special_hazards || "" %></td>
+        <td><span class="checkbox-box"><%= data.other_special_hazards || "" %></span></td>
       </tr>
     </tbody>
   </table>
@@ -828,12 +833,14 @@ const segmentName = data.segment || "Plumber";
   <p><strong>To Insureds in the States of:</strong></p>
   
   <p><strong>Alabama and West Virginia:</strong> Any person who knowingly presents a false or fraudulent 
-  claim for payment of a loss or benefit or who knowingly presents false information in an application for insurance is guilty of a crime and may be subject to restitution fines or confinement in prison, or any combination thereof.</p>
+  claim for payment 
+  of a loss or benefit or who knowingly presents false information in an application for insurance is guilty of a crime and may be subject to restitution fines or confinement in prison, or any combination thereof.</p>
   
   <p><strong>Arkansas and Rhode Island:</strong> Any person who knowingly presents a false or fraudulent claim for payment of a loss or benefit or knowingly presents false information in an application for insurance is guilty of a crime and may be subject to fines and confinement in prison.</p>
   
   <p><strong>Colorado:</strong> It is unlawful to knowingly provide false, incomplete, 
-  or misleading facts or information to an insurance company for the purpose of defrauding or attempting to defraud the company.
+  or 
+  misleading facts or information to an insurance company for the purpose of defrauding or attempting to defraud the company.
   Penalties may include imprisonment, fines, denial of insurance, and civil damages.
   Any insurance company or agent of an insurance company who knowingly provides false, incomplete, or misleading facts or information to a policyholder or claimant for the purpose of defrauding or attempting to defraud the policyholder or claimant with regard to a settlement or award payable from insurance proceeds shall be reported to the Colorado division of insurance within the department of regulatory agencies.</p>
   
@@ -843,26 +850,31 @@ const segmentName = data.segment || "Plumber";
   <p><strong>Florida:</strong> Any person who knowingly and with intent to injure, defraud or deceive any insurer files a statement of claim or an application containing any false, incomplete, or misleading information is guilty of a felony of the third degree.</p>
   
   <p><strong>Kentucky:</strong> Any person who knowingly and with intent to defraud any insurance company or other person files an application for insurance containing any materially false information or conceals, for 
+  
   the purpose of misleading, information concerning any fact material thereto commits a fraudulent insurance act, which is a crime.</p>
   
   <p><strong>Louisiana:</strong> Any person who knowingly presents a false or fraudulent claim for payment of a loss or benefit or knowingly presents false information in an application for insurance is guilty of a crime and may be subject to fines and confinement in prison.</p>
   
-  <p><strong>Maryland:</strong> Any person who knowingly or willfully presents a false or fraudulent claim for payment of a loss or benefit or who knowingly or willfully presents false information in an application for 
+  <p><strong>Maryland:</strong> Any person who knowingly or willfully presents a false or fraudulent claim for payment of a loss or benefit or who knowingly or willfully presents false information in an 
+  application for 
   insurance is guilty of a crime and may be subject to fines and confinement in prison.</p>
   
   <p><strong>New Jersey:</strong> Any person who includes any false or misleading information on an application for an insurance policy is subject to criminal and civil penalties.</p>
   
   <p><strong>New Mexico:</strong> Any person who knowingly presents a false or fraudulent claim for payment of a loss or benefit or knowingly presents false information in an application for insurance is guilty of a crime and may be subject to civil fines and criminal penalties.</p>
   
-  <p><strong>New York:</strong> Any person who knowingly 
+  <p><strong>New York:</strong> 
+  Any person who knowingly 
   and with intent to defraud any insurance company or other person files an application for insurance or statement of claim containing any materially false information, or conceals for the purpose of misleading, information concerning any fact material thereto, commits a fraudulent insurance act, which is a crime, and shall also be subject to a civil penalty not to exceed five thousand dollars and the stated value of the claim for each such violation.</p>
   
-  <p><strong>Ohio:</strong> Any person who, with intent to defraud or knowing that he is facilitating a fraud against an insurer, submits an application or files 
+  <p><strong>Ohio:</strong> Any person who, with intent to defraud or knowing that he is facilitating a fraud against an 
+  insurer, submits an application or files 
   a claim containing a false or deceptive statement is guilty of insurance fraud.</p>
   
   <p><strong>Oklahoma:</strong> WARNING: Any person who knowingly, and with intent to injure, defraud or deceive any insurer, makes any claim for the proceeds of an insurance policy containing any false, incomplete or misleading information is guilty of a felony.</p>
   
-  <p><strong>Pennsylvania:</strong> Any person who knowingly and with intent to defraud any insurance company or other person files an application for insurance or statement of claim containing any materially false information or conceals for the purpose of misleading, information concerning any fact material thereto 
+  <p><strong>Pennsylvania:</strong> Any person who knowingly and with intent to defraud any insurance company or other person files an application for insurance or statement of claim containing any materially false information or conceals for the purpose 
+  of misleading, information concerning any fact material thereto 
   commits a fraudulent insurance act, which is a crime and subjects such person to criminal and civil penalties.</p>
   
   <p><strong>Maine, Tennessee, Virginia and Washington:</strong> It is a crime to knowingly provide false, incomplete or misleading information to an insurance company for the purpose of defrauding the company.
@@ -880,32 +892,23 @@ const segmentName = data.segment || "Plumber";
   I understand that this is an application for insurance only and that completion and submission of this application does not bind coverage with any insurer.
 </div>
 
-<h2>Application Must Be Signed By Applicant</h2>
-
-<div class="signature-text">
-  I have reviewed this application for accuracy before signing it.
-  As a condition precedent to coverage, I hereby state that the information contained herein is true, accurate and complete and that no material facts have been omitted, misrepresented or misstated.
-  I know of no other claims or lawsuits against the applicant and I know of no other events, incidents or occurrences which might reasonably lead to a claim or lawsuit against the applicant.
-  I understand that this is an application for insurance only and that completion and submission of this application does not bind coverage with any insurer.
-</div>
-
 <div class="signature-section">
   <table class="signature-table">
-    <tr style="height: 40pt;">
+    <tr>
       <td style="width: 25%;">
-        <div class="signature-line"><%= data.producer_signature || '' %></div>
+        <div class="signature-line"></div>
       </td>
       <td style="width: 25%;">
-        <div class="signature-line"><%= data.producer_date || '' %></div>
+        <div class="signature-line"></div>
       </td>
       <td style="width: 25%;">
-        <div class="signature-line"><%= data.applicant_signature || '' %></div>
+        <div class="signature-line"></div>
       </td>
       <td style="width: 25%;">
-        <div class="signature-line"><%= data.applicant_date || '' %></div>
+        <div class="signature-line"></div>
       </td>
     </tr>
-    <tr style="vertical-align: top;">
+    <tr>
       <td style="width: 25%;">
         <div class="signature-label">Producer's Signature</div>
       </td>
