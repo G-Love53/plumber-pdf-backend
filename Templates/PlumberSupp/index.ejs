@@ -1,15 +1,10 @@
 <%
 /* ========================================================================= */
-/* EJS TEMPLATE: BERKLEY CONTRACTOR SUPPLEMENTAL APPLICATION (1:1 MAPPING)    */
-/* TARGET PDF: CONTRACTOR SUPP For Form Final.pdf (8 pages)                  */
+/* EJS TEMPLATE: CONTRACTOR SUPPLEMENTAL APPLICATION (Original Agency Format)  */
+/* TARGET FORM: Plumber-Contractor-Supplemental (5).pdf                      */
 /* This file must be paired with the custom styles.css file.                 */
 /* ========================================================================= */
-const segmentName = data.segment || "Contractor";
-
-// Helper function to render X in a checkbox box if the value is 'Yes'
-function renderCheckbox(value) {
-  return value && value.toLowerCase() === 'yes' ? 'X' : '';
-}
+const segmentName = data.segment || "Plumber";
 %>
 <!doctype html>
 <html>
@@ -22,1064 +17,891 @@ function renderCheckbox(value) {
 
 <div class="header-info">
   <div class="header-row">
-    <div class="header-col" style="font-size: 10pt; font-weight: 700;">Berkley Specialty Insurance Company</div>
-    <div class="header-col" style="text-align: right;">GF0089 08/18</div>
-    <div class="header-col" style="text-align: right;">Email: contactus@berkleyaspire.com</div>
-  </div>
-  <div class="header-row" style="grid-template-columns: 1fr 1fr;">
-    <div class="header-col"><strong>Contractors Supplemental Application</strong></div>
-    <div class="header-col" style="text-align: right;"><strong>Applicant:</strong> <%= data.business_name || data.applicant_name || "" %></div>
+    <div class="header-col">
+      <strong>Contractor Supplemental Application - <%= segmentName %></strong>
+    </div>
+    <div class="header-col" style="text-align: right;">
+      <strong>Prepared:</strong> <%= new Date().toLocaleDateString() %>
+    </div>
   </div>
 </div>
 
-<h2>Agent & Applicant Information</h2>
+<h2>Agent & Applicant</h2>
 <div class="form-section">
   <div class="form-row cols-2">
     <div>
-      <div class="form-label">Agent Name:</div>
+      <div class="form-label">Agent Name</div>
       <div class="form-value"><%= data.agent_name || "" %></div>
     </div>
     <div>
-      <div class="form-label">Agent Number:</div>
+      <div class="form-label">Agent Number</div>
       <div class="form-value"><%= data.agent_number || "" %></div>
     </div>
   </div>
+  
   <div class="form-row cols-2">
     <div>
-      <div class="form-label">Contact:</div>
+      <div class="form-label">Agent Phone</div>
+      <div class="form-value"><%= data.agent_phone || "" %></div>
+    </div>
+    <div>
+      <div class="form-label">Applicant's Name</div>
       <div class="form-value"><%= data.applicant_name || "" %></div>
     </div>
-    <div>
-      <div class="form-label">Phone:</div>
-      <div class="form-value"><%= data.business_phone || "" %></div>
-    </div>
   </div>
-</div>
-
-<h2>Applicant Information</h2>
-<div class="form-section">
+  
   <div class="form-row">
-    <div class="form-label">Applicant's Name:</div>
-    <div class="form-value"><%= data.business_name || data.applicant_name || "" %></div>
+    <div class="form-label">Mailing Address</div>
+    <div class="form-value"><%= data.mailing_address || data.premise_address || "" %></div>
   </div>
-  <div class="form-row">
-    <div class="form-label">Mailing Address:</div>
-    <div class="form-value"><%= data.mailing_address || "" %></div>
-  </div>
+  
   <div class="form-row cols-2">
     <div>
-      <div class="form-label">Phone Number:</div>
-      <div class="form-value"><%= data.business_phone || "" %></div>
+      <div class="form-label">Phone Number</div>
+      <div class="form-value"><%= data.business_phone || data.applicant_phone || "" %></div>
     </div>
     <div>
-      <div class="form-label">Web Address:</div>
+      <div class="form-label">Web Address</div>
       <div class="form-value"><%= data.web_address || "" %></div>
     </div>
   </div>
+  
   <div class="form-row cols-2">
     <div>
-      <div class="form-label">Proposed Policy Period: From</div>
+      <div class="form-label">Proposed Policy From</div>
       <div class="form-value"><%= data.policy_period_from || "" %></div>
     </div>
     <div>
-      <div class="form-label">To</div>
+      <div class="form-label">Proposed Policy To</div>
       <div class="form-value"><%= data.policy_period_to || "" %></div>
     </div>
   </div>
+  
   <div class="form-row">
-    <div class="form-label">Business Structure:</div>
+    <div class="form-label">Business Structure</div>
     <div class="form-value"><%= data.business_structure || "" %></div>
   </div>
-</div>
-
-<h2>Premises Information</h2>
-<div class="form-section">
+  
   <div class="form-row">
-    <div class="form-label">Location #1</div>
-    <div class="form-value"><%= data.mailing_address || data.premise_address || "" %></div>
-  </div>
-  <div class="form-row">
-    <div class="form-label">Location #2</div>
-    <div class="form-value"><%= data.location_2 || "" %></div>
-  </div>
-  <div class="form-row">
-    <div class="form-label">Location #3</div>
-    <div class="form-value"><%= data.location_3 || "" %></div>
+    <div class="form-label">Locations</div>
+    <div class="form-value">
+      <%= data.location_1 || data.premise_address || "" %>
+      <% if (data.location_2) { %><br/><%= data.location_2 %><% } %>
+      <% if (data.location_3) { %><br/><%= data.location_3 %><% } %>
+    </div>
   </div>
 </div>
 
-<h2>Underwriting Information</h2>
+<h2>Experience & Licensing</h2>
 <div class="form-section">
   <div class="form-row cols-2">
     <div>
-      <div class="form-label">1. How long has the applicant been in business? (years)</div>
+      <div class="form-label">Years in Business</div>
       <div class="form-value"><%= data.years_in_business || "" %></div>
     </div>
     <div>
-      <div class="form-label">Years of experience in this field:</div>
+      <div class="form-label">Years Experience</div>
       <div class="form-value"><%= data.years_experience || "" %></div>
     </div>
   </div>
+  
   <div class="form-row cols-3">
     <div>
-      <div class="form-label">2. Is the applicant licensed?</div>
-      <div class="yesno-line">
-          <span class="checkbox-inline">Yes <span class="checkbox-box"><%= renderCheckbox(data.is_licensed) %></span></span>
-          <span class="checkbox-inline">No <span class="checkbox-box"><%= renderCheckbox(data.is_licensed === 'No' ? 'Yes' : '') %></span></span>
-      </div>
+      <div class="form-label">Licensed?</div>
+      <div class="form-value"><%= data.is_licensed || "" %></div>
     </div>
     <div>
-      <div class="form-label">3. Your contractor's license number:</div>
+      <div class="form-label">License Number</div>
       <div class="form-value"><%= data.license_number || "" %></div>
     </div>
     <div>
-      <div class="form-label">Type of license:</div>
+      <div class="form-label">Type of License</div>
       <div class="form-value"><%= data.license_type || "" %></div>
     </div>
   </div>
-  <div class="form-row">
-    <div class="form-label">If no, explain (Q2):</div>
-    <div class="form-value"><%= data.unlicensed_explanation || "" %></div>
-  </div>
-  
-  <div class="form-row">
-    <div class="form-label">4. Indicate the percent of each type of work performed:</div>
-    <table class="data-table">
-      <thead>
-        <tr>
-          <th>TYPE</th>
-          <th>COMMERCIAL</th>
-          <th>RESIDENTIAL</th>
-          <th>INDUSTRIAL</th>
-          <th>% OF TOTAL OPERATIONS<br>(TOTAL MUST EQUAL 100%)</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td><strong>New Construction</strong></td>
-          <td><%= data.commercial_new_construction || "" %>%</td>
-          <td><%= data.residential_new_construction || "" %>%</td>
-          <td><%= data.industrial_new_construction || "" %>%</td>
-          <td><%= (data.pct_new_construction || (parseInt(data.commercial_new_construction||0) + parseInt(data.residential_new_construction||0) + parseInt(data.industrial_new_construction||0))) || "" %>%</td>
-        </tr>
-        <tr>
-          <td><strong>Renovation</strong></td>
-          <td><%= data.commercial_renovation || "" %>%</td>
-          <td><%= data.residential_renovation || "" %>%</td>
-          <td><%= data.industrial_renovation || "" %>%</td>
-          <td><%= (data.pct_renovation || (parseInt(data.commercial_renovation||0) + parseInt(data.residential_renovation||0) + parseInt(data.industrial_renovation||0))) || "" %>%</td>
-        </tr>
-        <tr>
-          <td><strong>Real Estate Developer</strong></td>
-          <td><%= data.commercial_developer || "" %>%</td>
-          <td><%= data.residential_developer || "" %>%</td>
-          <td><%= data.industrial_developer || "" %>%</td>
-          <td><%= (data.pct_developer || (parseInt(data.commercial_developer||0) + parseInt(data.residential_developer||0) + parseInt(data.industrial_developer||0))) || "" %>%</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+</div>
 
+<h2>Work Type Mix</h2>
+<div class="form-section">
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>TYPE</th>
+        <th>COMMERCIAL</th>
+        <th>RESIDENTIAL</th>
+        <th>INDUSTRIAL</th>
+        <th>TOTAL</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>New Construction</strong></td>
+        <td><%= data.commercial_new_construction || "" %>%</td>
+        <td><%= data.residential_new_construction || "" %>%</td>
+        <td><%= data.industrial_new_construction || "" %>%</td>
+        <td><%= (parseInt(data.commercial_new_construction||0) + parseInt(data.residential_new_construction||0) + parseInt(data.industrial_new_construction||0)) %>%</td>
+      </tr>
+      <tr>
+        <td><strong>Renovation</strong></td>
+        <td><%= data.commercial_renovation || "" %>%</td>
+        <td><%= data.residential_renovation || "" %>%</td>
+        <td><%= data.industrial_renovation || "" %>%</td>
+        <td><%= (parseInt(data.commercial_renovation||0) + parseInt(data.residential_renovation||0) + parseInt(data.industrial_renovation||0)) %>%</td>
+      </tr>
+      <tr>
+        <td><strong>Developer</strong></td>
+        <td><%= data.commercial_developer || "" %>%</td>
+        <td><%= data.residential_developer || "" %>%</td>
+        <td><%= data.industrial_developer || "" %>%</td>
+        <td><%= (parseInt(data.commercial_developer||0) + parseInt(data.residential_developer||0) + parseInt(data.industrial_developer||0)) %>%</td>
+      </tr>
+      <tr>
+        <td><strong>Other</strong></td>
+        <td><%= data.commercial_other || "" %>%</td>
+        <td><%= data.residential_other || "" %>%</td>
+        <td><%= data.industrial_other || "" %>%</td>
+        <td><%= (parseInt(data.commercial_other||0) + parseInt(data.residential_other||0) + parseInt(data.industrial_other||0)) %>%</td>
+      </tr>
+    </tbody>
+  </table>
+  
   <div class="form-row cols-2">
     <div>
-      <div class="form-label">5. (a) General Contractor %</div>
+      <div class="form-label">General Contractor %</div>
       <div class="form-value"><%= data.pct_gc || "" %>%</div>
     </div>
     <div>
-      <div class="form-label">(b) Subcontractor %</div>
+      <div class="form-label">Subcontractor %</div>
       <div class="form-value"><%= data.pct_sub || "" %>%</div>
     </div>
   </div>
+  
   <div class="form-row cols-2">
     <div>
-      <div class="form-label">Indicate the percentage of work on a typical project performed by: (a) Your Employees</div>
-      <div class="form-value"><%= data.pct_work_employees || (data.annual_payroll_excl_owners && data.projected_gross_revenue ? ((data.annual_payroll_excl_owners / data.projected_gross_revenue) * 100).toFixed(0) : '') || "" %>%</div>
+      <div class="form-label">Work by Employees %</div>
+      <div class="form-value"><%= data.pct_work_employees || "" %>%</div>
     </div>
     <div>
-      <div class="form-label">(b) Subcontractors under your supervision</div>
-      <div class="form-value"><%= data.pct_work_subs || (data.estimated_annual_subcontract_cost && data.projected_gross_revenue ? ((data.estimated_annual_subcontract_cost / data.projected_gross_revenue) * 100).toFixed(0) : '') || "" %>%</div>
+      <div class="form-label">Work by Subs %</div>
+      <div class="form-value"><%= data.pct_work_subs || "" %>%</div>
     </div>
-  </div>
-  
-  <div class="form-row">
-    <div class="form-label">6. If residential construction, how many new detached single family homes per year?</div>
-    <div class="form-value"><%= data.single_family_homes_per_year || "" %></div>
-  </div>
-
-  <div class="form-row">
-    <div class="form-label">7. In the past, have you done any work involving NEW construction of Condominiums, Townhouses, Duplexes, Triplexes, Four-plexes, Patio homes, or single family homes in tract developments?</div>
-    <div class="yesno-line">
-        <span class="checkbox-inline">Yes <span class="checkbox-box"><%= renderCheckbox(data.past_tract_development) %></span></span>
-        <span class="checkbox-inline">No <span class="checkbox-box"><%= renderCheckbox(data.past_tract_development === 'No' ? 'Yes' : '') %></span></span>
-    </div>
-  </div>
-  <div class="form-row indent cols-2">
-    <div>
-      <div class="form-label">8. If yes, please specify work completed and maximum number of individual living units in a project:</div>
-      <div class="form-value"><%= data.past_tract_details || "" %></div>
-    </div>
-    <div>
-      <div class="form-label">9. When was your most recent project completed?</div>
-      <div class="form-value"><%= data.most_recent_project_date || "" %></div>
-    </div>
-  </div>
-
-  <div class="form-row">
-    <div class="form-label">10. Will any of your work during this upcoming policy term involve NEW construction of Condominiums, Townhouses, Duplexes, Triplexes, Four-plexes, Patio homes, or single family homes in tract developments?</div>
-    <div class="yesno-line">
-        <span class="checkbox-inline">Yes <span class="checkbox-box"><%= renderCheckbox(data.upcoming_tract_development) %></span></span>
-        <span class="checkbox-inline">No <span class="checkbox-box"><%= renderCheckbox(data.upcoming_tract_development === 'No' ? 'Yes' : '') %></span></span>
-    </div>
-  </div>
-  <div class="form-row indent">
-    <div class="form-label">If yes, explain and indicate maximum number of units in a project:</div>
-    <div class="form-value"><%= data.upcoming_tract_details || "" %></div>
-  </div>
-
-  <div class="form-row">
-    <div class="form-label">11. Has or will any of your work involve NEW construction of Apartments?</div>
-    <div class="yesno-line">
-        <span class="checkbox-inline">Yes <span class="checkbox-box"><%= renderCheckbox(data.apartment_work) %></span></span>
-        <span class="checkbox-inline">No <span class="checkbox-box"><%= renderCheckbox(data.apartment_work === 'No' ? 'Yes' : '') %></span></span>
-    </div>
-  </div>
-  <div class="form-row indent">
-    <div class="form-label">If yes, explain and indicated maximum number of units in a project:</div>
-    <div class="form-value"><%= data.apartment_units || "" %></div>
   </div>
 </div>
 
 <div class="page-break"></div>
-<div class="header-info">
-  <div class="header-row">
-    <div class="header-col" style="font-size: 10pt; font-weight: 700;">Berkley Specialty Insurance Company</div>
-    <div class="header-col" style="text-align: right;">GF0089 08/18</div>
-    <div class="header-col" style="text-align: right;">Email: contactus@berkleyaspire.com</div>
+
+<h2><%= segmentName %>-Specific Operations</h2>
+<div class="form-section trade-specific">
+  
+  <h3>Core <%= segmentName %> Operations</h3>
+  
+  <div class="form-row cols-3">
+    <div>
+      <div class="form-label">% Residential <%= segmentName %></div>
+      <div class="form-value"><%= data.pct_residential || "" %></div>
+    </div>
+    <div>
+      <div class="form-label">% Commercial <%= segmentName %></div>
+      <div class="form-value"><%= data.pct_commercial || "" %></div>
+    </div>
+    <div>
+      <div class="form-label">% Industrial <%= segmentName %></div>
+      <div class="form-value"><%= data.pct_industrial || "" %></div>
+    </div>
   </div>
-  <div class="header-row" style="grid-template-columns: 1fr 1fr;">
-    <div class="header-col"><strong>UNDERWRITING INFORMATION (continued)</strong></div>
-    <div class="header-col" style="text-align: right;"><strong>Applicant:</strong> <%= data.business_name || data.applicant_name || "" %></div>
+  
+  <% if (segmentName === "Plumber") { %>
+  <div class="form-row">
+    <div class="form-label">Perform any gas line work or hook-ups?</div>
+    <div class="form-value"><%= data.gas_line_work || "" %></div>
+  </div>
+  
+  <div class="form-row">
+    <div class="form-label">Any boiler work? (install, inspection, service, cleaning or repair)</div>
+    <div class="form-value"><%= data.boiler_work || "" %></div>
+  </div>
+  
+  <div class="form-row">
+    <div class="form-label">If any INDUSTRIAL plumbing, what type of clients?</div>
+    <div class="form-value"><%= data.industrial_plumbing_clients || "" %></div>
+  </div>
+  
+  <div class="form-row">
+    <div class="form-label">High-pressure steam pipe installation, service or repair?</div>
+    <div class="form-value"><%= data.high_pressure_steam_work || "" %></div>
+  </div>
+  
+  <h3>Gas Line Work Follow-up (if applicable)</h3>
+  
+  <div class="form-row">
+    <div class="form-label">Any boiler work related to gas line installations?</div>
+    <div class="form-value"><%= data.boiler_work_gas || "" %></div>
+  </div>
+  
+  <div class="form-row">
+    <div class="form-label">Welding operations?</div>
+    <div class="form-value"><%= data.welding_operations_gas || "" %></div>
+  </div>
+  
+  <div class="form-row">
+    <div class="form-label">High-pressure steam pipe work related to gas lines?</div>
+    <div class="form-value"><%= data.high_pressure_steam_gas || "" %></div>
+  </div>
+  
+  <div class="form-row">
+    <div class="form-label">Work on or install Air Conditioning Units?</div>
+    <div class="form-value"><%= data.ac_unit_work || "" %></div>
+  </div>
+  
+  <div class="form-row">
+    <div class="form-label">Work on or install Refrigeration Equipment?</div>
+    <div class="form-value"><%= data.refrigeration_work || "" %></div>
+  </div>
+  <% } %>
+  
+  <h3>Residential / Tract / Apartments</h3>
+  
+  <div class="form-row">
+    <div class="form-label"># New detached single family homes/year</div>
+    <div class="form-value"><%= data.single_family_homes_per_year || "" %></div>
+  </div>
+  
+  <div class="form-row cols-2">
+    <div>
+      <div class="form-label">Past NEW condo/townhome/tract dev</div>
+      <div class="form-value"><%= data.past_tract_development || "" %></div>
+    </div>
+    <div>
+      <div class="form-label">If yes, specify work & max units</div>
+      <div class="form-value"><%= data.past_tract_details || "" %></div>
+    </div>
+  </div>
+  
+  <div class="form-row">
+    <div class="form-label">Most recent project completion date</div>
+    <div class="form-value"><%= data.most_recent_project_date || "" %></div>
+  </div>
+  
+  <div class="form-row cols-2">
+    <div>
+      <div class="form-label">Upcoming NEW condo/townhome/tract dev</div>
+      <div class="form-value"><%= data.upcoming_tract_development || "" %></div>
+    </div>
+    <div>
+      <div class="form-label">If yes, explain & units</div>
+      <div class="form-value"><%= data.upcoming_tract_details || "" %></div>
+    </div>
+  </div>
+  
+  <div class="form-row cols-2">
+    <div>
+      <div class="form-label">Any work involving Apartments</div>
+      <div class="form-value"><%= data.apartment_work || "" %></div>
+    </div>
+    <div>
+      <div class="form-label">If yes, units</div>
+      <div class="form-value"><%= data.apartment_units || "" %></div>
+    </div>
   </div>
 </div>
 
-<h2>Underwriting Information (continued)</h2>
+<div class="page-break"></div>
+
+<h2>Subcontractor Controls & Remodeling</h2>
 <div class="form-section">
+  
+  <h3>Subcontractor Controls</h3>
+  
   <div class="form-row cols-2">
     <div>
-      <div class="form-label">12. Do you ever hire subcontractors?</div>
-      <div class="yesno-line">
-          <span class="checkbox-inline">Yes <span class="checkbox-box"><%= renderCheckbox(data.hire_subs) %></span></span>
-          <span class="checkbox-inline">No <span class="checkbox-box"><%= renderCheckbox(data.hire_subs === 'No' ? 'Yes' : '') %></span></span>
-      </div>
+      <div class="form-label">Hire subcontractors</div>
+      <div class="form-value"><%= data.hire_subs || "" %></div>
     </div>
     <div>
-      <div class="form-label">13. Are certificates of insurance required from subcontractors prior to the start of every project?</div>
-      <div class="yesno-line">
-          <span class="checkbox-inline">Yes <span class="checkbox-box"><%= renderCheckbox(data.subs_require_coi) %></span></span>
-          <span class="checkbox-inline">No <span class="checkbox-box"><%= renderCheckbox(data.subs_require_coi === 'No' ? 'Yes' : '') %></span></span>
-      </div>
+      <div class="form-label">COIs required before start</div>
+      <div class="form-value"><%= data.subs_require_coi || "" %></div>
     </div>
   </div>
+  
   <div class="form-row cols-2">
     <div>
-      <div class="form-label">14. Do your subcontractors carry coverage or limits less than yours?</div>
-      <div class="yesno-line">
-          <span class="checkbox-inline">Yes <span class="checkbox-box"><%= renderCheckbox(data.subs_carry_lower_limits) %></span></span>
-          <span class="checkbox-inline">No <span class="checkbox-box"><%= renderCheckbox(data.subs_carry_lower_limits === 'No' ? 'Yes' : '') %></span></span>
-      </div>
+      <div class="form-label">Subs carry lower limits</div>
+      <div class="form-value"><%= data.subs_carry_lower_limits || "" %></div>
     </div>
     <div>
-      <div class="form-label">If yes, what are the minimum limits you accept?</div>
+      <div class="form-label">Minimum limits accepted</div>
       <div class="form-value"><%= data.subs_min_limits || "" %></div>
     </div>
   </div>
+  
   <div class="form-row cols-2">
     <div>
-      <div class="form-label">15. Do you require your subcontractors to carry workers compensation?</div>
-      <div class="yesno-line">
-          <span class="checkbox-inline">Yes <span class="checkbox-box"><%= renderCheckbox(data.subs_wc) %></span></span>
-          <span class="checkbox-inline">No <span class="checkbox-box"><%= renderCheckbox(data.subs_wc === 'No' ? 'Yes' : '') %></span></span>
-      </div>
+      <div class="form-label">Subs carry WC</div>
+      <div class="form-value"><%= data.subs_wc || "" %></div>
     </div>
     <div>
-      <div class="form-label">16. Are written contracts, including an indemnification and a hold harmless clause in your favor, obtained from all subcontractors? (A copy of the contract is mandatory to bind coverage)</div>
-      <div class="yesno-line">
-          <span class="checkbox-inline">Yes <span class="checkbox-box"><%= renderCheckbox(data.subs_contracts_holdharmless) %></span></span>
-          <span class="checkbox-inline">No <span class="checkbox-box"><%= renderCheckbox(data.subs_contracts_holdharmless === 'No' ? 'Yes' : '') %></span></span>
-      </div>
+      <div class="form-label">Written contracts with IH/HH clause</div>
+      <div class="form-value"><%= data.subs_contracts_holdharmless || "" %></div>
     </div>
   </div>
+  
   <div class="form-row cols-2">
     <div>
-      <div class="form-label">17. Are you named as an additional insured on the subcontractors' policy?</div>
-      <div class="yesno-line">
-          <span class="checkbox-inline">Yes <span class="checkbox-box"><%= renderCheckbox(data.subs_ai) %></span></span>
-          <span class="checkbox-inline">No <span class="checkbox-box"><%= renderCheckbox(data.subs_ai === 'No' ? 'Yes' : '') %></span></span>
-      </div>
+      <div class="form-label">Named as AI on subs</div>
+      <div class="form-value"><%= data.subs_ai || "" %></div>
     </div>
     <div>
-      <div class="form-label">18. Does your subcontractor general liability insurance requirements specify that they not have third party action over exclusions?</div>
-      <div class="yesno-line">
-          <span class="checkbox-inline">Yes <span class="checkbox-box"><%= renderCheckbox(data.subs_no_action_over) %></span></span>
-          <span class="checkbox-inline">No <span class="checkbox-box"><%= renderCheckbox(data.subs_no_action_over === 'No' ? 'Yes' : '') %></span></span>
-      </div>
+      <div class="form-label">How long are COIs kept?</div>
+      <div class="form-value"><%= data.coi_retention_period || "" %></div>
     </div>
   </div>
+  
+  <h3>Remodeling, Wraps & Safety</h3>
+  
   <div class="form-row">
-    <div class="form-label">19. How long are Certificates of Insurance kept?</div>
-    <div class="form-value"><%= data.coi_retention_period || "" %></div>
+    <div class="form-label">Do repair/remodeling</div>
+    <div class="form-value"><%= data.work_repair_remodel || "" %></div>
   </div>
-
+  
+  <div class="form-row cols-2">
+    <div>
+      <div class="form-label">Renovation for HOA/Condo/Townhome</div>
+      <div class="form-value"><%= data.remodel_condos_hoas || "" %></div>
+    </div>
+    <div>
+      <div class="form-label">Condo conversions</div>
+      <div class="form-value"><%= data.condo_conversions || "" %></div>
+    </div>
+  </div>
+  
   <div class="form-row">
-    <div class="form-label">20. Does your work involve repair or remodeling?</div>
-    <div class="yesno-line">
-        <span class="checkbox-inline">Yes <span class="checkbox-box"><%= renderCheckbox(data.work_repair_remodel) %></span></span>
-        <span class="checkbox-inline">No <span class="checkbox-box"><%= renderCheckbox(data.work_repair_remodel === 'No' ? 'Yes' : '') %></span></span>
-    </div>
+    <div class="form-label">If yes, describe work & units</div>
+    <div class="form-value"><%= data.condo_conversion_details || "" %></div>
   </div>
-  <div class="form-row indent cols-2">
-    <div>
-      <div class="form-label">If yes, have or do you plan to do any remodeling / renovation work for Condominium, Townhome, or Homeowners Associations?</div>
-      <div class="yesno-line">
-          <span class="checkbox-inline">Yes <span class="checkbox-box"><%= renderCheckbox(data.remodel_condos_hoas) %></span></span>
-          <span class="checkbox-inline">No <span class="checkbox-box"><%= renderCheckbox(data.remodel_condos_hoas === 'No' ? 'Yes' : '') %></span></span>
-      </div>
-    </div>
-    <div>
-      <div class="form-label">Will any of this work involve condo conversions?</div>
-      <div class="yesno-line">
-          <span class="checkbox-inline">Yes <span class="checkbox-box"><%= renderCheckbox(data.condo_conversions) %></span></span>
-          <span class="checkbox-inline">No <span class="checkbox-box"><%= renderCheckbox(data.condo_conversions === 'No' ? 'Yes' : '') %></span></span>
-      </div>
-    </div>
-  </div>
-  <div class="form-row indent">
-    <div class="form-label">21. If you have done this work in the past, how long ago? Please describe type of work:</div>
-    <div class="form-value"><%= data.past_remodel_work_details || "" %></div>
-  </div>
-  <div class="form-row indent">
-    <div class="form-label">If you plan on doing this type of work during this upcoming policy term, what is the maximum number of individual living units involved in the remodling / renovation project? What type of work will it entail?</div>
-    <div class="form-value"><%= data.upcoming_remodel_work_details || "" %></div>
-  </div>
-
+  
   <div class="form-row cols-2">
     <div>
-      <div class="form-label">22. Have you ever been involved in or are you aware of pending litigation against you or any named insured concerning construction defect or fungus / mold claims?</div>
-      <div class="yesno-line">
-          <span class="checkbox-inline">Yes <span class="checkbox-box"><%= renderCheckbox(data.mold_defect_litigation || data.mold_defect_losses) %></span></span>
-          <span class="checkbox-inline">No <span class="checkbox-box"><%= renderCheckbox((data.mold_defect_litigation === 'No' && data.mold_defect_losses === 'No') ? 'Yes' : '') %></span></span>
-      </div>
+      <div class="form-label">Any construction defect or mold claims</div>
+      <div class="form-value"><%= data.mold_defect_losses || "" %></div>
     </div>
     <div>
-      <div class="form-label">23. Are you aware of any loss, damage, or claim that may be made against you or any named insured that involves or alleges construction defect or fungus / mold damage?</div>
-      <div class="yesno-line">
-          <span class="checkbox-inline">Yes <span class="checkbox-box"><%= renderCheckbox(data.aware_defect_mold) %></span></span>
-          <span class="checkbox-inline">No <span class="checkbox-box"><%= renderCheckbox(data.aware_defect_mold === 'No' ? 'Yes' : '') %></span></span>
-      </div>
+      <div class="form-label">Aware of potential defect/mold claims</div>
+      <div class="form-value"><%= data.aware_defect_mold || "" %></div>
     </div>
   </div>
-
+  
   <div class="form-row cols-2">
     <div>
-      <div class="form-label">24. Any current Wrap-Up/OCIP Projects?</div>
-      <div class="yesno-line">
-          <span class="checkbox-inline">Yes <span class="checkbox-box"><%= renderCheckbox(data.wrap_up_projects) %></span></span>
-          <span class="checkbox-inline">No <span class="checkbox-box"><%= renderCheckbox(data.wrap_up_projects === 'No' ? 'Yes' : '') %></span></span>
-      </div>
+      <div class="form-label">Current Wrap/OCIP projects</div>
+      <div class="form-value"><%= data.wrap_up_projects || "" %></div>
     </div>
     <div>
-      <div class="form-label">If yes, what is the projected cost associated with the Wrap-Up/OCIP Projects?</div>
+      <div class="form-label">Wrap/OCIP projected cost</div>
       <div class="form-value"><%= data.wrap_up_cost || "" %></div>
     </div>
   </div>
-
+  
   <div class="form-row">
-    <div class="form-label">25. Do you have a written safety program?</div>
-    <div class="yesno-line">
-        <span class="checkbox-inline">Yes <span class="checkbox-box"><%= renderCheckbox(data.written_safety_program) %></span></span>
-        <span class="checkbox-inline">No <span class="checkbox-box"><%= renderCheckbox(data.written_safety_program === 'No' ? 'Yes' : '') %></span></span>
-    </div>
+    <div class="form-label">Written safety program</div>
+    <div class="form-value"><%= data.written_safety_program || "" %></div>
   </div>
-  <div class="form-row indent">
-    <div class="form-label">If yes, describe what safety precautions are in place:</div>
+  
+  <div class="form-row">
+    <div class="form-label">Safety precautions</div>
     <div class="form-value"><%= data.safety_precautions || "" %></div>
   </div>
+  
   <div class="form-row">
-    <div class="form-label">26. How do you protect the general public from potential injury?</div>
+    <div class="form-label">Public protection measures</div>
     <div class="form-value"><%= data.protect_public || "" %></div>
   </div>
 </div>
 
 <div class="page-break"></div>
-<div class="header-info">
-  <div class="header-row">
-    <div class="header-col" style="font-size: 10pt; font-weight: 700;">Berkley Specialty Insurance Company</div>
-    <div class="header-col" style="text-align: right;">GF0089 08/18</div>
-    <div class="header-col" style="text-align: right;">Email: contactus@berkleyaspire.com</div>
+
+<h2>Ops, Professional, Employment</h2>
+<div class="form-section">
+  
+  <h3>Ops & Exposures</h3>
+  
+  <div class="form-row cols-2">
+    <div>
+      <div class="form-label">Jobsite security at night</div>
+      <div class="form-value"><%= data.jobsite_security_night || "" %></div>
+    </div>
+    <div>
+      <div class="form-label">Max building height (stories)</div>
+      <div class="form-value"><%= data.max_building_height || "" %></div>
+    </div>
   </div>
-  <div class="header-row" style="grid-template-columns: 1fr 1fr;">
-    <div class="header-col"><strong>UNDERWRITING INFORMATION (continued)</strong></div>
-    <div class="header-col" style="text-align: right;"><strong>Applicant:</strong> <%= data.business_name || data.applicant_name || "" %></div>
+  
+  <div class="form-row cols-2">
+    <div>
+      <div class="form-label">Post-completion inspection</div>
+      <div class="form-value"><%= data.completion_inspection || "" %></div>
+    </div>
+    <div>
+      <div class="form-label">Out-of-state work</div>
+      <div class="form-value"><%= data.out_of_state_work || "" %></div>
+    </div>
+  </div>
+  
+  <div class="form-row">
+    <div class="form-label">If yes, states & details</div>
+    <div class="form-value"><%= data.out_of_state_details || "" %></div>
+  </div>
+  
+  <div class="form-row cols-2">
+    <div>
+      <div class="form-label">Work in AZ, CA, CO, NV, NY, OR, UT, WA</div>
+      <div class="form-value"><%= data.work_restricted_states || "" %></div>
+    </div>
+    <div>
+      <div class="form-label">If yes, details</div>
+      <div class="form-value"><%= data.states_work_in || data.restricted_states_details || "" %></div>
+    </div>
+  </div>
+  
+  <h3>Professional / Equipment / Environmental</h3>
+  
+  <div class="form-row cols-2">
+    <div>
+      <div class="form-label">Asbestos ever</div>
+      <div class="form-value"><%= data.asbestos_work || data.asbestos_lead_work || "" %></div>
+    </div>
+    <div>
+      <div class="form-label">Draw plans/specs</div>
+      <div class="form-value"><%= data.draw_plans_designs || "" %></div>
+    </div>
+  </div>
+  
+  <div class="form-row cols-2">
+    <div>
+      <div class="form-label">Lease equipment to others</div>
+      <div class="form-value"><%= data.lease_equipment || "" %></div>
+    </div>
+    <div>
+      <div class="form-label">Describe (plans/equipment)</div>
+      <div class="form-value"><%= data.lease_equipment_description || "" %></div>
+    </div>
+  </div>
+  
+  <div class="form-row cols-2">
+    <div>
+      <div class="form-label">Employ soil engineer</div>
+      <div class="form-value"><%= data.employ_soil_engineer || "" %></div>
+    </div>
+    <div>
+      <div class="form-label">Hire independent soil engineer</div>
+      <div class="form-value"><%= data.hire_soil_engineer || "" %></div>
+    </div>
+  </div>
+  
+  <div class="form-row cols-2">
+    <div>
+      <div class="form-label">AI on his policy</div>
+      <div class="form-value"><%= data.soil_engineer_ai || "" %></div>
+    </div>
+    <div>
+      <div class="form-label">Offer warranties</div>
+      <div class="form-value"><%= data.warranties_offered || "" %></div>
+    </div>
+  </div>
+  
+  <div class="form-row cols-2">
+    <div>
+      <div class="form-label">Mobile equipment on roads</div>
+      <div class="form-value"><%= data.mobile_equipment_roads || "" %></div>
+    </div>
+    <div>
+      <div class="form-label">Lease mobile equipment</div>
+      <div class="form-value"><%= data.lease_mobile_equipment || "" %></div>
+    </div>
+  </div>
+  
+  <div class="form-row">
+    <div class="form-label">COIs required when leased with operator</div>
+    <div class="form-value"><%= data.mobile_equipment_coi || "" %></div>
+  </div>
+  
+  <div class="form-row cols-2">
+    <div>
+      <div class="form-label">Fire restoration or water remediation</div>
+      <div class="form-value"><%= data.fire_water_restoration || "" %></div>
+    </div>
+    <div>
+      <div class="form-label">Hazardous materials operations</div>
+      <div class="form-value"><%= data.hazardous_materials_handling || "" %></div>
+    </div>
+  </div>
+  
+  <h3>Employment & Corporate</h3>
+  
+  <div class="form-row cols-2">
+    <div>
+      <div class="form-label">Lease employees</div>
+      <div class="form-value"><%= data.lease_employees || "" %></div>
+    </div>
+    <div>
+      <div class="form-label">Workers comp in force</div>
+      <div class="form-value"><%= data.carry_workers_comp || "" %></div>
+    </div>
+  </div>
+  
+  <div class="form-row">
+    <div class="form-label">Labor interchange with other businesses</div>
+    <div class="form-value"><%= data.labor_interchange || "" %></div>
+  </div>
+  
+  <div class="form-row">
+    <div class="form-label">Other names used (past)</div>
+    <div class="form-value"><%= data.other_names || "" %></div>
   </div>
 </div>
 
-<h2>Underwriting Information (continued)</h2>
+<h2>Cross-Trade Operations</h2>
 <div class="form-section">
   <div class="form-row">
-    <div class="form-label">27. Is jobsite security provided at night?</div>
-    <div class="yesno-line">
-        <span class="checkbox-inline">Yes <span class="checkbox-box"><%= renderCheckbox(data.jobsite_security_night) %></span></span>
-        <span class="checkbox-inline">No <span class="checkbox-box"><%= renderCheckbox(data.jobsite_security_night === 'No' ? 'Yes' : '') %></span></span>
-    </div>
+    <div class="form-label">Do you perform Roofing (new roofs or re-roofing)?</div>
+    <div class="form-value"><%= data.roofing_operations || "" %></div>
   </div>
-  <div class="form-row indent">
-    <div class="form-label">If yes, please describe:</div>
-    <div class="form-value"><%= data.jobsite_security_details || "" %></div>
-  </div>
-  <div class="form-row cols-2">
-    <div>
-      <div class="form-label">28. What is the maximum height of buildings you work on? (# stories)</div>
-      <div class="form-value"><%= data.max_building_height || "" %></div>
-    </div>
-    <div>
-      <div class="form-label">29. Does a foreman or qualified individual inspect all jobs upon completion?</div>
-      <div class="yesno-line">
-          <span class="checkbox-inline">Yes <span class="checkbox-box"><%= renderCheckbox(data.completion_inspection) %></span></span>
-          <span class="checkbox-inline">No <span class="checkbox-box"><%= renderCheckbox(data.completion_inspection === 'No' ? 'Yes' : '') %></span></span>
-      </div>
-    </div>
-  </div>
-
+  
   <div class="form-row">
-    <div class="form-label">30. Do you perform any out of state work?</div>
-    <div class="yesno-line">
-        <span class="checkbox-inline">Yes <span class="checkbox-box"><%= renderCheckbox(data.out_of_state_work) %></span></span>
-        <span class="checkbox-inline">No <span class="checkbox-box"><%= renderCheckbox(data.out_of_state_work === 'No' ? 'Yes' : '') %></span></span>
-    </div>
+    <div class="form-label">Any HVAC operations?</div>
+    <div class="form-value"><%= data.hvac_operations || "" %></div>
   </div>
-  <div class="form-row indent">
-    <div class="form-label">If yes, in what states? (provide details of work performed)</div>
-    <div class="form-value"><%= data.out_of_state_details || data.states_work_in || "" %></div>
-  </div>
+  
   <div class="form-row">
-    <div class="form-label">31. Have you, will you ever, or do you currently perform work in AZ, CA, CO, NV, NY, OR, UT or WA?</div>
-    <div class="yesno-line">
-        <span class="checkbox-inline">Yes <span class="checkbox-box"><%= renderCheckbox(data.work_restricted_states) %></span></span>
-        <span class="checkbox-inline">No <span class="checkbox-box"><%= renderCheckbox(data.work_restricted_states === 'No' ? 'Yes' : '') %></span></span>
-    </div>
-  </div>
-  <div class="form-row indent">
-    <div class="form-label">If yes, please provide details of work performed:</div>
-    <div class="form-value"><%= data.restricted_states_details || "" %></div>
-  </div>
-
-  <div class="form-row">
-    <div class="form-label">32. Have you ever used sold, installed or removed asbestos?</div>
-    <div class="yesno-line">
-        <span class="checkbox-inline">Yes <span class="checkbox-box"><%= renderCheckbox(data.asbestos_lead_work) %></span></span>
-        <span class="checkbox-inline">No <span class="checkbox-box"><%= renderCheckbox(data.asbestos_lead_work === 'No' ? 'Yes' : '') %></span></span>
-    </div>
-  </div>
-  <div class="form-row indent">
-    <div class="form-label">If yes, explain in detail:</div>
-    <div class="form-value"><%= data.asbestos_details || "" %></div>
-  </div>
-
-  <div class="form-row">
-    <div class="form-label">33. Do you draw plans, designs or specifications?</div>
-    <div class="yesno-line">
-        <span class="checkbox-inline">Yes <span class="checkbox-box"><%= renderCheckbox(data.draw_plans_designs) %></span></span>
-        <span class="checkbox-inline">No <span class="checkbox-box"><%= renderCheckbox(data.draw_plans_designs === 'No' ? 'Yes' : '') %></span></span>
-    </div>
-  </div>
-  <div class="form-row indent">
-    <div class="form-label">If yes, describe:</div>
-    <div class="form-value"><%= data.plans_designs_details || "" %></div>
-  </div>
-
-  <div class="form-row">
-    <div class="form-label">34. Do you lease equipment to others with or without operators?</div>
-    <div class="yesno-line">
-        <span class="checkbox-inline">Yes <span class="checkbox-box"><%= renderCheckbox(data.lease_equipment) %></span></span>
-        <span class="checkbox-inline">No <span class="checkbox-box"><%= renderCheckbox(data.lease_equipment === 'No' ? 'Yes' : '') %></span></span>
-    </div>
-  </div>
-  <div class="form-row indent">
-    <div class="form-label">If yes, describe equipment and forward copy of lease agreement:</div>
-    <div class="form-value"><%= data.lease_equipment_description || "" %></div>
-  </div>
-
-  <div class="form-row cols-2">
-    <div>
-      <div class="form-label">35. Do you employ a soil engineer?</div>
-      <div class="yesno-line">
-          <span class="checkbox-inline">Yes <span class="checkbox-box"><%= renderCheckbox(data.employ_soil_engineer) %></span></span>
-          <span class="checkbox-inline">No <span class="checkbox-box"><%= renderCheckbox(data.employ_soil_engineer === 'No' ? 'Yes' : '') %></span></span>
-      </div>
-    </div>
-    <div>
-      <div class="form-label">If no, do you hire an independent soil engineer?</div>
-      <div class="yesno-line">
-          <span class="checkbox-inline">Yes <span class="checkbox-box"><%= renderCheckbox(data.hire_soil_engineer) %></span></span>
-          <span class="checkbox-inline">No <span class="checkbox-box"><%= renderCheckbox(data.hire_soil_engineer === 'No' ? 'Yes' : '') %></span></span>
-      </div>
-    </div>
-  </div>
-  <div class="form-row indent">
-    <div class="form-label">If yes, does he name you as an Additional Insured?</div>
-    <div class="yesno-line">
-        <span class="checkbox-inline">Yes <span class="checkbox-box"><%= renderCheckbox(data.soil_engineer_ai) %></span></span>
-        <span class="checkbox-inline">No <span class="checkbox-box"><%= renderCheckbox(data.soil_engineer_ai === 'No' ? 'Yes' : '') %></span></span>
-    </div>
-  </div>
-
-  <div class="form-row">
-    <div class="form-label">36. Do you offer warranties? (If yes, attach copies of warranty)</div>
-    <div class="yesno-line">
-        <span class="checkbox-inline">Yes <span class="checkbox-box"><%= renderCheckbox(data.warranties_offered) %></span></span>
-        <span class="checkbox-inline">No <span class="checkbox-box"><%= renderCheckbox(data.warranties_offered === 'No' ? 'Yes' : '') %></span></span>
-    </div>
-  </div>
-
-  <div class="form-row cols-2">
-    <div>
-      <div class="form-label">37. Do you have Mobile Equipment that travels over public roads?</div>
-      <div class="yesno-line">
-          <span class="checkbox-inline">Yes <span class="checkbox-box"><%= renderCheckbox(data.mobile_equipment_roads) %></span></span>
-          <span class="checkbox-inline">No <span class="checkbox-box"><%= renderCheckbox(data.mobile_equipment_roads === 'No' ? 'Yes' : '') %></span></span>
-      </div>
-    </div>
-    <div>
-      <div class="form-label">38. Do you lease Mobile Equipment from others?</div>
-      <div class="yesno-line">
-          <span class="checkbox-inline">Yes <span class="checkbox-box"><%= renderCheckbox(data.lease_mobile_equipment) %></span></span>
-          <span class="checkbox-inline">No <span class="checkbox-box"><%= renderCheckbox(data.lease_mobile_equipment === 'No' ? 'Yes' : '') %></span></span>
-      </div>
-    </div>
-  </div>
-  <div class="form-row indent">
-    <div class="form-label">If yes, are certificates of insurance required when leased with an operator?</div>
-    <div class="yesno-line">
-        <span class="checkbox-inline">Yes <span class="checkbox-box"><%= renderCheckbox(data.mobile_equipment_coi) %></span></span>
-        <span class="checkbox-inline">No <span class="checkbox-box"><%= renderCheckbox(data.mobile_equipment_coi === 'No' ? 'Yes' : '') %></span></span>
-    </div>
-  </div>
-  <div class="form-row indent">
-    <div class="form-label">Describe the type of equipment leased:</div>
-    <div class="form-value"><%= data.leased_equipment_description || "" %></div>
-  </div>
-
-  <div class="form-row cols-2">
-    <div>
-      <div class="form-label">39. Do you perform or subcontract fire restoration and/or water remediation work?</div>
-      <div class="yesno-line">
-          <span class="checkbox-inline">Yes <span class="checkbox-box"><%= renderCheckbox(data.fire_water_restoration) %></span></span>
-          <span class="checkbox-inline">No <span class="checkbox-box"><%= renderCheckbox(data.fire_water_restoration === 'No' ? 'Yes' : '') %></span></span>
-      </div>
-    </div>
-    <div>
-      <div class="form-label">40. Do you or have you had any past, present or discontinued operations involving storing, treating, discharging, applying, disposing, or transporting of hazardous material?</div>
-      <div class="yesno-line">
-          <span class="checkbox-inline">Yes <span class="checkbox-box"><%= renderCheckbox(data.hazardous_materials_handling) %></span></span>
-          <span class="checkbox-inline">No <span class="checkbox-box"><%= renderCheckbox(data.hazardous_materials_handling === 'No' ? 'Yes' : '') %></span></span>
-      </div>
-    </div>
-  </div>
-
-  <div class="form-row cols-2">
-    <div>
-      <div class="form-label">41. Do you lease employees to or from other employers?</div>
-      <div class="yesno-line">
-          <span class="checkbox-inline">Yes <span class="checkbox-box"><%= renderCheckbox(data.lease_employees) %></span></span>
-          <span class="checkbox-inline">No <span class="checkbox-box"><%= renderCheckbox(data.lease_employees === 'No' ? 'Yes' : '') %></span></span>
-      </div>
-    </div>
-    <div>
-      <div class="form-label">42. Do you carry workers compensation insurance?</div>
-      <div class="yesno-line">
-          <span class="checkbox-inline">Yes <span class="checkbox-box"><%= renderCheckbox(data.carry_workers_comp) %></span></span>
-          <span class="checkbox-inline">No <span class="checkbox-box"><%= renderCheckbox(data.carry_workers_comp === 'No' ? 'Yes' : '') %></span></span>
-      </div>
-    </div>
-  </div>
-  <div class="form-row">
-    <div class="form-label">43. Do you have a labor interchange with any other business or subsidiaries?</div>
-    <div class="yesno-line">
-        <span class="checkbox-inline">Yes <span class="checkbox-box"><%= renderCheckbox(data.labor_interchange) %></span></span>
-        <span class="checkbox-inline">No <span class="checkbox-box"><%= renderCheckbox(data.labor_interchange === 'No' ? 'Yes' : '') %></span></span>
-    </div>
-  </div>
-  <div class="form-row">
-    <div class="form-label">44. Have you operated under any other name(s)?</div>
-    <div class="yesno-line">
-        <span class="checkbox-inline">Yes <span class="checkbox-box"><%= renderCheckbox(data.other_names_used) %></span></span>
-        <span class="checkbox-inline">No <span class="checkbox-box"><%= renderCheckbox(data.other_names_used === 'No' ? 'Yes' : '') %></span></span>
-    </div>
-  </div>
-  <div class="form-row indent">
-    <div class="form-label">If yes, list name, address, years in operation and exposures:</div>
-    <div class="form-value"><%= data.other_names_details || "" %></div>
-  </div>
-
-  <div class="form-row cols-3">
-    <div>
-      <div class="form-label">45. Do you perform work below grade?</div>
-      <div class="yesno-line">
-          <span class="checkbox-inline">Yes <span class="checkbox-box"><%= renderCheckbox(data.work_below_grade) %></span></span>
-          <span class="checkbox-inline">No <span class="checkbox-box"><%= renderCheckbox(data.work_below_grade === 'No' ? 'Yes' : '') %></span></span>
-      </div>
-    </div>
-    <div>
-      <div class="form-label">% of work</div>
-      <div class="form-value"><%= data.pct_below_grade || "" %>%</div>
-    </div>
-    <div>
-      <div class="form-label">Depth</div>
-      <div class="form-value"><%= data.depth_below_grade || "" %></div>
-    </div>
-  </div>
-  <div class="form-row cols-2">
-    <div>
-      <div class="form-label">46. Do you now or have you ever built on hillsides, slopes, landfills or other terrain susceptible to subsidence?</div>
-      <div class="yesno-line">
-          <span class="checkbox-inline">Yes <span class="checkbox-box"><%= renderCheckbox(data.work_hillsides_slopes_landfills) %></span></span>
-          <span class="checkbox-inline">No <span class="checkbox-box"><%= renderCheckbox(data.work_hillsides_slopes_landfills === 'No' ? 'Yes' : '') %></span></span>
-      </div>
-    </div>
-    <div>
-      <div class="form-label">47. Any work relating to tunnels, subway, bridges, resevoirs, elevated highways, gas or electric utilities, stadiums, jetties, maritime structure or vessels?</div>
-      <div class="yesno-line">
-          <span class="checkbox-inline">Yes <span class="checkbox-box"><%= renderCheckbox(data.work_tunnels_subways_utilities) %></span></span>
-          <span class="checkbox-inline">No <span class="checkbox-box"><%= renderCheckbox(data.work_tunnels_subways_utilities === 'No' ? 'Yes' : '') %></span></span>
-      </div>
-    </div>
-  </div>
-  <div class="form-row indent">
-    <div class="form-label">If yes, describe (Q47):</div>
-    <div class="form-value"><%= data.tunnels_subways_utilities_details || "" %></div>
-  </div>
-
-  <div class="form-row">
-    <div class="form-label">48. Are you involved in any operations outside of the construction industry?</div>
-    <div class="yesno-line">
-        <span class="checkbox-inline">Yes <span class="checkbox-box"><%= renderCheckbox(data.operations_outside_construction) %></span></span>
-        <span class="checkbox-inline">No <span class="checkbox-box"><%= renderCheckbox(data.operations_outside_construction === 'No' ? 'Yes' : '') %></span></span>
-    </div>
-  </div>
-  <div class="form-row indent">
-    <div class="form-label">If yes, describe:</div>
-    <div class="form-value"><%= data.operations_outside_construction_details || "" %></div>
+    <div class="form-label">Any specific Additional Insureds requiring to be specifically named on the policy?</div>
+    <div class="form-value"><%= data.specific_additional_insureds || "" %></div>
   </div>
 </div>
 
 <div class="page-break"></div>
-<div class="header-info">
-  <div class="header-row">
-    <div class="header-col" style="font-size: 10pt; font-weight: 700;">Berkley Specialty Insurance Company</div>
-    <div class="header-col" style="text-align: right;">GF0089 08/18</div>
-    <div class="header-col" style="text-align: right;">Email: contactus@berkleyaspire.com</div>
-  </div>
-  <div class="header-row" style="grid-template-columns: 1fr 1fr;">
-    <div class="header-col"><strong>UNDERWRITING INFORMATION (continued)</strong></div>
-    <div class="header-col" style="text-align: right;"><strong>Applicant:</strong> <%= data.business_name || data.applicant_name || "" %></div>
-  </div>
-</div>
 
-<h2>Underwriting Information (continued)</h2>
+<h2>Supervision • Real Estate • Special Hazards • Revenue • Jobs • Corporate</h2>
 <div class="form-section">
+  
+  <h3>Supervision & Real Estate</h3>
+  
   <div class="form-row cols-2">
     <div>
-      <div class="form-label">49. Number of executive supervisors:</div>
+      <div class="form-label"># Executive supervisors</div>
       <div class="form-value"><%= data.num_executive_supervisors || "" %></div>
     </div>
     <div>
-      <div class="form-label">Estimated Payroll:</div>
+      <div class="form-label">Estimated payroll</div>
       <div class="form-value"><%= data.executive_payroll || "" %></div>
     </div>
   </div>
+  
   <div class="form-row">
-    <div class="form-label">50. Please provide the construction experience of your executive supervisors:</div>
-    <table class="data-table">
-      <thead>
-        <tr>
-          <th>NAME</th>
-          <th>YEARS OF EXPERIENCE</th>
-          <th>ESTIMATED PAYROLL</th>
-          <th>LARGEST JOB SUPERVISED</th>
-          <th>YEARS WITH COMPANY</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr><td><%= data.supervisor_1_name || "" %></td><td><%= data.supervisor_1_years || "" %></td><td><%= data.supervisor_1_payroll || "" %></td><td><%= data.supervisor_1_largest_job || "" %></td><td><%= data.supervisor_1_years_company || "" %></td></tr>
-        <tr><td><%= data.supervisor_2_name || "" %></td><td><%= data.supervisor_2_years || "" %></td><td><%= data.supervisor_2_payroll || "" %></td><td><%= data.supervisor_2_largest_job || "" %></td><td><%= data.supervisor_2_years_company || "" %></td></tr>
-        <tr><td><%= data.supervisor_3_name || "" %></td><td><%= data.supervisor_3_years || "" %></td><td><%= data.supervisor_3_payroll || "" %></td><td><%= data.supervisor_3_largest_job || "" %></td><td><%= data.supervisor_3_years_company || "" %></td></tr>
-      </tbody>
-    </table>
+    <div class="form-label">Experience of executive supervisors</div>
+    <div class="form-value"><%= data.executive_experience || "" %></div>
   </div>
   
   <div class="form-row cols-3">
     <div>
-      <div class="form-label">51. Number of Model Homes:</div>
+      <div class="form-label"># Model Homes</div>
       <div class="form-value"><%= data.model_homes || "" %></div>
     </div>
     <div>
-      <div class="form-label">Development Property: (acres)</div>
+      <div class="form-label">Development Property (acres)</div>
       <div class="form-value"><%= data.development_property_acres || "" %></div>
     </div>
     <div>
-      <div class="form-label">Vacant Land: (acres)</div>
+      <div class="form-label">Vacant Land (acres)</div>
       <div class="form-value"><%= data.vacant_land_acres || "" %></div>
     </div>
   </div>
-</div>
-
-<h2>Special Hazards</h2>
-<div class="form-section">
-  <div class="form-row">
-    <div class="form-label">1. Do any of your operations involve the following?</div>
-    <table class="data-table">
-      <tbody>
-        <tr>
-            <td>Use of cranes?</td><td><%= data.cranes_used || renderCheckbox(data.cranes_eifs_blasting) %></td>
-            <td>Use of tower cranes?</td><td><%= data.tower_cranes || "" %></td>
-        </tr>
-        <tr>
-            <td>Length of booms: (# of ft)</td><td><%= data.crane_boom_length || "" %></td>
-            <td>EIFS (Exterior Insulation and Finish Systems)?</td><td><%= data.eifs || renderCheckbox(data.cranes_eifs_blasting) %></td>
-        </tr>
-        <tr>
-            <td>Demolition of structures (other than interior)?</td><td><%= data.demolition || "" %></td>
-            <td>Structural alterations?</td><td><%= data.structural_alterations || "" %></td>
-        </tr>
-        <tr>
-            <td>Blasting?</td><td><%= data.blasting || renderCheckbox(data.cranes_eifs_blasting) %></td>
-            <td>Foundation Repair?</td><td><%= data.foundation_repair || "" %></td>
-        </tr>
-        <tr>
-            <td>Shoring or underpinning?</td><td><%= data.shoring_underpinning || "" %></td>
-            <td>Pile driving?</td><td><%= data.pile_driving || "" %></td>
-        </tr>
-        <tr>
-            <td>Caisson or cofferdam work?</td><td><%= data.caisson_cofferdam || "" %></td>
-            <td>Other Special Hazards:</td><td><%= data.other_special_hazards || "" %></td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
-  <div class="form-row">
-    <div class="form-label">Explain all "Yes" responses:</div>
-    <div class="form-value comments-box"><%= data.special_hazards_explanation || "" %></div>
-  </div>
-
+  
+  <h3>Special Hazards</h3>
+  
+  <table class="data-table">
+    <tbody>
+      <tr>
+        <td>Use cranes</td>
+        <td><%= data.cranes_used || "" %></td>
+        <td>Use tower cranes</td>
+        <td><%= data.tower_cranes || "" %></td>
+      </tr>
+      <tr>
+        <td>Boom length (ft)</td>
+        <td><%= data.crane_boom_length || "" %></td>
+        <td>EIFS</td>
+        <td><%= data.eifs || data.cranes_eifs_blasting || "" %></td>
+      </tr>
+      <tr>
+        <td>Demolition (beyond interior)</td>
+        <td><%= data.demolition || "" %></td>
+        <td>Structural alterations</td>
+        <td><%= data.structural_alterations || "" %></td>
+      </tr>
+      <tr>
+        <td>Blasting</td>
+        <td><%= data.blasting || "" %></td>
+        <td>Foundation repair</td>
+        <td><%= data.foundation_repair || "" %></td>
+      </tr>
+      <tr>
+        <td>Shoring/underpinning</td>
+        <td><%= data.shoring_underpinning || "" %></td>
+        <td>Pile driving</td>
+        <td><%= data.pile_driving || "" %></td>
+      </tr>
+      <tr>
+        <td>Caisson/cofferdam</td>
+        <td><%= data.caisson_cofferdam || "" %></td>
+        <td>Other special hazards</td>
+        <td><%= data.other_special_hazards || "" %></td>
+      </tr>
+    </tbody>
+  </table>
+  
   <div class="form-row cols-2">
     <div>
-      <div class="form-label">2. Have you or any of your Subcontractors installed wallboard or drywall manufactured in China?</div>
-      <div class="yesno-line">
-          <span class="checkbox-inline">Yes <span class="checkbox-box"><%= renderCheckbox(data.chinese_drywall) %></span></span>
-          <span class="checkbox-inline">No <span class="checkbox-box"><%= renderCheckbox(data.chinese_drywall === 'No' ? 'Yes' : '') %></span></span>
-      </div>
+      <div class="form-label">Chinese drywall installed by you/subs</div>
+      <div class="form-value"><%= data.chinese_drywall || "" %></div>
     </div>
     <div>
-      <div class="form-label">3. Are you involved in Torch Down or Hot Tar Roofing?</div>
-      <div class="yesno-line">
-          <span class="checkbox-inline">Yes <span class="checkbox-box"><%= renderCheckbox(data.torch_down_hot_tar) %></span></span>
-          <span class="checkbox-inline">No <span class="checkbox-box"><%= renderCheckbox(data.torch_down_hot_tar === 'No' ? 'Yes' : '') %></span></span>
-      </div>
+      <div class="form-label">Torch-down or hot tar roofing</div>
+      <div class="form-value"><%= data.torch_down_hot_tar || "" %></div>
     </div>
   </div>
-  <div class="form-row indent cols-2">
+  
+  <div class="form-row cols-2">
     <div>
-      <div class="form-label">If yes, idicate percentage of each: % Hot Tar</div>
-      <div class="form-value"><%= data.pct_hot_tar || "" %>%</div>
+      <div class="form-label">% Hot Tar</div>
+      <div class="form-value"><%= data.pct_hot_tar || "" %></div>
     </div>
     <div>
       <div class="form-label">% Torch Down</div>
-      <div class="form-value"><%= data.pct_torch_down || "" %>%</div>
+      <div class="form-value"><%= data.pct_torch_down || "" %></div>
     </div>
   </div>
-</div>
-
-<div class="page-break"></div>
-<div class="header-info">
-  <div class="header-row">
-    <div class="header-col" style="font-size: 10pt; font-weight: 700;">Berkley Specialty Insurance Company</div>
-    <div class="header-col" style="text-align: right;">GF0089 08/18</div>
-    <div class="header-col" style="text-align: right;">Email: contactus@berkleyaspire.com</div>
-  </div>
-  <div class="header-row" style="grid-template-columns: 1fr 1fr;">
-    <div class="header-col"><strong>TYPE OF WORK PERFORMED</strong></div>
-    <div class="header-col" style="text-align: right;"><strong>Applicant:</strong> <%= data.business_name || data.applicant_name || "" %></div>
-  </div>
-</div>
-
-<h2>Type of Work Performed</h2>
-<div class="form-section">
+  
+  <h3>Trades & Payroll/Sub Costs</h3>
+  
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Trade</th>
+        <th>By (employees/subs)</th>
+        <th>Projected $</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><%= segmentName %></td>
+        <td><%= data.trade_plumbing_by || "" %></td>
+        <td><%= data.trade_plumbing_cost || "" %></td>
+      </tr>
+      <tr>
+        <td>Electrical</td>
+        <td><%= data.trade_electrical_by || "" %></td>
+        <td><%= data.trade_electrical_cost || "" %></td>
+      </tr>
+      <tr>
+        <td>Roofing</td>
+        <td><%= data.trade_roofing_by || "" %></td>
+        <td><%= data.trade_roofing_cost || "" %></td>
+      </tr>
+      <tr>
+        <td>Excavation</td>
+        <td><%= data.trade_excavation_by || "" %></td>
+        <td><%= data.trade_excavation_cost || "" %></td>
+      </tr>
+      <tr>
+        <td>Other</td>
+        <td><%= data.trade_other_by || "" %></td>
+        <td><%= data.trade_other_cost || "" %></td>
+      </tr>
+    </tbody>
+  </table>
+  
+  <h3>Revenue</h3>
+  
   <div class="form-row">
-    <div class="form-label">1. Please indicate whether the following trades are: E-performed by your employees or S - performed by subcontractors, and provide your projected payroll or subcontractor costs:</div>
-    <table class="data-table">
-      <thead>
-        <tr>
-          <th rowspan="2">DESCRIPTION</th>
-          <th colspan="2">EMPLOYEE (E)</th>
-          <th colspan="2">SUBCONTRACTOR (S)</th>
-          <th rowspan="2">DESCRIPTION</th>
-          <th colspan="2">EMPLOYEE (E)</th>
-          <th colspan="2">SUBCONTRACTOR (S)</th>
-        </tr>
-        <tr>
-          <th>E</th>
-          <th>ANNUAL PAYROLL</th>
-          <th>S</th>
-          <th>ANNUAL COST</th>
-          <th>E</th>
-          <th>ANNUAL PAYROLL</th>
-          <th>S</th>
-          <th>ANNUAL COST</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% 
-        const isPlumbingPrimary = segmentName.toLowerCase() === 'plumber';
-        const plumbingPayroll = data.trade_plumbing_payroll || (isPlumbingPrimary ? data.annual_payroll_excl_owners : '');
-        const plumbingSubCost = data.trade_plumbing_cost || (isPlumbingPrimary ? data.estimated_annual_subcontract_cost : '');
-        %>
-        <tr>
-            <td>Bridge</td><td><%= data.trade_bridge_by === 'E' ? 'X' : '' %></td><td><%= data.trade_bridge_payroll || '' %></td><td><%= data.trade_bridge_by === 'S' ? 'X' : '' %></td><td><%= data.trade_bridge_cost || '' %></td>
-            <td>Insulation</td><td><%= data.trade_insulation_by === 'E' ? 'X' : '' %></td><td><%= data.trade_insulation_payroll || '' %></td><td><%= data.trade_insulation_by === 'S' ? 'X' : '' %></td><td><%= data.trade_insulation_cost || '' %></td>
-        </tr>
-        <tr>
-            <td>Carpentry</td><td><%= data.trade_carpentry_by === 'E' ? 'X' : '' %></td><td><%= data.trade_carpentry_payroll || '' %></td><td><%= data.trade_carpentry_by === 'S' ? 'X' : '' %></td><td><%= data.trade_carpentry_cost || '' %></td>
-            <td>Interior Demolition</td><td><%= data.trade_int_demol_by === 'E' ? 'X' : '' %></td><td><%= data.trade_int_demol_payroll || '' %></td><td><%= data.trade_int_demol_by === 'S' ? 'X' : '' %></td><td><%= data.trade_int_demol_cost || '' %></td>
-        </tr>
-        <tr>
-            <td>Concrete</td><td><%= data.trade_concrete_by === 'E' ? 'X' : '' %></td><td><%= data.trade_concrete_payroll || '' %></td><td><%= data.trade_concrete_by === 'S' ? 'X' : '' %></td><td><%= data.trade_concrete_cost || '' %></td>
-            <td>Landscaping</td><td><%= data.trade_landscape_by === 'E' ? 'X' : '' %></td><td><%= data.trade_landscape_payroll || '' %></td><td><%= data.trade_landscape_by === 'S' ? 'X' : '' %></td><td><%= data.trade_landscape_cost || '' %></td>
-        </tr>
-        <tr>
-            <td>Debris Removal</td><td><%= data.trade_debris_by === 'E' ? 'X' : '' %></td><td><%= data.trade_debris_payroll || '' %></td><td><%= data.trade_debris_by === 'S' ? 'X' : '' %></td><td><%= data.trade_debris_cost || '' %></td>
-            <td>Masonry</td><td><%= data.trade_masonry_by === 'E' ? 'X' : '' %></td><td><%= data.trade_masonry_payroll || '' %></td><td><%= data.trade_masonry_by === 'S' ? 'X' : '' %></td><td><%= data.trade_masonry_cost || '' %></td>
-        </tr>
-        <tr>
-            <td>Drilling</td><td><%= data.trade_drilling_by === 'E' ? 'X' : '' %></td><td><%= data.trade_drilling_payroll || '' %></td><td><%= data.trade_drilling_by === 'S' ? 'X' : '' %></td><td><%= data.trade_drilling_cost || '' %></td>
-            <td>Painting</td><td><%= data.trade_painting_by === 'E' ? 'X' : '' %></td><td><%= data.trade_painting_payroll || '' %></td><td><%= data.trade_painting_by === 'S' ? 'X' : '' %></td><td><%= data.trade_painting_cost || '' %></td>
-        </tr>
-        <tr>
-            <td>Drywall</td><td><%= data.trade_drywall_by === 'E' ? 'X' : '' %></td><td><%= data.trade_drywall_payroll || '' %></td><td><%= data.trade_drywall_by === 'S' ? 'X' : '' %></td><td><%= data.trade_drywall_cost || '' %></td>
-            <td>Parking Lot Paving</td><td><%= data.trade_parking_by === 'E' ? 'X' : '' %></td><td><%= data.trade_parking_payroll || '' %></td><td><%= data.trade_parking_by === 'S' ? 'X' : '' %></td><td><%= data.trade_parking_cost || '' %></td>
-        </tr>
-        <tr>
-            <td>Electrical</td><td><%= data.trade_electrical_by === 'E' ? 'X' : '' %></td><td><%= data.trade_electrical_payroll || '' %></td><td><%= data.trade_electrical_by === 'S' ? 'X' : '' %></td><td><%= data.trade_electrical_cost || '' %></td>
-            <td>Plumbing</td><td><%= data.trade_plumbing_by === 'E' ? 'X' : '' %></td><td>$<%= plumbingPayroll %></td><td><%= data.trade_plumbing_by === 'S' ? 'X' : '' %></td><td>$<%= plumbingSubCost %></td>
-        </tr>
-        <tr>
-            <td>Excavation</td><td><%= data.trade_excavation_by === 'E' ? 'X' : '' %></td><td><%= data.trade_excavation_payroll || '' %></td><td><%= data.trade_excavation_by === 'S' ? 'X' : '' %></td><td><%= data.trade_excavation_cost || '' %></td>
-            <td>Roofing</td><td><%= data.trade_roofing_by === 'E' ? 'X' : '' %></td><td><%= data.trade_roofing_payroll || '' %></td><td><%= data.trade_roofing_by === 'S' ? 'X' : '' %></td><td><%= data.trade_roofing_cost || '' %></td>
-        </tr>
-        <tr>
-            <td>Framing</td><td><%= data.trade_framing_by === 'E' ? 'X' : '' %></td><td><%= data.trade_framing_payroll || '' %></td><td><%= data.trade_framing_by === 'S' ? 'X' : '' %></td><td><%= data.trade_framing_cost || '' %></td>
-            <td>Street Paving</td><td><%= data.trade_street_paving_by === 'E' ? 'X' : '' %></td><td><%= data.trade_street_paving_payroll || '' %></td><td><%= data.trade_street_paving_by === 'S' ? 'X' : '' %></td><td><%= data.trade_street_paving_cost || '' %></td>
-        </tr>
-        <tr>
-            <td>Grading</td><td><%= data.trade_grading_by === 'E' ? 'X' : '' %></td><td><%= data.trade_grading_payroll || '' %></td><td><%= data.trade_grading_by === 'S' ? 'X' : '' %></td><td><%= data.trade_grading_cost || '' %></td>
-            <td>Stucco</td><td><%= data.trade_stucco_by === 'E' ? 'X' : '' %></td><td><%= data.trade_stucco_payroll || '' %></td><td><%= data.trade_stucco_by === 'S' ? 'X' : '' %></td><td><%= data.trade_stucco_cost || '' %></td>
-        </tr>
-        <tr>
-            <td>Guard rail installation</td><td><%= data.trade_guard_rail_by === 'E' ? 'X' : '' %></td><td><%= data.trade_guard_rail_payroll || '' %></td><td><%= data.trade_guard_rail_by === 'S' ? 'X' : '' %></td><td><%= data.trade_guard_rail_cost || '' %></td>
-            <td>HVAC</td><td><%= data.trade_hvac_by === 'E' ? 'X' : '' %></td><td><%= data.trade_hvac_payroll || '' %></td><td><%= data.trade_hvac_by === 'S' ? 'X' : '' %></td><td><%= data.trade_hvac_cost || '' %></td>
-        </tr>
-        <tr>
-            <td>Other (Specify: <%= data.trade_other_1_name || '' %>)</td><td><%= data.trade_other_1_by === 'E' ? 'X' : '' %></td><td><%= data.trade_other_1_payroll || '' %></td><td><%= data.trade_other_1_by === 'S' ? 'X' : '' %></td><td><%= data.trade_other_1_cost || '' %></td>
-            <td>Other (Specify: <%= data.trade_other_2_name || '' %>)</td><td><%= data.trade_other_2_by === 'E' ? 'X' : '' %></td><td><%= data.trade_other_2_payroll || '' %></td><td><%= data.trade_other_2_by === 'S' ? 'X' : '' %></td><td><%= data.trade_other_2_cost || '' %></td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-</div>
-
-<h2>Experience</h2>
-<div class="form-section">
-  <div class="form-row">
-    <div class="form-label">1. What is your projected gross revenue / sales for the upcoming policy term?</div>
+    <div class="form-label">Projected Gross Revenue (upcoming term)</div>
     <div class="form-value">$<%= data.projected_gross_revenue || "" %></div>
   </div>
+  
+  <table class="data-table">
+    <tbody>
+      <tr>
+        <td>Year 1 Gross Sales</td>
+        <td>$<%= data.gross_sales_year_1 || "" %></td>
+      </tr>
+      <tr>
+        <td>Year 2 Gross Sales</td>
+        <td>$<%= data.gross_sales_year_2 || "" %></td>
+      </tr>
+      <tr>
+        <td>Year 3 Gross Sales</td>
+        <td>$<%= data.gross_sales_year_3 || "" %></td>
+      </tr>
+    </tbody>
+  </table>
+  
+  <h3>Largest Jobs</h3>
+  
   <div class="form-row">
-    <div class="form-label">2. Please provide your gross revenue / sales for the last three years:</div>
-    <table class="data-table" style="width: 50%;">
-      <tbody>
-        <tr><td>Year <%= data.year_1_suffix || "" %> Gross Sales:</td><td>$<%= data.gross_sales_year_1 || "" %></td></tr>
-        <tr><td>Year <%= data.year_2_suffix || "" %> Gross Sales:</td><td>$<%= data.gross_sales_year_2 || "" %></td></tr>
-        <tr><td>Year <%= data.year_3_suffix || "" %> Gross Sales:</td><td>$<%= data.gross_sales_year_3 || "" %></td></tr>
-      </tbody>
-    </table>
+    <div class="form-label">Top 5 jobs in last 5 years</div>
+    <div class="form-value"><%= data.largest_jobs_past || "" %></div>
   </div>
+  
+  <div class="form-row">
+    <div class="form-label">Top 5 projects planned upcoming year</div>
+    <div class="form-value"><%= data.largest_projects_upcoming || "" %></div>
+  </div>
+  
+  <h3>Corporate & History</h3>
+  
+  <div class="form-row cols-2">
+    <div>
+      <div class="form-label">Subsidiary of another entity</div>
+      <div class="form-value"><%= data.is_subsidiary || "" %></div>
+    </div>
+    <div>
+      <div class="form-label">Any subsidiaries</div>
+      <div class="form-value"><%= data.has_subsidiaries || "" %></div>
+    </div>
+  </div>
+  
+  <div class="form-row">
+    <div class="form-label">Ops sold/acquired/discontinued (5 yrs)</div>
+    <div class="form-value"><%= data.ops_sold_acquired || "" %></div>
+  </div>
+  
+  <div class="form-row">
+    <div class="form-label">Cancelled/declined/refused similar insurance (3 yrs)</div>
+    <div class="form-value"><%= data.cancelled_insurance || "" %></div>
+  </div>
+  
+  <div class="form-row">
+    <div class="form-label">Exposure to flammables/explosives/chemicals</div>
+    <div class="form-value"><%= data.exposure_flammables || "" %></div>
+  </div>
+  
+  <div class="form-row cols-2">
+    <div>
+      <div class="form-label">Active in joint ventures</div>
+      <div class="form-value"><%= data.joint_ventures || "" %></div>
+    </div>
+    <div>
+      <div class="form-label">Bankruptcies/tax/credit liens (5 yrs)</div>
+      <div class="form-value"><%= data.bankruptcies || "" %></div>
+    </div>
+  </div>
+  
+  <div class="form-row">
+    <div class="form-label">Explain all "Yes" responses</div>
+    <div class="form-value comments-box"><%= data.yes_responses_explanation || "" %></div>
+  </div>
+</div>
 
+<h2>Additional Info</h2>
+<div class="form-section">
   <div class="form-row">
-    <div class="form-label">3. List five (5) of Your Largest Jobs in the Last Five (5) Years:</div>
-    <div class="form-value comments-box"><%= data.largest_jobs_past || "" %></div>
-  </div>
-  <div class="form-row">
-    <div class="form-label">4. List Five (5) of Your Largest Projects Planned for the Coming Year:</div>
-    <div class="form-value comments-box"><%= data.largest_projects_upcoming || "" %></div>
-  </div>
-
-  <div class="form-row">
-    <div class="form-label">5. Additional information or comments:</div>
     <div class="form-value comments-box"><%= data.additional_comments || "" %></div>
   </div>
 </div>
 
 <div class="page-break"></div>
-<div class="header-info">
-  <div class="header-row">
-    <div class="header-col" style="font-size: 10pt; font-weight: 700;">Berkley Specialty Insurance Company</div>
-    <div class="header-col" style="text-align: right;">GF0089 08/18</div>
-    <div class="header-col" style="text-align: right;">Email: contactus@berkleyaspire.com</div>
-  </div>
-  <div class="header-row" style="grid-template-columns: 1fr 1fr;">
-    <div class="header-col"><strong>EXPERIENCE (continued)</strong></div>
-    <div class="header-col" style="text-align: right;"><strong>Applicant:</strong> <%= data.business_name || data.applicant_name || "" %></div>
-  </div>
-</div>
 
-<h2>Experience (continued)</h2>
-<div class="form-section">
-  <div class="form-row">
-    <div class="form-label">6. Are you a subsidiary of another entity or do you have any subsidiaries?</div>
-    <div class="yesno-line">
-        <span class="checkbox-inline">Yes <span class="checkbox-box"><%= renderCheckbox(data.is_subsidiary || data.has_subsidiaries) %></span></span>
-        <span class="checkbox-inline">No <span class="checkbox-box"><%= renderCheckbox((data.is_subsidiary === 'No' && data.has_subsidiaries === 'No') ? 'Yes' : '') %></span></span>
-    </div>
-  </div>
-  <div class="form-row">
-    <div class="form-label">7. Any operations sold, acquired, or discontinued in last 5 years?</div>
-    <div class="yesno-line">
-        <span class="checkbox-inline">Yes <span class="checkbox-box"><%= renderCheckbox(data.ops_sold_acquired) %></span></span>
-        <span class="checkbox-inline">No <span class="checkbox-box"><%= renderCheckbox(data.ops_sold_acquired === 'No' ? 'Yes' : '') %></span></span>
-    </div>
-  </div>
-  <div class="form-row">
-    <div class="form-label">8. During the past three years, has any company ever cancelled, declined or refused to issue any similar insurance to you?</div>
-    <div class="yesno-line">
-        <span class="checkbox-inline">Yes <span class="checkbox-box"><%= renderCheckbox(data.cancelled_insurance) %></span></span>
-        <span class="checkbox-inline">No <span class="checkbox-box"><%= renderCheckbox(data.cancelled_insurance === 'No' ? 'Yes' : '') %></span></span>
-    </div>
-  </div>
-  <div class="form-row">
-    <div class="form-label">9. Any exposure to flammables, explosives, chemicals?</div>
-    <div class="yesno-line">
-        <span class="checkbox-inline">Yes <span class="checkbox-box"><%= renderCheckbox(data.exposure_flammables) %></span></span>
-        <span class="checkbox-inline">No <span class="checkbox-box"><%= renderCheckbox(data.exposure_flammables === 'No' ? 'Yes' : '') %></span></span>
-    </div>
-  </div>
-  <div class="form-row">
-    <div class="form-label">10. Have you been active in or are you currently active in joint ventures?</div>
-    <div class="yesno-line">
-        <span class="checkbox-inline">Yes <span class="checkbox-box"><%= renderCheckbox(data.joint_ventures) %></span></span>
-        <span class="checkbox-inline">No <span class="checkbox-box"><%= renderCheckbox(data.joint_ventures === 'No' ? 'Yes' : '') %></span></span>
-    </div>
-  </div>
-  <div class="form-row">
-    <div class="form-label">11. Any bankruptcies, tax or credit liens against you in the past 5 years?</div>
-    <div class="yesno-line">
-        <span class="checkbox-inline">Yes <span class="checkbox-box"><%= renderCheckbox(data.bankruptcies) %></span></span>
-        <span class="checkbox-inline">No <span class="checkbox-box"><%= renderCheckbox(data.bankruptcies === 'No' ? 'Yes' : '') %></span></span>
-    </div>
-  </div>
-    
-  <div class="form-row">
-    <div class="form-label">12. Please explain all "Yes" responses:</div>
-    <div class="form-value comments-box"><%= data.yes_responses_explanation || "" %></div>
-  </div>
-</div>
-
-<h2>Certificate Recipients/Additional Interests</h2>
-<div class="form-section">
-  <div class="form-row">
-    <table class="data-table">
-      <thead>
-        <tr>
-          <th>NAME & ADDRESS</th>
-          <th>RELATIONSHIP TO APPLICANT</th>
-          <th>ADDITIONAL INSURED</th>
-          <th>CERTIFICATE</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr><td><%= data.specific_additional_insureds || data.ai_1_name_address || "" %></td><td><%= data.ai_1_relationship || "" %></td><td><%= data.ai_1_is_ai || "" %></td><td><%= data.ai_1_is_cert || "" %></td></tr>
-        <tr><td><%= data.ai_2_name_address || "" %></td><td><%= data.ai_2_relationship || "" %></td><td><%= data.ai_2_is_ai || "" %></td><td><%= data.ai_2_is_cert || "" %></td></tr>
-        <tr><td><%= data.ai_3_name_address || "" %></td><td><%= data.ai_3_relationship || "" %></td><td><%= data.ai_3_is_ai || "" %></td><td><%= data.ai_3_is_cert || "" %></td></tr>
-        <tr><td><%= data.ai_4_name_address || "" %></td><td><%= data.ai_4_relationship || "" %></td><td><%= data.ai_4_is_ai || "" %></td><td><%= data.ai_4_is_cert || "" %></td></tr>
-      </tbody>
-    </table>
-  </div>
-</div>
-
-<div class="form-section" style="margin-top: 20pt;">
+<div class="notice-section">
   <h3>PLEASE READ BELOW AND COMPLETE SIGNATURE BLOCK ON LAST PAGE</h3>
   
-  <p><strong>WARRANTY STATEMENT:</strong> The purpose of the supplemental questionnaire is to assist in the underwriting process. Information contained herein is specifically relied upon in determination of insurability. The undersigned, therefore warrants to the best of his knowledge, information and belief. The supplemental questionnaire, and the application to which it is appended, shall be the basis of any insurance policy that may be issued and will be part of such policy.</p>
+  <p><strong>WARRANTY STATEMENT:</strong> The purpose of the supplemental questionnaire is to assist in the underwriting process.
+  Information contained herein is specifically relied upon in determination of insurability.
+  The undersigned, therefore warrants to the best of his knowledge, information and belief.
+  The supplemental questionnaire, and the application to which it is appended, shall be the basis of any insurance policy that may be issued and will be part of such policy.</p>
   
-  <p><strong>IMPORTANT NOTICE:</strong> As part of our underwriting procedure, a routine inquiry may be made to obtain applicable information concerning character, general reputation, personal characteristics, and mode of living. Upon written request, additional information as to the nature and scope of the report, if one is made, will be provided.</p>
+  <p><strong>IMPORTANT NOTICE:</strong> As part of our underwriting procedure, a routine inquiry may be made to obtain applicable information concerning character, general reputation, personal characteristics, and mode of living.
+  Upon written request, additional information as to the nature and scope of the report, if one is made, will be provided.</p>
+</div>
 
-  <h2>Fraud Statements</h2>
-  <div class="comments-box" style="min-height: 150pt; font-size: 7.5pt; line-height: 1.25; padding: 6pt;">
-    <p><strong>NOTICE:</strong> In some states, any person who knowingly presents a false or fraudulent claim for payment of a loss or benefit or knowingly presents false information in an application for insurance is guilty of a crime and may be subject to fines and confinement in prison.</p>
-    <p><strong>To Insureds in the States of:</strong></p>
-    <p><strong>Alabama and West Virginia:</strong> Any person who knowingly presents a false or fraudulent claim for payment of a loss or benefit or who knowingly presents false information in an application for insurance is guilty of a crime and may be subject to restitution fines or confinement in prison, or any combination thereof.</p>
-    <p><strong>Arkansas and Rhode Island:</strong> Any person who knowingly presents a false or fraudulent claim for payment of a loss or benefit or knowingly presents false information in an application for insurance is guilty of a crime and may be subject to fines and confinement in prison.</p>
-    <p><strong>Colorado:</strong> It is unlawful to knowingly provide false, incomplete, or misleading facts or information to an insurance company for the purpose of defrauding or attempting to defraud the company. Penalties may include imprisonment, fines, denial of insurance, and civil damages. Any insurance company or agent of an insurance company who knowingly provides false, incomplete, or misleading facts or information to a policyholder or claimant for the purpose of defrauding or attempting to defraud the policyholder or claimant with regard to a settlement or award payable from insurance proceeds shall be reported to the Colorado division of insurance within the department of regulatory agencies.</p>
-    <p><strong>District of Columbia:</strong> WARNING: It is a crime to provide false or misleading information to an insurer for the purpose of defrauding the insurer or any other person. Penalties include imprisonment and/or fines. In addition, an insurer may deny insurance benefits if false information materially related to a claim was provided by the applicant.</p>
-    <p><strong>Florida:</strong> Any person who knowingly and with intent to injure, defraud or deceive any insurer files a statement of claim or an application containing any false, incomplete, or misleading information is guilty of a felony of the third degree.</p>
-    <p><strong>Kentucky:</strong> Any person who knowingly and with intent to defraud any insurance company or other person files an application for insurance containing any materially false information or conceals, for the purpose of misleading, information concerning any fact material thereto commits a fraudulent insurance act, which is a crime.</p>
-    <p><strong>Louisiana:</strong> Any person who knowingly presents a false or fraudulent claim for payment of a loss or benefit or knowingly presents false information in an application for insurance is guilty of a crime and may be subject to fines and confinement in prison.</p>
-    <p><strong>Maryland:</strong> Any person who knowingly or willfully presents a false or fraudulent claim for payment of a loss or benefit or who knowingly or willfully presents false information in an application for insurance is guilty of a crime and may be subject to fines and confinement in prison.</p>
-    <p><strong>New Jersey:</strong> Any person who includes any false or misleading information on an application for an insurance policy is subject to criminal and civil penalties.</p>
-    <p><strong>New Mexico:</strong> Any person who knowingly presents a false or fraudulent claim for payment of a loss or benefit or knowingly presents false information in an application for insurance is guilty of a crime and may be subject to civil fines and criminal penalties.</p>
-    <p><strong>New York:</strong> Any person who knowingly and with intent to defraud any insurance company or other person files an application for insurance or statement of claim containing any materially false information, or conceals for the purpose of misleading, information concerning any fact material thereto, commits a fraudulent insurance act, which is a crime, and shall also be subject to a civil penalty not to exceed five thousand dollars and the stated value of the claim for each such violation.</p>
-    <p><strong>Ohio:</strong> Any person who, with intent to defraud or knowing that he is facilitating a fraud against an insurer, submits an application or files a claim containing a false or deceptive statement is guilty of insurance fraud.</p>
-    <p><strong>Oklahoma:</strong> WARNING: Any person who knowingly, and with intent to injure, defraud or deceive any insurer, makes any claim for the proceeds of an insurance policy containing any false, incomplete or misleading information is guilty of a felony.</p>
-    <p><strong>Pennsylvania:</strong> Any person who knowingly and with intent to defraud any insurance company or other person files an application for insurance or statement of claim containing any materially false information or conceals for the purpose of misleading, information concerning any fact material thereto commits a fraudulent insurance act, which is a crime and subjects such person to criminal and civil penalties.</p>
-    <p><strong>Maine, Tennessee, Virginia and Washington:</strong> It is a crime to knowingly provide false, incomplete or misleading information to an insurance company for the purpose of defrauding the company. Penalties include imprisonment, fines and denial of insurance benefits.</p>
-  </div>
+<h2>Fraud Statements</h2>
+<div class="fraud-section">
+  <p><strong>NOTICE:</strong> In some states, any person who knowingly presents a false or fraudulent claim for payment of a loss or benefit or knowingly presents false information in an application for insurance is guilty of a crime and may be subject to fines and confinement in prison.</p>
+  
+  <p><strong>To Insureds in the States of:</strong></p>
+  
+  <p><strong>Alabama and West Virginia:</strong> Any person who knowingly presents a false or fraudulent 
+  claim for payment of a loss or benefit or who knowingly presents false information in an application for insurance is guilty of a crime and may be subject to restitution fines or confinement in prison, or any combination thereof.</p>
+  
+  <p><strong>Arkansas and Rhode Island:</strong> Any person who knowingly presents a false or fraudulent claim for payment of a loss or benefit or knowingly presents false information in an application for insurance is guilty of a crime and may be subject to fines and confinement in prison.</p>
+  
+  <p><strong>Colorado:</strong> It is unlawful to knowingly provide false, incomplete, 
+  or misleading facts or information to an insurance company for the purpose of defrauding or attempting to defraud the company.
+  Penalties may include imprisonment, fines, denial of insurance, and civil damages.
+  Any insurance company or agent of an insurance company who knowingly provides false, incomplete, or misleading facts or information to a policyholder or claimant for the purpose of defrauding or attempting to defraud the policyholder or claimant with regard to a settlement or award payable from insurance proceeds shall be reported to the Colorado division of insurance within the department of regulatory agencies.</p>
+  
+  <p><strong>District of Columbia:</strong> WARNING: It is a crime to provide false or misleading information to an insurer for the purpose of defrauding the insurer or any other person.
+  Penalties include imprisonment and/or fines. In addition, an insurer may deny insurance benefits if false information materially related to a claim was provided by the applicant.</p>
+  
+  <p><strong>Florida:</strong> Any person who knowingly and with intent to injure, defraud or deceive any insurer files a statement of claim or an application containing any false, incomplete, or misleading information is guilty of a felony of the third degree.</p>
+  
+  <p><strong>Kentucky:</strong> Any person who knowingly and with intent to defraud any insurance company or other person files an application for insurance containing any materially false information or conceals, for 
+  the purpose of misleading, information concerning any fact material thereto commits a fraudulent insurance act, which is a crime.</p>
+  
+  <p><strong>Louisiana:</strong> Any person who knowingly presents a false or fraudulent claim for payment of a loss or benefit or knowingly presents false information in an application for insurance is guilty of a crime and may be subject to fines and confinement in prison.</p>
+  
+  <p><strong>Maryland:</strong> Any person who knowingly or willfully presents a false or fraudulent claim for payment of a loss or benefit or who knowingly or willfully presents false information in an application for 
+  insurance is guilty of a crime and may be subject to fines and confinement in prison.</p>
+  
+  <p><strong>New Jersey:</strong> Any person who includes any false or misleading information on an application for an insurance policy is subject to criminal and civil penalties.</p>
+  
+  <p><strong>New Mexico:</strong> Any person who knowingly presents a false or fraudulent claim for payment of a loss or benefit or knowingly presents false information in an application for insurance is guilty of a crime and may be subject to civil fines and criminal penalties.</p>
+  
+  <p><strong>New York:</strong> Any person who knowingly 
+  and with intent to defraud any insurance company or other person files an application for insurance or statement of claim containing any materially false information, or conceals for the purpose of misleading, information concerning any fact material thereto, commits a fraudulent insurance act, which is a crime, and shall also be subject to a civil penalty not to exceed five thousand dollars and the stated value of the claim for each such violation.</p>
+  
+  <p><strong>Ohio:</strong> Any person who, with intent to defraud or knowing that he is facilitating a fraud against an insurer, submits an application or files 
+  a claim containing a false or deceptive statement is guilty of insurance fraud.</p>
+  
+  <p><strong>Oklahoma:</strong> WARNING: Any person who knowingly, and with intent to injure, defraud or deceive any insurer, makes any claim for the proceeds of an insurance policy containing any false, incomplete or misleading information is guilty of a felony.</p>
+  
+  <p><strong>Pennsylvania:</strong> Any person who knowingly and with intent to defraud any insurance company or other person files an application for insurance or statement of claim containing any materially false information or conceals for the purpose of misleading, information concerning any fact material thereto 
+  commits a fraudulent insurance act, which is a crime and subjects such person to criminal and civil penalties.</p>
+  
+  <p><strong>Maine, Tennessee, Virginia and Washington:</strong> It is a crime to knowingly provide false, incomplete or misleading information to an insurance company for the purpose of defrauding the company.
+  Penalties include imprisonment, fines and denial of insurance benefits.</p>
 </div>
 
 <div class="page-break"></div>
-<div class="header-info">
-  <div class="header-row">
-    <div class="header-col" style="font-size: 10pt; font-weight: 700;">Berkley Specialty Insurance Company</div>
-    <div class="header-col" style="text-align: right;">GF0089 08/18</div>
-    <div class="header-col" style="text-align: right;">Email: contactus@berkleyaspire.com</div>
-  </div>
-  <div class="header-row" style="grid-template-columns: 1fr 1fr;">
-    <div class="header-col"></div>
-    <div class="header-col" style="text-align: right;"><strong>Applicant:</strong> <%= data.business_name || data.applicant_name || "" %></div>
-  </div>
-</div>
 
 <h2>Application Must Be Signed By Applicant</h2>
 
-<div class="comments-box" style="margin: 10pt 0;">
-  I have reviewed this application for accuracy before signing it. As a condition precedent to coverage, I hereby state that the information contained herein is true, accurate and complete and that no material facts have been omitted, misrepresented or misstated. I know of no other claims or lawsuits against the applicant and I know of no other events, incidents or occurrences which might reasonably lead to a claim or lawsuit against the applicant. I understand that this is an application for insurance only and that completion and submission of this application does not bind coverage with any insurer.
+<div class="signature-text">
+  I have reviewed this application for accuracy before signing it.
+  As a condition precedent to coverage, I hereby state that the information contained herein is true, accurate and complete and that no material facts have been omitted, misrepresented or misstated.
+  I know of no other claims or lawsuits against the applicant and I know of no other events, incidents or occurrences which might reasonably lead to a claim or lawsuit against the applicant.
+  I understand that this is an application for insurance only and that completion and submission of this application does not bind coverage with any insurer.
 </div>
 
 <div class="signature-section">
-  <table class="signature-table" style="width: 75%; margin-left: 0;">
+  <table class="signature-table">
     <tr>
-      <td style="width: 35%;">
-        <div class="signature-line">Producer's Signature</div>
+      <td style="width: 25%;">
+        <div class="signature-name">Rick Cline</div>
       </td>
-      <td style="width: 15%;">
-        <div class="signature-line">Date</div>
-      </td>
-      <td style="width: 35%;">
-        <div class="signature-line">Applicant's Signature</div>
-      </td>
-      <td style="width: 15%;">
-        <div class="signature-line">Date</div>
-      </td>
+      <td style="width: 25%;"></td>
+      <td style="width: 25%;"></td>
+      <td style="width: 25%;"></td>
+    </tr>
+    <tr>
+      <td><div class="signature-line">Producer's Signature</div></td>
+      <td><div class="signature-line">Date</div></td>
+      <td><div class="signature-line">Applicant's Signature</div></td>
+      <td><div class="signature-line">Date</div></td>
     </tr>
   </table>
+</div>
+
+<div class="page-footer">
+  Contractor Supplemental - <%= segmentName %> • Page <span class="page-number"></span><br/>
+  © Commercial Insurance Direct LLC
 </div>
 
 </body>
