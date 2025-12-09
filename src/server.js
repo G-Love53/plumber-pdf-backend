@@ -198,48 +198,59 @@ APP.post("/submit-quote", async (req, res) => {
     console.error(e);
     res.status(500).json({ ok: false, success: false, error: e.message || String(e) });
   }
-});
-/* ------------------------------- Leg 2: The Email Robot -------------------- */
-// This is the missing endpoint that wakes up the robot to check emails
+});/* ------------------------------- Leg 2: The Email Robot (Debug Version) -------------------- */
 APP.post("/check-quotes", async (req, res) => {
   console.log("🤖 Robot Waking Up: Checking for new quotes...");
 
-  // 1. Check if we have the Private Key
-  const privateKey = process.env.GOOGLE_PRIVATE_KEY;
-  const serviceEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
+  // 1. Read & Clean Credentials
+  // We trim() to remove any accidental spaces from the copy-paste
+  const rawKey = process.env.GOOGLE_PRIVATE_KEY || "";
+  const serviceEmail = (process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL || "").trim();
 
-  if (!privateKey || !serviceEmail) {
-    console.error("❌ Missing Google Credentials");
-    return res.status(500).json({ ok: false, error: "Missing GOOGLE_PRIVATE_KEY or EMAIL in Env Vars" });
+  // 2. Safety Checks (The "Precondition" Fix)
+  if (!serviceEmail) {
+    console.error("❌ Error: GOOGLE_SERVICE_ACCOUNT_EMAIL is missing or empty.");
+    return res.status(500).json({ ok: false, error: "Missing Email Env Var" });
+  }
+  if (!rawKey || rawKey.length < 50) {
+    console.error(`❌ Error: GOOGLE_PRIVATE_KEY looks wrong. Length: ${rawKey.length}`);
+    return res.status(500).json({ ok: false, error: "Key is too short or missing" });
+  }
+  if (!rawKey.includes("BEGIN PRIVATE KEY")) {
+    console.error("❌ Error: Key is missing 'BEGIN PRIVATE KEY' header.");
+    return res.status(500).json({ ok: false, error: "Key missing BEGIN header" });
   }
 
+  console.log(`✅ Credentials found. Email: ${serviceEmail}, Key Length: ${rawKey.length}`);
+
   try {
-    // 2. Prepare the Authentication (The Robot's ID Badge)
-    // We are dynamically importing to avoid crashes if you missed the npm install
-    // If this fails, we will know you need to add 'googleapis' to your package.json
+    // 3. Connect to Google
     const { google } = await import('googleapis'); 
     
+    // Fix newlines: If the key was pasted as one long line, this fixes it.
+    const privateKey = rawKey.replace(/\\n/g, '\n');
+
     const jwtClient = new google.auth.JWT(
       serviceEmail,
       null,
-      privateKey.replace(/\\n/g, '\n'), // Fix formatting issues
+      privateKey,
       ['https://www.googleapis.com/auth/gmail.modify']
     );
 
-    // 3. Connect to Gmail
+    // 4. Test Authorization
     await jwtClient.authorize();
     const gmail = google.gmail({ version: 'v1', auth: jwtClient });
 
-    // 4. Look for the Label 'CID/CarrierQuotes'
-    // (We search for the label ID first to be safe)
+    // 5. Check Labels
     const labelList = await gmail.users.labels.list({ userId: 'me' });
     const quoteLabel = labelList.data.labels.find(l => l.name === 'CID/CarrierQuotes');
 
     if (!quoteLabel) {
-      return res.json({ ok: true, message: "Connected to Gmail, but 'CID/CarrierQuotes' label not found." });
+      console.log("⚠️ Connected, but label 'CID/CarrierQuotes' not found.");
+      return res.json({ ok: true, message: "Connected, but Label not found." });
     }
 
-    // 5. Success! The Robot can see the account.
+    console.log("✅ Robot connected and found Label ID:", quoteLabel.id);
     return res.json({ 
       ok: true, 
       message: "✅ Robot connected successfully!", 
@@ -247,7 +258,7 @@ APP.post("/check-quotes", async (req, res) => {
     });
 
   } catch (error) {
-    console.error("❌ Robot Error:", error);
+    console.error("❌ Robot Error Stack:", error);
     return res.status(500).json({ ok: false, error: error.message || String(error) });
   }
 });
