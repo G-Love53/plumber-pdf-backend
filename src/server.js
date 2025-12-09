@@ -199,7 +199,58 @@ APP.post("/submit-quote", async (req, res) => {
     res.status(500).json({ ok: false, success: false, error: e.message || String(e) });
   }
 });
+/* ------------------------------- Leg 2: The Email Robot -------------------- */
+// This is the missing endpoint that wakes up the robot to check emails
+APP.post("/check-quotes", async (req, res) => {
+  console.log("🤖 Robot Waking Up: Checking for new quotes...");
 
+  // 1. Check if we have the Private Key
+  const privateKey = process.env.GOOGLE_PRIVATE_KEY;
+  const serviceEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
+
+  if (!privateKey || !serviceEmail) {
+    console.error("❌ Missing Google Credentials");
+    return res.status(500).json({ ok: false, error: "Missing GOOGLE_PRIVATE_KEY or EMAIL in Env Vars" });
+  }
+
+  try {
+    // 2. Prepare the Authentication (The Robot's ID Badge)
+    // We are dynamically importing to avoid crashes if you missed the npm install
+    // If this fails, we will know you need to add 'googleapis' to your package.json
+    const { google } = await import('googleapis'); 
+    
+    const jwtClient = new google.auth.JWT(
+      serviceEmail,
+      null,
+      privateKey.replace(/\\n/g, '\n'), // Fix formatting issues
+      ['https://www.googleapis.com/auth/gmail.modify']
+    );
+
+    // 3. Connect to Gmail
+    await jwtClient.authorize();
+    const gmail = google.gmail({ version: 'v1', auth: jwtClient });
+
+    // 4. Look for the Label 'CID/CarrierQuotes'
+    // (We search for the label ID first to be safe)
+    const labelList = await gmail.users.labels.list({ userId: 'me' });
+    const quoteLabel = labelList.data.labels.find(l => l.name === 'CID/CarrierQuotes');
+
+    if (!quoteLabel) {
+      return res.json({ ok: true, message: "Connected to Gmail, but 'CID/CarrierQuotes' label not found." });
+    }
+
+    // 5. Success! The Robot can see the account.
+    return res.json({ 
+      ok: true, 
+      message: "✅ Robot connected successfully!", 
+      foundLabelId: quoteLabel.id 
+    });
+
+  } catch (error) {
+    console.error("❌ Robot Error:", error);
+    return res.status(500).json({ ok: false, error: error.message || String(error) });
+  }
+});
 /* ------------------------------- start server ------------------------------ */
 
 const PORT = process.env.PORT || 10000;
