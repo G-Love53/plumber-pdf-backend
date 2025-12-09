@@ -198,43 +198,39 @@ APP.post("/submit-quote", async (req, res) => {
     console.error(e);
     res.status(500).json({ ok: false, success: false, error: e.message || String(e) });
   }
-});/* ------------------------------- Leg 2: The Email Robot (Debug Version) -------------------- */
+/* ------------------------------- Leg 2: The Email Robot (Impersonation Fix) -------------------- */
 APP.post("/check-quotes", async (req, res) => {
   console.log("🤖 Robot Waking Up: Checking for new quotes...");
 
-  // 1. Read & Clean Credentials
-  // We trim() to remove any accidental spaces from the copy-paste
+  // 1. Read Credentials
   const rawKey = process.env.GOOGLE_PRIVATE_KEY || "";
   const serviceEmail = (process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL || "").trim();
+  // CRITICAL: This is the human email we are impersonating
+  const impersonatedUser = (process.env.GMAIL_USER || "").trim(); 
 
-  // 2. Safety Checks (The "Precondition" Fix)
-  if (!serviceEmail) {
-    console.error("❌ Error: GOOGLE_SERVICE_ACCOUNT_EMAIL is missing or empty.");
-    return res.status(500).json({ ok: false, error: "Missing Email Env Var" });
+  // 2. Safety Checks
+  if (!serviceEmail || !impersonatedUser) {
+    console.error("❌ Error: Missing Email Config (Service Account or Gmail User).");
+    return res.status(500).json({ ok: false, error: "Missing Email Config" });
   }
-  if (!rawKey || rawKey.length < 50) {
-    console.error(`❌ Error: GOOGLE_PRIVATE_KEY looks wrong. Length: ${rawKey.length}`);
-    return res.status(500).json({ ok: false, error: "Key is too short or missing" });
+  if (!rawKey || !rawKey.includes("BEGIN PRIVATE KEY")) {
+    console.error("❌ Error: Invalid Private Key.");
+    return res.status(500).json({ ok: false, error: "Invalid Key" });
   }
-  if (!rawKey.includes("BEGIN PRIVATE KEY")) {
-    console.error("❌ Error: Key is missing 'BEGIN PRIVATE KEY' header.");
-    return res.status(500).json({ ok: false, error: "Key missing BEGIN header" });
-  }
-
-  console.log(`✅ Credentials found. Email: ${serviceEmail}, Key Length: ${rawKey.length}`);
 
   try {
-    // 3. Connect to Google
+    // 3. Connect to Google (WITH IMPERSONATION)
     const { google } = await import('googleapis'); 
-    
-    // Fix newlines: If the key was pasted as one long line, this fixes it.
     const privateKey = rawKey.replace(/\\n/g, '\n');
 
+    // The 5th argument 'impersonatedUser' tells Google: 
+    // "I am the Robot, but let me see THIS person's inbox."
     const jwtClient = new google.auth.JWT(
       serviceEmail,
       null,
       privateKey,
-      ['https://www.googleapis.com/auth/gmail.modify']
+      ['https://www.googleapis.com/auth/gmail.modify'],
+      impersonatedUser 
     );
 
     // 4. Test Authorization
@@ -250,7 +246,7 @@ APP.post("/check-quotes", async (req, res) => {
       return res.json({ ok: true, message: "Connected, but Label not found." });
     }
 
-    console.log("✅ Robot connected and found Label ID:", quoteLabel.id);
+    console.log("✅ Robot connected successfully!");
     return res.json({ 
       ok: true, 
       message: "✅ Robot connected successfully!", 
@@ -258,7 +254,7 @@ APP.post("/check-quotes", async (req, res) => {
     });
 
   } catch (error) {
-    console.error("❌ Robot Error Stack:", error);
+    console.error("❌ Robot Error:", error.response ? error.response.data : error.message);
     return res.status(500).json({ ok: false, error: error.message || String(error) });
   }
 });
