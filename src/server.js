@@ -4,6 +4,7 @@ import fs from "fs/promises";
 import { fileURLToPath } from "url";
 import { renderPdf } from "./pdf.js";
 import * as Email from "./email.js";
+import { processInbox } from "./quote-processor.js";
 const sendWithGmail = Email.sendWithGmail || Email.default || Email.sendEmail;
 
 if (!sendWithGmail) {
@@ -188,62 +189,63 @@ APP.post("/submit-quote", async (req, res) => {
   }
 });
 
-/* ------------------------------- Leg 2: The Email Robot (Corrected) -------------------- */
+/* ------------------------------- Leg 2: The Email Robot (Functional) -------------------- */
 APP.post("/check-quotes", async (req, res) => {
-  console.log("🤖 Robot Waking Up: Checking for new quotes...");
+  console.log("🤖 Robot Waking Up: Checking for new quotes...");
 
-  // 1. Read Credentials
-  const rawKey = process.env.GOOGLE_PRIVATE_KEY || "";
-  const serviceEmail = (process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL || "").trim();
-  const impersonatedUser = (process.env.GMAIL_USER || "").trim(); 
+  // 1. Read Credentials
+  // GMAIL_USER is the corrected quotes@plumberinsurancedirect.com
+  const rawKey = process.env.GOOGLE_PRIVATE_KEY || "";
+  const serviceEmail = (process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL || "").trim();
+  const impersonatedUser = (process.env.GMAIL_USER || "").trim();
+  const privateKey = rawKey.replace(/\\n/g, '\n'); // Fix for Render newline issues
 
-  // 2. Safety Checks
-  if (!serviceEmail || !impersonatedUser) {
-    console.error("❌ Error: Missing Email Config (Service Account or Gmail User).");
-    return res.status(500).json({ ok: false, error: "Missing Email Config" });
-  }
-  if (!rawKey || !rawKey.includes("BEGIN PRIVATE KEY")) {
-    console.error("❌ Error: Invalid Private Key.");
-    return res.status(500).json({ ok: false, error: "Invalid Key" });
-  }
+  // 2. Safety Checks
+  if (!serviceEmail || !impersonatedUser) {
+    console.error("❌ Error: Missing Email Config (Service Account or Gmail User).");
+    return res.status(500).json({ ok: false, error: "Missing Email Config" });
+  }
+  if (!rawKey || !rawKey.includes("BEGIN PRIVATE KEY")) {
+    console.error("❌ Error: Invalid Private Key.");
+    return res.status(500).json({ ok: false, error: "Invalid Key" });
+  }
+  if (!process.env.OPENAI_API_KEY) {
+    console.error("❌ Error: Missing OPENAI_API_KEY.");
+    return res.status(500).json({ ok: false, error: "Missing OPENAI_API_KEY" });
+  }
 
-  try {
-    // 3. Connect to Google (WITH IMPERSONATION)
-    const { google } = await import('googleapis'); 
-    const privateKey = rawKey.replace(/\\n/g, '\n');
+  try {
+    // 3. Connect to Google (WITH IMPERSONATION)
+    // Note: googleapis is only imported here to avoid top-level import errors
+    const { google } = await import('googleapis'); 
 
-    const jwtClient = new google.auth.JWT(
-      serviceEmail,
-      null,
-      privateKey,
-      ['https://www.googleapis.com/auth/gmail.modify'],
-      impersonatedUser 
-    );
+    const jwtClient = new google.auth.JWT(
+      serviceEmail,
+      null,
+      privateKey,
+      ['https://www.googleapis.com/auth/gmail.modify'], // Scope to read/modify mailbox
+      impersonatedUser 
+    );
 
-    // 4. Test Authorization
-    await jwtClient.authorize();
-    const gmail = google.gmail({ version: 'v1', auth: jwtClient });
+    // 4. Authorize and Run the Processor
+    await jwtClient.authorize();
+    const result = await processInbox(jwtClient); // <-- EXECUTES THE CORE LOGIC
 
-    // 5. Check Labels
-    const labelList = await gmail.users.labels.list({ userId: 'me' });
-    const quoteLabel = labelList.data.labels.find(l => l.name === 'CID/CarrierQuotes');
+    console.log("✅ Robot finished checking inbox.");
+    return res.json({ ok: true, ...result });
 
-    if (!quoteLabel) {
-      console.log("⚠️ Connected, but label 'CID/CarrierQuotes' not found.");
-      return res.json({ ok: true, message: "Connected, but Label not found." });
-    }
-
-    console.log("✅ Robot connected successfully!");
-    return res.json({ 
-      ok: true, 
-      message: "✅ Robot connected successfully!", 
-      foundLabelId: quoteLabel.id 
-    });
-
-  } catch (error) {
-    console.error("❌ Robot Error:", error.response ? error.response.data : error.message);
-    return res.status(500).json({ ok: false, error: error.message || String(error) });
-  }
+  } catch (error) {
+    const errMsg = error.message || String(error);
+    if (errMsg.includes('not authorized to perform this operation')) {
+      console.error("🔴 Major Error: Domain-Wide Delegation missing or scopes incorrect.");
+      return res.status(500).json({ 
+          ok: false, 
+          error: "Authentication Failed: Check DWD setup in Google Admin." 
+      });
+    }
+    console.error("❌ Robot Global Error:", errMsg);
+    return res.status(500).json({ ok: false, error: errMsg });
+  }
 });
 
 /* ------------------------------- start server ------------------------------ */
