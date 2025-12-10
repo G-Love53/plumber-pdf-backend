@@ -1,4 +1,3 @@
-// src/server.js - Plumber PDF Service (Complete, Independent)
 import express from "express";
 import path from "path";
 import fs from "fs/promises";
@@ -6,13 +5,13 @@ import { fileURLToPath } from "url";
 import { renderPdf } from "./pdf.js";
 import * as Email from "./email.js";
 const sendWithGmail = Email.sendWithGmail || Email.default || Email.sendEmail;
+
 if (!sendWithGmail) {
   throw new Error("email.js must export sendWithGmail (named) or a default sender.");
 }
 
 /* ----------------------------- helpers & consts ---------------------------- */
 
-// keep shape if no enricher is needed
 const enrichFormData = (d) => d || {};
 
 const FILENAME_MAP = {
@@ -21,7 +20,6 @@ const FILENAME_MAP = {
   PlumberSupp:      "Plumber-Contractor-Supplemental.pdf"
 };
 
-// allow friendlier names from callers
 const TEMPLATE_ALIASES = {
   Accord125: "PlumberAccord125",
   Accord126: "PlumberAccord126",
@@ -38,7 +36,6 @@ const __dirname  = path.dirname(__filename);
 const APP = express();
 APP.use(express.json({ limit: "20mb" }));
 
-// CORS (limit to configured origins if provided)
 const allowed = (process.env.CORS_ORIGINS || "")
   .split(",")
   .map(s => s.trim())
@@ -61,10 +58,8 @@ const MAP_DIR = path.join(__dirname, "..", "mapping");
 
 /* -------------------------------- routes ---------------------------------- */
 
-// health
 APP.get("/healthz", (_req, res) => res.status(200).send("ok"));
 
-// optional mapping: mapping/<template>.json
 async function maybeMapData(templateName, raw) {
   try {
     const mapPath = path.join(MAP_DIR, `${templateName}.json`);
@@ -75,12 +70,10 @@ async function maybeMapData(templateName, raw) {
     }
     return { ...raw, ...mapped };
   } catch {
-    // no mapping file, pass through
     return raw;
   }
 }
 
-// core renderer that both endpoints use
 async function renderBundleAndRespond({ templates, email }, res) {
   if (!Array.isArray(templates) || templates.length === 0) {
     return res.status(400).json({ ok: false, error: "NO_TEMPLATES" });
@@ -91,7 +84,7 @@ async function renderBundleAndRespond({ templates, email }, res) {
   for (const t of templates) {
     const name = resolveTemplate(t.name);
     const htmlPath = path.join(TPL_DIR, name, "index.ejs");
-    const cssPath  = path.join(TPL_DIR, name, "styles.css"); // optional
+    const cssPath  = path.join(TPL_DIR, name, "styles.css");
     const rawData  = t.data || {};
     const unified  = await maybeMapData(name, rawData);
 
@@ -118,15 +111,14 @@ async function renderBundleAndRespond({ templates, email }, res) {
 
   const attachments = results.map(r => r.value);
 
-  // Email branch
   if (email?.to?.length) {
     try {
       await sendWithGmail({
         to: email.to,
         cc: email.cc,
         subject: email.subject || "Plumber Submission Packet",
-        formData: email.formData, // preferred for template-based emails
-        html: email.bodyHtml,     // fallback body
+        formData: email.formData,
+        html: email.bodyHtml,
         attachments,
       });
       return res.json({ ok: true, success: true, sent: true, count: attachments.length });
@@ -141,15 +133,13 @@ async function renderBundleAndRespond({ templates, email }, res) {
     }
   }
 
-  // Fallback: return first PDF directly
   res.setHeader("Content-Type", "application/pdf");
   res.setHeader("Content-Disposition", `attachment; filename="${attachments[0].filename}"`);
   return res.send(attachments[0].buffer);
 }
 
-/* ------------------------------- public APIs ------------------------------- */
+/* ------------------------------- Leg 1: Submit Quote ---------------------- */
 
-// JSON API: { templates:[{name,filename?,data}], email? }
 APP.post("/render-bundle", async (req, res) => {
   try {
     await renderBundleAndRespond(req.body || {}, res);
@@ -159,7 +149,6 @@ APP.post("/render-bundle", async (req, res) => {
   }
 });
 
-// Back-compat: { formData, segments[], email? }
 APP.post("/submit-quote", async (req, res) => {
   try {
     let { formData = {}, segments = [], email } = req.body || {};
@@ -177,7 +166,6 @@ APP.post("/submit-quote", async (req, res) => {
       return res.status(400).json({ ok: false, success: false, error: "NO_VALID_SEGMENTS" });
     }
 
-    // default email so this endpoint returns JSON (not a PDF stream)
     const defaultTo = process.env.CARRIER_EMAIL || process.env.GMAIL_USER;
     const cc = (process.env.UW_EMAIL || "")
       .split(",")
@@ -198,14 +186,15 @@ APP.post("/submit-quote", async (req, res) => {
     console.error(e);
     res.status(500).json({ ok: false, success: false, error: e.message || String(e) });
   }
-/* ------------------------------- Leg 2: The Email Robot (Impersonation Fix) -------------------- */
+});
+
+/* ------------------------------- Leg 2: The Email Robot (Corrected) -------------------- */
 APP.post("/check-quotes", async (req, res) => {
   console.log("🤖 Robot Waking Up: Checking for new quotes...");
 
   // 1. Read Credentials
   const rawKey = process.env.GOOGLE_PRIVATE_KEY || "";
   const serviceEmail = (process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL || "").trim();
-  // CRITICAL: This is the human email we are impersonating
   const impersonatedUser = (process.env.GMAIL_USER || "").trim(); 
 
   // 2. Safety Checks
@@ -223,8 +212,6 @@ APP.post("/check-quotes", async (req, res) => {
     const { google } = await import('googleapis'); 
     const privateKey = rawKey.replace(/\\n/g, '\n');
 
-    // The 5th argument 'impersonatedUser' tells Google: 
-    // "I am the Robot, but let me see THIS person's inbox."
     const jwtClient = new google.auth.JWT(
       serviceEmail,
       null,
@@ -258,6 +245,7 @@ APP.post("/check-quotes", async (req, res) => {
     return res.status(500).json({ ok: false, error: error.message || String(error) });
   }
 });
+
 /* ------------------------------- start server ------------------------------ */
 
 const PORT = process.env.PORT || 10000;
@@ -265,14 +253,13 @@ const server = APP.listen(PORT, () => {
   console.log(`Plumber PDF service listening on ${PORT}`);
 });
 
-// graceful shutdown to avoid npm SIGTERM noise
 function shutdown(signal) {
   console.log(`Received ${signal}, shutting down gracefully...`);
   server.close(() => {
     console.log("HTTP server closed.");
     process.exit(0);
   });
-  setTimeout(() => process.exit(0), 5000).unref(); // safety
+  setTimeout(() => process.exit(0), 5000).unref();
 }
 
 process.on("SIGTERM", () => shutdown("SIGTERM"));
