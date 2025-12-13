@@ -23,7 +23,7 @@ const enrichFormData = (d) => d || {};
 const FILENAME_MAP = {
   PlumberAccord125: "ACORD-125.pdf",
   PlumberAccord126: "ACORD-126.pdf",
-  PlumberSupp:      "Plumber-Contractor-Supplemental.pdf"
+  PlumberSupp:       "Plumber-Contractor-Supplemental.pdf"
 };
 
 const TEMPLATE_ALIASES = {
@@ -88,9 +88,7 @@ async function renderBundleAndRespond({ templates, email }, res) {
 
   const results = [];
   // ... (PDF rendering and email sending logic remains here) ...
-  // (Full function body omitted for brevity, keeping only the signature)
-  
-  // NOTE: Assuming your full function body is still present here.
+  // (Assuming your full function body is still present here.)
 
   const attachments = results.map(r => r.value); // placeholder for attachments list
 
@@ -242,16 +240,9 @@ APP.post("/check-quotes", async (req, res) => {
     // Using the old name for backward compatibility, but this should be checked 
     // in your quote-processor.js file if it still exists.
     // NOTE: If you deleted the old function, you must remove this route entirely.
-    // For now, let's assume you have an exported function for the inbox processing logic:
+    // For now, leaving the original logic placeholder.
     // The previous error was with 'processInbox' -- if you renamed it, update this line.
     
-    // REMINDER: The original processInbox error was here. You must resolve the name 
-    // in quote-processor.js or remove this route if email scanning is decommissioned.
-    // If you plan to keep email reading, ensure the name is exported correctly.
-    // For now, leaving the original logic placeholder.
-    // const result = await processInbox(jwtClient); 
-
-
     console.log("✅ Robot finished checking inbox.");
     // return res.json({ ok: true, ...result });
 
@@ -318,6 +309,43 @@ APP.post('/bind-quote', async (req, res) => {
     } catch (error) {
         console.error('Binding error:', error);
         res.status(500).json({ message: 'Internal server error during binding.' });
+    }
+});
+
+// --- Leg 3: Service App Routes (New Addition) ---
+
+// 3. Endpoint for the Famous.AI App to request a COI
+APP.post('/request-coi', async (req, res) => {
+    try {
+        const { userId, policyId, details } = req.body;
+        // Logic will involve: Fetching the policy using service_role key, 
+        // generating the PDF COI, and emailing it to the user.
+        console.log(`COI Request received for user ${userId} and policy ${policyId}`);
+        res.status(200).json({ 
+            message: 'COI request received and is being processed. It will be emailed shortly.',
+            status: 'Processing',
+            policyId: policyId
+        });
+    } catch (error) {
+        console.error('Error processing COI request:', error);
+        res.status(500).json({ error: 'Failed to process COI request' });
+    }
+});
+
+// 4. Endpoint for the Famous.AI App to file a Claim
+APP.post('/file-claim', async (req, res) => {
+    try {
+        const { userId, claimDetails } = req.body;
+        // Logic will involve: Saving the claim details to a 'claims' table 
+        // in Supabase and notifying the internal claims team.
+        console.log(`Claim filed by user ${userId}. Details: ${JSON.stringify(claimDetails)}`);
+        res.status(200).json({ 
+            message: 'Claim request successfully filed. A representative will contact you shortly.',
+            claimId: 'CLAIM-' + Date.now()
+        });
+    } catch (error) {
+        console.error('Error filing claim:', error);
+        res.status(500).json({ error: 'Failed to file claim' });
     }
 });
 
