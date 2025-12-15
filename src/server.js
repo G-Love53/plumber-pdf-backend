@@ -1,370 +1,234 @@
-// Load environment variables early (important for database connections)
-import 'dotenv/config'; 
 import express from "express";
 import path from "path";
 import fs from "fs/promises";
 import { fileURLToPath } from "url";
 import { renderPdf } from "./pdf.js";
-import * as Email from "./email.js";
-// Import the new quote processing and binding functions
-import { processQuote, bindQuote } from "./quote-processor.js"; 
+import { sendWithGmail } from "./email.js";
+// Note: Ensure your enricher import matches the file name in your 'src' folder
+// For Roofer/Bar, you might need to comment this out or rename the enricher file to 'data-enricher.js' to make it standard.
+// import enrichFormData from '../mapping/data-enricher.js'; 
 
-/* ----------------------------- Helpers & Consts ---------------------------- */
-const sendWithGmail = Email.sendWithGmail || Email.default || Email.sendEmail;
-
-if (!sendWithGmail) {
-  throw new Error("email.js must export sendWithGmail (named) or a default sender.");
-}
-
-const enrichFormData = (d) => d || {};
-
-// NOTE: This map assumes 'Plumber' is the default segment structure. 
-// For Bar/Roofer, you will need to adjust your Templates/mapping folder structure.
-const FILENAME_MAP = {
-  PlumberAccord125: "ACORD-125.pdf",
-  PlumberAccord126: "ACORD-126.pdf",
-  PlumberSupp:       "Plumber-Contractor-Supplemental.pdf"
-};
-
-const TEMPLATE_ALIASES = {
-  Accord125: "PlumberAccord125",
-  Accord126: "PlumberAccord126",
-  PlumberAccord125: "PlumberAccord125",
-  PlumberAccord126: "PlumberAccord126",
-  PlumberSupp: "PlumberSupp"
-};
-const resolveTemplate = (name) => TEMPLATE_ALIASES[name] || name;
+// --- LEG 2 / LEG 3 IMPORTS ---
+import { processInbox } from "./quote-processor.js";
+import { triggerCarrierBind } from "./bind-processor.js";
+import { google } from 'googleapis';
 
 const __filename = fileURLToPath(import.meta.url);
-const __dirname  = path.dirname(__filename);
+const __dirname = path.dirname(__filename);
 
-/* --------------------------------- Express Setup -------------------------------- */
+/* ============================================================
+   🟢 SECTION 1: CONFIGURATION (EDIT THIS PER SEGMENT)
+   ============================================================ */
+
+// 1. Map Frontend Names (from Netlify) to Actual Folder Names (in /templates)
+const TEMPLATE_ALIASES = {
+  // Generic Name      : Actual Folder Name
+  "Accord125":         "PlumberAccord125", // <--- CHANGE THIS for Plumber/Bar
+  "Accord126":         "PlumberAccord126", // <--- CHANGE THIS
+  "Accord140":         "PlumberAccord140", // <--- CHANGE THIS
+  "WCForm":            "WCRoofForm",       // <--- CHANGE THIS
+  "Supplemental":      "PlumberSupp",      // <--- CHANGE THIS
+  
+  // Self-referencing aliases for safety (so code finds them even if full name is sent)
+  "PlumberAccord125":  "PlumberAccord125",
+  "PlumberAccord126":  "PlumberAccord126",
+  "PlumberAccord140":  "PlumberAccord140",
+};
+
+// 2. Map Folder Names to Pretty Output Filenames (for the client email)
+const FILENAME_MAP = {
+  "PlumberAccord125": "ACORD-125.pdf",
+  "PlumberAccord126": "ACORD-126.pdf",
+  "PlumberAccord140": "ACORD-140.pdf",
+  "PlumberSupp":      "Supplemental-Application.pdf",
+  "WCRoofForm":       "WC-Application.pdf"
+};
+
+/* ============================================================
+   🔴 SECTION 2: LOGIC (DO NOT EDIT BELOW THIS LINE)
+   ============================================================ */
+
+const resolveTemplate = (name) => TEMPLATE_ALIASES[name] || name;
+
+// --- APP SETUP ---
 const APP = express();
 APP.use(express.json({ limit: "20mb" }));
 
-// Configure CORS for security
-const allowed = (process.env.CORS_ORIGINS || "")
-  .split(",")
-  .map(s => s.trim())
-  .filter(Boolean);
-
+// CORS
 APP.use((req, res, next) => {
-  const origin = req.headers.origin;
-  if (!allowed.length || (origin && allowed.includes(origin))) {
-    res.setHeader("Access-Control-Allow-Origin", origin || "*");
-  }
+  res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-API-Key");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   if (req.method === "OPTIONS") return res.sendStatus(204);
   next();
 });
 
-/* --------------------------------- Dirs ----------------------------------- */
-const TPL_DIR = path.join(__dirname, "..", "Templates");
+const TPL_DIR = path.join(__dirname, "..", "templates");
 const MAP_DIR = path.join(__dirname, "..", "mapping");
 
-/* -------------------------------- Helper Functions ---------------------------------- */
+// --- ROUTES ---
 
-async function maybeMapData(templateName, raw) {
-  // Logic to map form data to PDF template fields
+APP.get("/healthz", (_req, res) => res.status(200).send("ok"));
+
+// Helper: Data Mapping
+async function maybeMapData(templateName, rawData) {
   try {
     const mapPath = path.join(MAP_DIR, `${templateName}.json`);
     const mapping = JSON.parse(await fs.readFile(mapPath, "utf8"));
     const mapped = {};
     for (const [tplKey, formKey] of Object.entries(mapping)) {
-      mapped[tplKey] = raw?.[formKey] ?? "";
+      mapped[tplKey] = rawData?.[formKey] ?? "";
     }
-    return { ...raw, ...mapped };
+    return { ...rawData, ...mapped };
   } catch {
-    return raw;
+    return rawData;
   }
 }
 
+// Helper: Render Bundle
 async function renderBundleAndRespond({ templates, email }, res) {
-  // Logic to render multiple PDF templates and optionally email them
   if (!Array.isArray(templates) || templates.length === 0) {
     return res.status(400).json({ ok: false, error: "NO_TEMPLATES" });
   }
 
   const results = [];
-  // ... (PDF rendering and email sending logic remains here) ...
-  // (Assuming your full function body is still present here.)
 
-  const attachments = results.map(r => r.value); // placeholder for attachments list
-
-  // ... (Full function body continues) ...
-
-  const failures = results.filter(r => r.status === "rejected");
-  if (failures.length) {
-    console.error("RENDER_FAILURES", failures.map(f => String(f.reason)));
-    return res.status(500).json({
-      ok: false,
-      success: false,
-      error: "ONE_OR_MORE_ATTACHMENTS_FAILED",
-      failedCount: failures.length,
-      details: failures.map(f => String(f.reason)),
-    });
-  }
-
-  // NOTE: This part is crucial, the actual attachments need to be generated 
-  // in the loop above for the rest of this function to work.
-  // Assuming 'attachments' is correctly populated here:
-  const validAttachments = results.map(r => r.value); 
-
-  if (email?.to?.length) {
+  for (const t of templates) {
+    const name = resolveTemplate(t.name);
+    
+    // Safety check: verify folder exists
     try {
-      await sendWithGmail({
-        to: email.to,
-        cc: email.cc,
-        subject: email.subject || "Submission Packet",
-        formData: email.formData,
-        html: email.bodyHtml,
-        attachments: validAttachments,
-      });
-      return res.json({ ok: true, success: true, sent: true, count: validAttachments.length });
+        await fs.access(path.join(TPL_DIR, name));
+    } catch (e) {
+        console.error(`❌ Template folder not found: ${name} (Original: ${t.name})`);
+        results.push({ status: "rejected", reason: `Template ${name} not found` });
+        continue;
+    }
+
+    const htmlPath = path.join(TPL_DIR, name, "index.ejs");
+    const cssPath  = path.join(TPL_DIR, name, "styles.css");
+    const rawData  = t.data || {};
+    const unified  = await maybeMapData(name, rawData);
+
+    try {
+      const buffer = await renderPdf({ htmlPath, cssPath, data: unified });
+      const prettyName = FILENAME_MAP[name] || t.filename || `${name}.pdf`;
+      results.push({ status: "fulfilled", value: { filename: prettyName, buffer } });
     } catch (err) {
-      console.error("EMAIL_SEND_FAILED", err);
-      return res.status(502).json({
-        ok: false,
-        success: false,
-        error: "EMAIL_SEND_FAILED",
-        detail: String(err?.message || err),
-      });
+      console.error(`❌ Render Error for ${name}:`, err.message);
+      results.push({ status: "rejected", reason: err });
     }
   }
 
-  res.setHeader("Content-Type", "application/pdf");
-  res.setHeader("Content-Disposition", `attachment; filename="${validAttachments[0].filename}"`);
-  return res.send(validAttachments[0].buffer);
+  const attachments = results.filter(r => r.status === "fulfilled").map(r => r.value);
+
+  if (email?.to?.length) {
+    await sendWithGmail({
+      to: email.to,
+      subject: email.subject || "Submission Packet",
+      formData: email.formData,
+      html: email.bodyHtml,
+      attachments
+    });
+    return res.json({ ok: true, success: true, sent: true, count: attachments.length });
+  }
+
+  if (attachments.length > 0) {
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader("Content-Disposition", `attachment; filename="${attachments[0].filename}"`);
+      res.send(attachments[0].buffer);
+  } else {
+      res.status(500).send("No valid PDFs were generated.");
+  }
 }
 
-
-/* -------------------------------- Routes ---------------------------------- */
-
-APP.get("/healthz", (_req, res) => res.status(200).send("ok"));
-
-// --- Leg 1: PDF Submission Routes ---
-
+// 1. Render Bundle Endpoint
 APP.post("/render-bundle", async (req, res) => {
   try {
     await renderBundleAndRespond(req.body || {}, res);
   } catch (e) {
     console.error(e);
-    res.status(500).json({ ok: false, error: e.message || String(e) });
+    res.status(500).json({ ok: false, error: e.message });
   }
 });
 
+// 2. Submit Quote Endpoint
 APP.post("/submit-quote", async (req, res) => {
   try {
     let { formData = {}, segments = [], email } = req.body || {};
-    formData = enrichFormData(formData);
+    // Optional: Run Enricher if you imported it
+    // formData = enrichFormData(formData);
 
-    const templates = (segments || [])
-      .map((n) => resolveTemplate(n))
-      .map((name) => ({
-        name,
-        filename: FILENAME_MAP[name] || `${name}.pdf`,
-        data: formData,
-      }));
-
-    if (!templates.length) {
+    const templates = (segments || []).map((name) => ({
+      name, 
+      filename: FILENAME_MAP[resolveTemplate(name)] || `${name}.pdf`,
+      data: formData,
+    }));
+    
+    if (templates.length === 0) {
       return res.status(400).json({ ok: false, success: false, error: "NO_VALID_SEGMENTS" });
     }
 
     const defaultTo = process.env.CARRIER_EMAIL || process.env.GMAIL_USER;
-    const cc = (process.env.UW_EMAIL || "")
-      .split(",")
-      .map(s => s.trim())
-      .filter(Boolean);
-
     const emailBlock = email?.to?.length
       ? email
       : {
           to: [defaultTo].filter(Boolean),
-          cc,
-          subject: `New Submission — ${formData.business_name || formData.applicant_name || ""}`,
-          formData,
+          subject: `New Submission — ${formData.applicant_name || ""}`,
+          formData: formData,
         };
 
     await renderBundleAndRespond({ templates, email: emailBlock }, res);
   } catch (e) {
     console.error(e);
-    res.status(500).json({ ok: false, success: false, error: e.message || String(e) });
+    res.status(500).json({ ok: false, success: false, error: e.message });
   }
 });
 
-// --- Leg 2: The Email Robot (Functional) ---
-
+// 3. LEG 2: Check Quotes
 APP.post("/check-quotes", async (req, res) => {
   console.log("🤖 Robot Waking Up: Checking for new quotes...");
-
-  // 1. Read Credentials
   const rawKey = process.env.GOOGLE_PRIVATE_KEY || "";
   const serviceEmail = (process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL || "").trim();
   const impersonatedUser = (process.env.GMAIL_USER || "").trim();
-  const privateKey = rawKey.replace(/\\n/g, '\n'); 
+  const privateKey = rawKey.replace(/\\n/g, '\n');
 
-  // 2. Safety Checks (ensure your OPENAI key is replaced with GEMINI key if needed)
-  if (!serviceEmail || !impersonatedUser) {
-    console.error("❌ Error: Missing Email Config (Service Account or Gmail User).");
-    return res.status(500).json({ ok: false, error: "Missing Email Config" });
-  }
-  if (!rawKey || !rawKey.includes("BEGIN PRIVATE KEY")) {
-    console.error("❌ Error: Invalid Private Key.");
-    return res.status(500).json({ ok: false, error: "Invalid Key" });
-  }
-  // NOTE: This check should likely be for process.env.GEMINI_API_KEY now
-  if (!process.env.OPENAI_API_KEY && !process.env.GEMINI_API_KEY) { 
-    console.error("❌ Error: Missing API Key.");
-    return res.status(500).json({ ok: false, error: "Missing API Key" });
+  if (!serviceEmail || !impersonatedUser || !rawKey || !process.env.OPENAI_API_KEY) {
+    return res.status(500).json({ ok: false, error: "Missing Env Vars" });
   }
 
   try {
-    // 3. Connect to Google (WITH IMPERSONATION)
-    const { google } = await import('googleapis'); 
-
     const jwtClient = new google.auth.JWT(
-      serviceEmail,
-      null,
-      privateKey,
-      ['https://www.googleapis.com/auth/gmail.modify'],
-      impersonatedUser 
+      serviceEmail, null, privateKey,
+      ['https://www.googleapis.com/auth/gmail.modify'], impersonatedUser 
     );
-
-    // 4. Authorize and Run the Processor
     await jwtClient.authorize();
-    // Assuming you have an 'inboxProcessor' function now in quote-processor.js 
-    // that encapsulates the old 'processInbox' logic:
-    // const result = await inboxProcessor(jwtClient); 
-    
-    // Using the old name for backward compatibility, but this should be checked 
-    // in your quote-processor.js file if it still exists.
-    // NOTE: If you deleted the old function, you must remove this route entirely.
-    // For now, leaving the original logic placeholder.
-    // The previous error was with 'processInbox' -- if you renamed it, update this line.
-    
-    console.log("✅ Robot finished checking inbox.");
-    // return res.json({ ok: true, ...result });
-
-    // Since processInbox was causing an error, we'll return a placeholder success response
-    // to allow the rest of the file to deploy, assuming you will fix/remove the old email logic later.
-    return res.json({ ok: true, message: "Inbox check initiated (check logs for full status)." });
-
-
+    const result = await processInbox(jwtClient); 
+    return res.json({ ok: true, ...result });
   } catch (error) {
-    const errMsg = error.message || String(error);
-    if (errMsg.includes('not authorized to perform this operation')) {
-      console.error("🔴 Major Error: Domain-Wide Delegation missing or scopes incorrect.");
-      return res.status(500).json({ 
-          ok: false, 
-          error: "Authentication Failed: Check DWD setup in Google Admin." 
-      });
-    }
-    console.error("❌ Robot Global Error:", errMsg);
-    return res.status(500).json({ ok: false, error: errMsg });
+    console.error("Robot Error:", error);
+    return res.status(500).json({ ok: false, error: error.message });
   }
 });
 
-
-// --- Leg 3: Quote Analysis and Binding (The App's Core Routes) ---
-
-// 1. Endpoint for the Famous.AI App to submit text for analysis
-APP.post('/process-quote', async (req, res) => {
-    const { userInput, quoteId, segment, clientEmail } = req.body; 
-
-    if (!userInput || !quoteId || !segment) {
-        return res.status(400).json({ message: 'Missing required fields: userInput, quoteId, and segment.' });
-    }
-
+// 4. LEG 3: Bind Quote
+APP.get("/bind-quote", async (req, res) => {
+    const quoteId = req.query.id;
+    if (!quoteId) return res.status(400).send("Quote ID is missing.");
     try {
-        const result = await processQuote({ userInput, quoteId, segment, clientEmail });
-        res.status(200).json(result); 
-    } catch (error) {
-        console.error('Processing error:', error);
-        res.status(500).json({ message: 'Internal server error during quote analysis.' });
+        await triggerCarrierBind({ quoteId }); 
+        const confirmationHtml = `
+            <!DOCTYPE html>
+            <html><head><title>Bind Request Received</title></head>
+            <body style="text-align:center; padding:50px; font-family:sans-serif;">
+                <h1 style="color:#10b981;">Bind Request Received</h1>
+                <p>We are processing your request for Quote ID: <b>${quoteId.substring(0,8)}</b>.</p>
+            </body></html>`;
+        res.status(200).send(confirmationHtml);
+    } catch (e) {
+        res.status(500).send("Error processing bind request.");
     }
 });
 
-
-// 2. Endpoint for the Famous.AI App to finalize the quote binding
-APP.post('/bind-quote', async (req, res) => {
-    const { quoteId } = req.body; 
-
-    if (!quoteId) {
-        return res.status(400).json({ message: 'Missing required field: quoteId.' });
-    }
-
-    try {
-        const result = await bindQuote(quoteId);
-        
-        if (result.success) {
-            res.status(200).json({ 
-                message: `Quote ID ${quoteId} successfully bound.`,
-                status: 'bound',
-                quote: result.quote 
-            });
-        } else {
-            res.status(404).json({ message: `Binding failed: ${result.error}` });
-        }
-    } catch (error) {
-        console.error('Binding error:', error);
-        res.status(500).json({ message: 'Internal server error during binding.' });
-    }
-});
-
-// --- Leg 3: Service App Routes (New Addition) ---
-
-// 3. Endpoint for the Famous.AI App to request a COI
-APP.post('/request-coi', async (req, res) => {
-    try {
-        const { userId, policyId, details } = req.body;
-        // Logic will involve: Fetching the policy using service_role key, 
-        // generating the PDF COI, and emailing it to the user.
-        console.log(`COI Request received for user ${userId} and policy ${policyId}`);
-        res.status(200).json({ 
-            message: 'COI request received and is being processed. It will be emailed shortly.',
-            status: 'Processing',
-            policyId: policyId
-        });
-    } catch (error) {
-        console.error('Error processing COI request:', error);
-        res.status(500).json({ error: 'Failed to process COI request' });
-    }
-});
-
-// 4. Endpoint for the Famous.AI App to file a Claim
-APP.post('/file-claim', async (req, res) => {
-    try {
-        const { userId, claimDetails } = req.body;
-        // Logic will involve: Saving the claim details to a 'claims' table 
-        // in Supabase and notifying the internal claims team.
-        console.log(`Claim filed by user ${userId}. Details: ${JSON.stringify(claimDetails)}`);
-        res.status(200).json({ 
-            message: 'Claim request successfully filed. A representative will contact you shortly.',
-            claimId: 'CLAIM-' + Date.now()
-        });
-    } catch (error) {
-        console.error('Error filing claim:', error);
-        res.status(500).json({ error: 'Failed to file claim' });
-    }
-});
-
-
-/* ------------------------------- Start Server ------------------------------ */
-
-const PORT = process.env.PORT || 10000;
-const server = APP.listen(PORT, () => {
-  console.log(`Plumber PDF service listening on ${PORT}`);
-});
-
-function shutdown(signal) {
-  console.log(`Received ${signal}, shutting down gracefully...`);
-  server.close(() => {
-    console.log("HTTP server closed.");
-    process.exit(0);
-  });
-  setTimeout(() => process.exit(0), 5000).unref();
-}
-
-process.on("SIGTERM", () => shutdown("SIGTERM"));
-process.on("SIGINT",  () => shutdown("SIGINT"));
+const PORT = process.env.PORT || 8080;
+APP.listen(PORT, () => console.log(`PDF service listening on ${PORT}`));
