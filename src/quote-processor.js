@@ -1,90 +1,155 @@
-// src/quote-processor.js (UPDATED)
+import { google } from 'googleapis';
+import { simpleParser } from 'mailparser';
+import pdf from 'pdf-parse/lib/pdf-parse.js';
+import OpenAI from 'openai';
+import { randomUUID } from 'crypto';
 
-import { GoogleGenAI } from '@google/genai';
-// Import only the required database function
-import { saveQuoteToDb, supabase } from './db.js'; // <-- Updated Import
-
-// --- Initialization ---
-
-// Gemini AI setup
-const ai = new GoogleGenAI(process.env.GEMINI_API_KEY);
-const model = "gemini-2.5-flash";
-
-// --- Core Functions ---
-
-// The dedicated saveQuoteData function from the previous step is replaced by the imported saveQuoteToDb
-
-// Function to process the quote (AI analysis and data saving)
-export async function processQuote(clientData) {
-    const { quoteId, userInput, segment, clientEmail } = clientData; // Use the expanded fields from the new schema
-    let aiAnalysis = null;
-    let dbResult = { success: false };
-
-    // ... (AI Analysis remains the same) ...
-
-    try {
-        // 1. AI Analysis (using Gemini)
-        // ... (existing AI prompt and parsing logic) ...
-        const prompt = `Analyze the following insurance application text and extract key policy details in a JSON object...`;
-        const response = await ai.models.generateContent({
-            // ... config ...
-        });
-        const aiAnalysis = JSON.parse(response.text.trim());
-
-        // 2. Prepare Data for Supabase
-        const dataToSave = {
-            quote_id: quoteId,
-            segment: segment,
-            client_email: clientEmail,
-            premium: aiAnalysis.premium,
-            carrier: aiAnalysis.carrier, // Assuming carrier comes from AI or a lookup
-            subjectivities: aiAnalysis, // Store the full analyzed JSON here
-            status: 'draft' 
-        };
-
-        // 3. Save Data to Supabase (using the secure function)
-        await saveQuoteToDb(dataToSave);
-        dbResult.success = true;
-
-        // 4. Return combined result to the client
-        return {
-            quoteId: quoteId,
-            quoteDetails: aiAnalysis,
-            dbSaveSuccess: dbResult.success,
-            message: "Quote analyzed and data saved for binding."
-        };
-
-    } catch (error) {
-        console.error('Error during quote processing:', error.message);
-        return {
-            quoteId: quoteId,
-            quoteDetails: null,
-            dbSaveSuccess: false,
-            message: `Processing failed. Error: ${error.message}`
-        };
-    }
+/* ---------------- Configuration ---------------- */
+// Ensure API Key is available
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY; 
+let openai;
+if (OPENAI_API_KEY) {
+    openai = new OpenAI({ apiKey: OPENAI_API_KEY });
+} else {
+    console.warn("⚠️ OPENAI_API_KEY is missing. AI features will fail.");
 }
 
+/**
+ * Processes incoming emails labeled 'CID/CarrierQuotes'.
+ * @param {google.auth.JWT} authClient - The authenticated Google JWT client.
+ * @returns {Object} Processing results.
+ */
+export async function processInbox(authClient) {
+  console.log("Starting Quote Ingestion...");
+  const gmail = google.gmail({ version: 'v1', auth: authClient });
+  const results = [];
 
-// --- Updated Bind Function (Need to ensure it uses the imported 'supabase') ---
-export async function bindQuote(quoteId) {
-    console.log(`Attempting to bind quote with ID: ${quoteId}`);
+  // 1. Find Unread Quotes
+  const res = await gmail.users.messages.list({
+    userId: 'me',
+    q: 'label:CID/CarrierQuotes is:unread has:attachment',
+    maxResults: 5 
+  });
+
+  const messages = res.data.messages || [];
+  if (messages.length === 0) return { status: "No new quotes to process" };
+
+  console.log(`Found ${messages.length} new quote(s).`);
+
+  for (const message of messages) {
+    let subject = 'Unknown Subject';
     try {
-        const { data, error } = await supabase // <-- Uses the imported 'supabase'
-            .from('quotes')
-            .update({ status: 'bound', bound_at: new Date() }) 
-            .eq('quote_id', quoteId) // Use quote_id for the lookup
-            .select();
+      // 2. Fetch Email Content
+      const msgData = await gmail.users.messages.get({
+        userId: 'me',
+        id: message.id,
+        format: 'raw'
+      });
+      
+      const decodedEmail = Buffer.from(msgData.data.raw, 'base64');
+      const parsed = await simpleParser(decodedEmail);
+      
+      subject = parsed.subject;
+      const from = parsed.from.value[0].address;
+      
+      // 3. Find PDF Attachment
+      const pdfAttachment = parsed.attachments.find(att => att.contentType === 'application/pdf');
+      if (!pdfAttachment) {
+        console.log(`Skipping ${subject} - No PDF found.`);
+        results.push({ id: message.id, status: "Skipped: No PDF" });
+        continue;
+      }
 
-        // ... (rest of the binding logic) ...
-        if (error || !data || data.length === 0) {
-            return { success: false, error: error ? error.message : `Quote ID ${quoteId} not found.` };
+      // 4. Extract Text using pdf-parse (Inbound Reader)
+      const pdfData = await pdf(pdfAttachment.content);
+      const rawText = pdfData.text;
+
+      // 5. AI Analysis (The Salesman)
+      const quoteId = randomUUID(); // Unique ID for Leg 3 Binding
+      
+      if (!openai) throw new Error("OpenAI Client not initialized");
+
+      const aiResponse = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          {
+            role: "system",
+            content: `You are an expert insurance underwriter assistant. 
+            Analyze the attached carrier quote text.
+            
+            Task 1: Extract Premium, Carrier Name, Subjectivities.
+            Task 2: Write a persuasive sales email for the client.
+            Task 3: Embed the Bind Link placeholder [BIND_LINK_PLACEHOLDER].
+            
+            Return JSON: { 
+              "premium": "Number", 
+              "carrier": "String", 
+              "subjectivities": ["List"], 
+              "sales_email_html": "HTML String", 
+              "quote_id": "${quoteId}" 
+            }`
+          },
+          { role: "user", content: `Quote Text:\n${rawText}` }
+        ],
+        response_format: { type: "json_object" }
+      });
+
+      const contentString = aiResponse.choices[0].message.content;
+      const aiContent = JSON.parse(contentString);
+
+      // 6. Create Draft Reply
+      // Use dynamic hostname if available, else default to localhost for safety
+      const hostname = process.env.RENDER_EXTERNAL_HOSTNAME || 'localhost:10000';
+      const bindUrl = `https://${hostname}/bind-quote?id=${quoteId}`;
+      
+      const finalEmailBody = aiContent.sales_email_html.replace(
+        '[BIND_LINK_PLACEHOLDER]', 
+        `<a href="${bindUrl}" style="color: #10B981; font-weight: bold; text-decoration: none;">CLICK HERE TO BIND NOW</a>`
+      );
+
+      const rawDraft = makeRawEmail({
+        to: from,
+        subject: `RE: ${subject} - Proposal Ready`,
+        body: finalEmailBody,
+        threadId: message.threadId
+      });
+
+      await gmail.users.drafts.create({
+        userId: 'me',
+        requestBody: {
+          message: {
+            threadId: message.threadId,
+            raw: rawDraft
+          }
         }
+      });
 
-        return { success: true, quote: data[0] };
+      // 7. Mark as Processed (Remove Unread Label)
+      await gmail.users.messages.modify({
+        userId: 'me',
+        id: message.id,
+        requestBody: { removeLabelIds: ['UNREAD'] }
+      });
 
-    } catch (e) {
-        console.error('Unexpected Binding Operation Error:', e);
-        return { success: false, error: 'Binding operation failed' };
+      results.push({ id: message.id, status: "Draft Created", quoteId });
+
+    } catch (err) {
+      console.error(`❌ Failed message ${message.id}:`, err.message);
+      results.push({ id: message.id, error: err.message });
     }
+  }
+
+  return { processedCount: results.length, results };
+}
+
+function makeRawEmail({ to, subject, body, threadId }) {
+  const str = [
+    `To: ${to}`,
+    `Subject: ${subject}`,
+    'Content-Type: text/html; charset=utf-8',
+    'MIME-Version: 1.0',
+    '',
+    body
+  ].join('\n');
+  return Buffer.from(str).toString('base64').replace(/\+/g, '-').replace(/\//g, '_');
 }
