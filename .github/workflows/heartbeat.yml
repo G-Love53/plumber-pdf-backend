@@ -1,0 +1,15 @@
+name: Leg 2 Robot Heartbeat
+
+on:
+  schedule:
+    # Runs every 10 minutes
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+
+jobs:
+  wake-up-service:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Poke the Robot
+        # REPLACE THIS with your specific Render URL
+        run: curl -X POST https://plumber-pdf-backend.onrender.com/check-quotes
