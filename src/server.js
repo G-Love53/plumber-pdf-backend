@@ -20,7 +20,7 @@ const __dirname = path.dirname(__filename);
    🟢 SECTION 1: CONFIGURATION (EDIT THIS PER SEGMENT)
    ============================================================ */
 
-// 1. Map Frontend Names (from Netlify) to Actual Folder Names (in /templates)
+// 1. Map Frontend Names (from Netlify) to Actual Folder Names (in /Templates)
 const TEMPLATE_ALIASES = {
   // Generic Name      : Actual Folder Name
   "Accord125":         "PlumberAccord125", // <--- CHANGE THIS for Plumber/Bar
@@ -63,7 +63,7 @@ APP.use((req, res, next) => {
   next();
 });
 
-const TPL_DIR = path.join(__dirname, "..", "templates");
+const TPL_DIR = path.join(__dirname, "..", "Templates");
 const MAP_DIR = path.join(__dirname, "..", "mapping");
 
 // --- ROUTES ---
