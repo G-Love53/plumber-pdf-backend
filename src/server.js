@@ -26,7 +26,7 @@ const TEMPLATE_ALIASES = {
   "Accord125":         "PlumberAccord125", // <--- CHANGE THIS for Plumber/Bar
   "Accord126":         "PlumberAccord126", // <--- CHANGE THIS
   "Accord140":         "PlumberAccord140", // <--- CHANGE THIS
-  "WCForm":            "WCRoofForm",       // <--- CHANGE THIS
+  "WCForm":            "WCPlumberForm",       // <--- CHANGE THIS
   "Supplemental":      "PlumberSupp",      // <--- CHANGE THIS
   
   // Self-referencing aliases for safety (so code finds them even if full name is sent)
@@ -41,7 +41,7 @@ const FILENAME_MAP = {
   "PlumberAccord126": "ACORD-126.pdf",
   "PlumberAccord140": "ACORD-140.pdf",
   "PlumberSupp":      "Supplemental-Application.pdf",
-  "WCRoofForm":       "WC-Application.pdf"
+  "WCPlumberForm":       "WC-Application.pdf"
 };
 
 /* ============================================================
