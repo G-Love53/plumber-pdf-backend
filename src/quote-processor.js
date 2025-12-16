@@ -13,7 +13,7 @@ if (OPENAI_API_KEY) {
 }
 
 // 👇 THE MAGIC: Defaults to 'bar' if you forget to set it in Render
-const SEGMENT = process.env.SEGMENT_NAME || 'bar'; 
+const SEGMENT = process.env.SEGMENT_NAME || 'plumber'; 
 
 /**
  * Processes incoming emails labeled 'CID/CarrierQuotes'.
