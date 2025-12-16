@@ -3,13 +3,7 @@ import { simpleParser } from 'mailparser';
 import pdf from 'pdf-parse/lib/pdf-parse.js';
 import OpenAI from 'openai';
 import { randomUUID } from 'crypto';
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
-
-// Fix for __dirname in ES Modules
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+import { loadPrompts } from "./services/promptLoader.js"; 
 
 /* ---------------- Configuration ---------------- */
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY; 
@@ -18,19 +12,32 @@ if (OPENAI_API_KEY) {
     openai = new OpenAI({ apiKey: OPENAI_API_KEY });
 }
 
-// 👇👇👇 CHANGE THIS FILENAME FOR EACH REPO 👇👇👇
-// Options: 'bar.md', 'plumber.md', 'roofer.md'
-const SEGMENT_FILE = 'plumber.md'; 
+// 👇 THE MAGIC: Defaults to 'bar' if you forget to set it in Render
+const SEGMENT = process.env.SEGMENT_NAME || 'bar'; 
 
 /**
  * Processes incoming emails labeled 'CID/CarrierQuotes'.
  */
 export async function processInbox(authClient) {
-  console.log(`Starting Quote Ingestion for ${SEGMENT_FILE}...`);
+  console.log(`Starting Quote Ingestion for Segment: [ ${SEGMENT} ]`);
+  
+  // 1. Load the Brains dynamically
+  let globalSystem, segmentPersona;
+  try {
+    const prompts = loadPrompts(SEGMENT);
+    globalSystem = prompts.globalSystem;
+    segmentPersona = prompts.segmentPersona;
+  } catch (err) {
+    console.error("❌ Error loading prompts:", err.message);
+    return { status: "Error loading prompts" };
+  }
+
+  const combinedSystemPrompt = `${globalSystem}\n\n${segmentPersona}`;
+
   const gmail = google.gmail({ version: 'v1', auth: authClient });
   const results = [];
 
-  // 1. Find Unread Quotes
+  // 2. Find Unread Quotes
   const res = await gmail.users.messages.list({
     userId: 'me',
     q: 'label:CID/CarrierQuotes is:unread has:attachment',
@@ -39,11 +46,6 @@ export async function processInbox(authClient) {
 
   const messages = res.data.messages || [];
   if (messages.length === 0) return { status: "No new quotes to process" };
-
-  // 2. Load the "Brain" (Prompts)
-  const globalPrompt = fs.readFileSync(path.join(__dirname, 'prompts', 'global_system.md'), 'utf-8');
-  const segmentPrompt = fs.readFileSync(path.join(__dirname, 'prompts', SEGMENT_FILE), 'utf-8');
-  const combinedSystemPrompt = `${globalPrompt}\n\n${segmentPrompt}`;
 
   for (const message of messages) {
     try {
@@ -61,7 +63,7 @@ export async function processInbox(authClient) {
       const pdfData = await pdf(pdfAttachment.content);
       const rawText = pdfData.text;
 
-      // 4. AI Analysis (Using the File-Based Brain)
+      // 4. AI Analysis
       const quoteId = randomUUID();
       
       const aiResponse = await openai.chat.completions.create({
@@ -80,12 +82,10 @@ export async function processInbox(authClient) {
       const bindUrl = `https://${hostname}/bind-quote?id=${quoteId}`;
       const bindButton = `<a href="${bindUrl}" style="background-color: #10B981; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block; margin: 20px 0;">CLICK HERE TO BIND NOW</a>`;
 
-      // Quality Gate: Add a red warning box if risks were found
       let qualityWarning = "";
       if (aiContent.risk_flags && aiContent.risk_flags.length > 0) {
          qualityWarning = `<div style="background: #fee2e2; color: #b91c1c; padding: 15px; border: 1px solid #b91c1c; border-radius: 5px; margin-bottom: 20px;">
-           <strong>⚠️ INTERNAL SAFETY FLAG:</strong> The AI found the following risks in this quote. Review before sending.<br>
-           <ul>${aiContent.risk_flags.map(flag => `<li>${flag}</li>`).join('')}</ul>
+           <strong>⚠️ INTERNAL SAFETY FLAG:</strong> The AI found risks: ${aiContent.risk_flags.join(', ')}
          </div>`;
       }
 
