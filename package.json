@@ -17,10 +17,11 @@
     "openai": "^4.52.7",
     "pdf-parse": "^1.1.1",
     "mailparser": "^3.7.1",
-    "@google/genai": "^0.15.0",          
-    "@supabase/supabase-js": "^2.43.4",   
-    "cors": "^2.8.5",                    
-    "dotenv": "^16.4.5"                   
+    "@google/genai": "^0.15.0",
+    "@supabase/supabase-js": "^2.43.4",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "node-cron": "^3.0.3"                   
   },
   "engines": {
     "node": ">=20.0.0"
