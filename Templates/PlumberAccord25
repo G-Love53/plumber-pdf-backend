@@ -1,0 +1,278 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>ACORD 25 - Certificate of Liability Insurance</title>
+  <link rel="stylesheet" href="./assets/styles.css" />
+</head>
+<body>
+<div class="page">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="title">
+      <h1 class="upper">Certificate of Liability Insurance</h1>
+      <div class="sub tiny">
+        THIS CERTIFICATE IS ISSUED AS A MATTER OF INFORMATION ONLY AND CONFERS NO RIGHTS UPON THE CERTIFICATE HOLDER.
+        THIS CERTIFICATE DOES NOT AFFIRMATIVELY OR NEGATIVELY AMEND, EXTEND OR ALTER THE COVERAGE AFFORDED BY THE POLICIES BELOW.
+        THIS CERTIFICATE OF INSURANCE DOES NOT CONSTITUTE A CONTRACT BETWEEN THE ISSUING INSURER(S), AUTHORIZED REPRESENTATIVE OR PRODUCER, AND THE CERTIFICATE HOLDER.
+      </div>
+    </div>
+  </div>
+
+  <!-- TOP BLOCKS -->
+  <div class="topBlocks">
+
+    <!-- PRODUCER -->
+    <div class="box">
+      <div class="blockTitle">Producer</div>
+      <div class="pad">
+        <div class="bold"><%= producer?.name || "" %></div>
+        <div><%= producer?.address1 || "" %></div>
+        <% if (producer?.address2) { %><div><%= producer.address2 %></div><% } %>
+        <div>
+          <%= producer?.city || "" %><% if (producer?.city) { %>, <% } %><%= producer?.state || "" %> <%= producer?.zip || "" %>
+        </div>
+      </div>
+
+      <div class="kv"><div class="k">Name</div><div class="v"><%= contact?.name || "" %></div></div>
+      <div class="kv"><div class="k">Phone (A/C, No, Ext)</div><div class="v"><%= contact?.phone || "" %></div></div>
+      <div class="kv"><div class="k">Fax (A/C, No)</div><div class="v"><%= contact?.fax || "" %></div></div>
+      <div class="kv"><div class="k">E-mail Address</div><div class="v"><%= contact?.email || "" %></div></div>
+    </div>
+
+    <!-- INSURED + CERT INFO + INSURERS -->
+    <div class="box">
+      <div class="grid2 noGap">
+
+        <!-- INSURED -->
+        <div class="innerBox rightBorder">
+          <div class="blockTitle">Insured</div>
+          <div class="pad">
+            <div class="bold"><%= insured?.name || "" %></div>
+            <div><%= insured?.address1 || "" %></div>
+            <% if (insured?.address2) { %><div><%= insured.address2 %></div><% } %>
+            <div>
+              <%= insured?.city || "" %><% if (insured?.city) { %>, <% } %><%= insured?.state || "" %> <%= insured?.zip || "" %>
+            </div>
+          </div>
+        </div>
+
+        <!-- CERT INFO -->
+        <div class="innerBox">
+          <div class="blockTitle">Date (MM/DD/YYYY)</div>
+          <div class="pad"><div class="bold"><%= certificate?.date || "" %></div></div>
+
+          <div class="kv"><div class="k">Certificate Number</div><div class="v"><%= certificate?.number || "" %></div></div>
+          <div class="kv"><div class="k">Revision Number</div><div class="v"><%= certificate?.revision || "" %></div></div>
+        </div>
+
+      </div>
+
+      <!-- INSURERS -->
+      <div class="insurersBox">
+        <div class="blockTitle">Insurer(s) Affording Coverage</div>
+
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Insurer A</th>
+              <th class="nowrap">NAIC #</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><%= insurers?.A?.name || "" %></td>
+              <td class="right"><%= insurers?.A?.naic || "" %></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <table class="table tableNoTop">
+          <tbody>
+            <tr><td class="bold tiny">Insurer B:</td><td><%= insurers?.B?.name || "" %></td><td class="right naicCol"><%= insurers?.B?.naic || "" %></td></tr>
+            <tr><td class="bold tiny">Insurer C:</td><td><%= insurers?.C?.name || "" %></td><td class="right naicCol"><%= insurers?.C?.naic || "" %></td></tr>
+            <tr><td class="bold tiny">Insurer D:</td><td><%= insurers?.D?.name || "" %></td><td class="right naicCol"><%= insurers?.D?.naic || "" %></td></tr>
+            <tr><td class="bold tiny">Insurer E:</td><td><%= insurers?.E?.name || "" %></td><td class="right naicCol"><%= insurers?.E?.naic || "" %></td></tr>
+            <tr><td class="bold tiny">Insurer F:</td><td><%= insurers?.F?.name || "" %></td><td class="right naicCol"><%= insurers?.F?.naic || "" %></td></tr>
+          </tbody>
+        </table>
+
+      </div>
+    </div>
+
+  </div>
+
+  <!-- COVERAGES -->
+  <div class="box mt6">
+    <div class="blockTitle">Coverages</div>
+    <div class="pad tiny">
+      THIS IS TO CERTIFY THAT THE POLICIES OF INSURANCE LISTED BELOW HAVE BEEN ISSUED TO THE INSURED NAMED ABOVE FOR THE POLICY PERIOD INDICATED.
+      NOTWITHSTANDING ANY REQUIREMENT, TERM OR CONDITION OF ANY CONTRACT OR OTHER DOCUMENT WITH RESPECT TO WHICH THIS CERTIFICATE MAY BE ISSUED OR MAY PERTAIN,
+      THE INSURANCE AFFORDED BY THE POLICIES DESCRIBED HEREIN IS SUBJECT TO ALL THE TERMS, EXCLUSIONS AND CONDITIONS OF SUCH POLICIES.
+      LIMITS SHOWN MAY HAVE BEEN REDUCED BY PAID CLAIMS.
+    </div>
+
+    <table class="table">
+      <thead>
+        <tr>
+          <th class="col-insr">Insr<br/>ltr</th>
+          <th class="col-type">Type of Insurance</th>
+          <th class="col-addl">Addl<br/>insd</th>
+          <th class="col-subr">Subr<br/>wvd</th>
+          <th class="col-polno">Policy Number</th>
+          <th class="col-eff">Policy Eff<br/>(MM/DD/YYYY)</th>
+          <th class="col-exp">Policy Exp<br/>(MM/DD/YYYY)</th>
+          <th class="col-limits">Limits</th>
+        </tr>
+      </thead>
+      <tbody>
+
+        <!-- COMMERCIAL GENERAL LIABILITY -->
+        <tr class="rowCgl">
+          <td class="center"><%= coverages?.cgl?.insr || "" %></td>
+          <td>
+            <div class="bold">COMMERCIAL GENERAL LIABILITY</div>
+            <div class="tiny mt2">
+              <span class="inline"><span class="checkbox <%= coverages?.cgl?.claimsMade ? "checked" : "" %>"></span>CLAIMS-MADE</span>
+              <span class="sp10"></span>
+              <span class="inline"><span class="checkbox <%= coverages?.cgl?.occur ? "checked" : "" %>"></span>OCCUR</span>
+            </div>
+            <div class="tiny mt4">
+              GEN'L AGGREGATE LIMIT APPLIES PER:
+              <span class="inline ml6"><span class="checkbox <%= coverages?.cgl?.perPolicy ? "checked" : "" %>"></span>POLICY</span>
+              <span class="inline"><span class="checkbox <%= coverages?.cgl?.perProject ? "checked" : "" %>"></span>PROJECT</span>
+              <span class="inline"><span class="checkbox <%= coverages?.cgl?.perLoc ? "checked" : "" %>"></span>LOC</span>
+            </div>
+          </td>
+          <td class="center"><%= coverages?.cgl?.addlInsd || "" %></td>
+          <td class="center"><%= coverages?.cgl?.subrWvd || "" %></td>
+          <td><%= coverages?.cgl?.policyNumber || "" %></td>
+          <td class="center"><%= coverages?.cgl?.eff || "" %></td>
+          <td class="center"><%= coverages?.cgl?.exp || "" %></td>
+          <td>
+            <div class="limitsList">
+              <div class="limitsRow"><div>EACH OCCURRENCE</div><div class="amt">$ <%= coverages?.cgl?.eachOcc || "" %></div></div>
+              <div class="limitsRow"><div>DAMAGE TO RENTED PREMISES (Ea occurrence)</div><div class="amt">$ <%= coverages?.cgl?.dmgRented || "" %></div></div>
+              <div class="limitsRow"><div>MED EXP (Any one person)</div><div class="amt">$ <%= coverages?.cgl?.medExp || "" %></div></div>
+              <div class="limitsRow"><div>PERSONAL &amp; ADV INJURY</div><div class="amt">$ <%= coverages?.cgl?.perAdv || "" %></div></div>
+              <div class="limitsRow"><div>GENERAL AGGREGATE</div><div class="amt">$ <%= coverages?.cgl?.genAgg || "" %></div></div>
+              <div class="limitsRow"><div>PRODUCTS - COMP/OP AGG</div><div class="amt">$ <%= coverages?.cgl?.prodAgg || "" %></div></div>
+            </div>
+          </td>
+        </tr>
+
+        <!-- AUTOMOBILE LIABILITY -->
+        <tr class="rowAuto">
+          <td class="center"><%= coverages?.auto?.insr || "" %></td>
+          <td>
+            <div class="bold">AUTOMOBILE LIABILITY</div>
+            <div class="tiny mt2">ANY AUTO <span class="sp12"></span>OWNED AUTOS ONLY <span class="sp12"></span>SCHEDULED AUTOS</div>
+            <div class="tiny mt2">HIRED AUTOS ONLY <span class="sp12"></span>NON-OWNED AUTOS ONLY</div>
+          </td>
+          <td class="center"><%= coverages?.auto?.addlInsd || "" %></td>
+          <td class="center"><%= coverages?.auto?.subrWvd || "" %></td>
+          <td><%= coverages?.auto?.policyNumber || "" %></td>
+          <td class="center"><%= coverages?.auto?.eff || "" %></td>
+          <td class="center"><%= coverages?.auto?.exp || "" %></td>
+          <td>
+            <div class="limitsRow"><div>COMBINED SINGLE LIMIT</div><div class="amt">$ <%= coverages?.auto?.csl || "" %></div></div>
+            <div class="limitsRow"><div>BODILY INJURY (Per person)</div><div class="amt">$ <%= coverages?.auto?.biPerson || "" %></div></div>
+            <div class="limitsRow"><div>BODILY INJURY (Per accident)</div><div class="amt">$ <%= coverages?.auto?.biAcc || "" %></div></div>
+            <div class="limitsRow"><div>PROPERTY DAMAGE (Per accident)</div><div class="amt">$ <%= coverages?.auto?.pdAcc || "" %></div></div>
+          </td>
+        </tr>
+
+        <!-- UMBRELLA / EXCESS -->
+        <tr class="rowUmb">
+          <td class="center"><%= coverages?.umb?.insr || "" %></td>
+          <td>
+            <div class="bold">UMBRELLA LIAB</div>
+            <div class="tiny mt2">
+              <span class="inline"><span class="checkbox <%= coverages?.umb?.occur ? "checked" : "" %>"></span>OCCUR</span>
+              <span class="sp10"></span>
+              <span class="inline"><span class="checkbox <%= coverages?.umb?.claimsMade ? "checked" : "" %>"></span>CLAIMS-MADE</span>
+            </div>
+            <div class="tiny mt2">EXCESS LIAB &nbsp;&nbsp; DED <%= coverages?.umb?.ded || "" %> &nbsp;&nbsp; RETENTION <%= coverages?.umb?.retention || "" %></div>
+          </td>
+          <td class="center"><%= coverages?.umb?.addlInsd || "" %></td>
+          <td class="center"><%= coverages?.umb?.subrWvd || "" %></td>
+          <td><%= coverages?.umb?.policyNumber || "" %></td>
+          <td class="center"><%= coverages?.umb?.eff || "" %></td>
+          <td class="center"><%= coverages?.umb?.exp || "" %></td>
+          <td>
+            <div class="limitsRow"><div>EACH OCCURRENCE</div><div class="amt">$ <%= coverages?.umb?.eachOcc || "" %></div></div>
+            <div class="limitsRow"><div>AGGREGATE</div><div class="amt">$ <%= coverages?.umb?.agg || "" %></div></div>
+          </td>
+        </tr>
+
+        <!-- WORKERS COMP -->
+        <tr class="rowWc">
+          <td class="center"><%= coverages?.wc?.insr || "" %></td>
+          <td>
+            <div class="bold">WORKERS COMPENSATION</div>
+            <div class="bold">AND EMPLOYERS' LIABILITY</div>
+            <div class="tiny mt2">
+              ANY PROPRIETOR/PARTNER/EXECUTIVE OFFICER/MEMBER EXCLUDED?
+              <span class="right">(Mandatory in NH)</span>
+            </div>
+            <div class="tiny mt2">
+              <span class="inline"><span class="checkbox <%= coverages?.wc?.excludedYes ? "checked" : "" %>"></span>Y</span>
+              <span class="inline"><span class="checkbox <%= coverages?.wc?.excludedNo ? "checked" : "" %>"></span>N</span>
+              <span class="inline"><span class="checkbox <%= coverages?.wc?.excludedNA ? "checked" : "" %>"></span>N/A</span>
+            </div>
+          </td>
+          <td class="center"><%= coverages?.wc?.addlInsd || "" %></td>
+          <td class="center"><%= coverages?.wc?.subrWvd || "" %></td>
+          <td><%= coverages?.wc?.policyNumber || "" %></td>
+          <td class="center"><%= coverages?.wc?.eff || "" %></td>
+          <td class="center"><%= coverages?.wc?.exp || "" %></td>
+          <td>
+            <div class="limitsRow"><div>WC STATUTE</div><div class="amt"><%= coverages?.wc?.statute || "OTH" %></div></div>
+            <div class="limitsRow"><div>E.L. EACH ACCIDENT</div><div class="amt">$ <%= coverages?.wc?.elEachAcc || "" %></div></div>
+            <div class="limitsRow"><div>E.L. DISEASE - EA EMPLOYEE</div><div class="amt">$ <%= coverages?.wc?.elDiseaseEa || "" %></div></div>
+            <div class="limitsRow"><div>E.L. DISEASE - POLICY LIMIT</div><div class="amt">$ <%= coverages?.wc?.elDiseasePol || "" %></div></div>
+          </td>
+        </tr>
+
+      </tbody>
+    </table>
+
+    <!-- DESCRIPTION -->
+    <div class="descSection">
+      <div class="blockTitle">Description of Operations / Locations / Vehicles</div>
+      <div class="pad descBox"><%= operations?.description || "" %></div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footerGrid">
+    <div class="box footerBox">
+      <div class="blockTitle">Certificate Holder</div>
+      <div class="pad holderPad">
+        <div class="bold"><%= holder?.name || "" %></div>
+        <div><%= holder?.address1 || "" %></div>
+        <% if (holder?.address2) { %><div><%= holder.address2 %></div><% } %>
+        <div><%= holder?.city || "" %><% if (holder?.city) { %>, <% } %><%= holder?.state || "" %> <%= holder?.zip || "" %></div>
+      </div>
+    </div>
+
+    <div class="box footerBox">
+      <div class="blockTitle">Cancellation</div>
+      <div class="pad tiny cancelPad">
+        SHOULD ANY OF THE ABOVE DESCRIBED POLICIES BE CANCELLED BEFORE THE EXPIRATION DATE THEREOF, NOTICE WILL BE DELIVERED IN ACCORDANCE WITH THE POLICY PROVISIONS.
+      </div>
+      <div class="blockTitle">Authorized Representative</div>
+      <div class="signature"><span class="bold"><%= authorizedRep || "" %></span></div>
+    </div>
+  </div>
+
+  <div class="brandFooter tiny">
+    <div class="left">ACORD 25 (2016/03)</div>
+    <div class="mid">© 1988-2015 ACORD CORPORATION. All rights reserved.</div>
+    <div class="right">The ACORD name and logo are registered marks of ACORD</div>
+  </div>
+
+</div>
+</body>
+</html>
