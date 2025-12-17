@@ -239,7 +239,11 @@ import cron from 'node-cron';
 import { createClient } from '@supabase/supabase-js';
 
 // Initialize the Brain (Supabase)
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
+// Note: You need BOTH the URL and the Key here
+const supabase = createClient(
+  process.env.SUPABASE_URL, 
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+);
 
 console.log("🤖 Robot Scheduler: ONLINE and Listening...");
 
