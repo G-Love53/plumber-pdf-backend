@@ -235,8 +235,8 @@ APP.listen(PORT, () => console.log(`PDF service listening on ${PORT}`));
 // =====================================================
 // 🤖 THE ROBOT MANAGER (Automated Tasks)
 // =====================================================
-const cron = require('node-cron');
-const { createClient } = require('@supabase/supabase-js');
+import cron from 'node-cron';
+import { createClient } from '@supabase/supabase-js';
 
 // Initialize the Brain (Supabase)
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
