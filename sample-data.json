@@ -1,0 +1,126 @@
+{
+  "producer": {
+    "name": "Rick P Cline Agency Inc dba All Access Insurance LLC",
+    "address1": "9200 W Cross Dr Ste 515",
+    "city": "Littleton",
+    "state": "CO",
+    "zip": "80123"
+  },
+  "contact": {
+    "name": "Mark Rendon",
+    "phone": "",
+    "fax": "",
+    "email": "mark@allaccessins.com"
+  },
+  "insured": {
+    "name": "Sheryl Rendon",
+    "address1": "9944 W CANYON AVE",
+    "city": "LITTLETON",
+    "state": "CO",
+    "zip": "80127"
+  },
+  "certificate": {
+    "date": "11/25/2025",
+    "number": "",
+    "revision": ""
+  },
+  "insurers": {
+    "A": {
+      "name": "",
+      "naic": ""
+    },
+    "B": {
+      "name": "",
+      "naic": ""
+    },
+    "C": {
+      "name": "",
+      "naic": ""
+    },
+    "D": {
+      "name": "",
+      "naic": ""
+    },
+    "E": {
+      "name": "",
+      "naic": ""
+    },
+    "F": {
+      "name": "",
+      "naic": ""
+    }
+  },
+  "coverages": {
+    "cgl": {
+      "insr": "A",
+      "claimsMade": true,
+      "occur": false,
+      "perPolicy": true,
+      "perProject": false,
+      "perLoc": false,
+      "addlInsd": "Y",
+      "subrWvd": "N",
+      "policyNumber": "GL1234567",
+      "eff": "01/01/2025",
+      "exp": "01/01/2026",
+      "eachOcc": "1,000,000",
+      "dmgRented": "300,000",
+      "medExp": "5,000",
+      "perAdv": "1,000,000",
+      "genAgg": "2,000,000",
+      "prodAgg": "2,000,000"
+    },
+    "auto": {
+      "insr": "B",
+      "addlInsd": "",
+      "subrWvd": "",
+      "policyNumber": "AU1234567",
+      "eff": "01/01/2025",
+      "exp": "01/01/2026",
+      "csl": "1,000,000",
+      "biPerson": "",
+      "biAcc": "",
+      "pdAcc": ""
+    },
+    "umb": {
+      "insr": "",
+      "occur": true,
+      "claimsMade": false,
+      "ded": "",
+      "retention": "",
+      "addlInsd": "",
+      "subrWvd": "",
+      "policyNumber": "",
+      "eff": "",
+      "exp": "",
+      "eachOcc": "",
+      "agg": ""
+    },
+    "wc": {
+      "insr": "C",
+      "excludedYes": false,
+      "excludedNo": true,
+      "excludedNA": false,
+      "addlInsd": "",
+      "subrWvd": "",
+      "policyNumber": "WC1234567",
+      "eff": "01/01/2025",
+      "exp": "01/01/2026",
+      "statute": "OTH",
+      "elEachAcc": "1,000,000",
+      "elDiseaseEa": "1,000,000",
+      "elDiseasePol": "1,000,000"
+    }
+  },
+  "operations": {
+    "description": "Roofing operations and related work. Certificate holder is included as additional insured where required by written contract."
+  },
+  "holder": {
+    "name": "CERTIFICATE HOLDER NAME",
+    "address1": "123 MAIN ST",
+    "city": "DENVER",
+    "state": "CO",
+    "zip": "80202"
+  },
+  "authorizedRep": "Rick Cline"
+}
