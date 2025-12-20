@@ -4,9 +4,6 @@ import fs from "fs/promises";
 import { fileURLToPath } from "url";
 import { renderPdf } from "./pdf.js";
 import { sendWithGmail } from "./email.js";
-// Note: Ensure your enricher import matches the file name in your 'src' folder
-// For Roofer/Bar, you might need to comment this out or rename the enricher file to 'data-enricher.js' to make it standard.
-// import enrichFormData from '../mapping/data-enricher.js'; 
 
 // --- LEG 2 / LEG 3 IMPORTS ---
 import { processInbox } from "./quote-processor.js";
@@ -17,31 +14,31 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 /* ============================================================
-   🟢 SECTION 1: CONFIGURATION (EDIT THIS PER SEGMENT)
+   🟢 SECTION 1: CONFIGURATION (PLUMBER SEGMENT)
    ============================================================ */
 
 // 1. Map Frontend Names (from Netlify) to Actual Folder Names (in /Templates)
 const TEMPLATE_ALIASES = {
-  // Generic Name      : Actual Folder Name
-  "Accord125":         "PlumberAccord125", // <--- CHANGE THIS for Plumber/Bar
-  "Accord126":         "PlumberAccord126", // <--- CHANGE THIS
-  "Accord140":         "PlumberAccord140", // <--- CHANGE THIS
-  "WCForm":            "WCPlumberForm",       // <--- CHANGE THIS
-  "Supplemental":      "PlumberSupp",      // <--- CHANGE THIS
+  // Generic Name       : Actual Folder Name
+  "Accord125":         "PlumberAccord125", 
+  "Accord126":         "PlumberAccord126", 
+  "Accord140":         "PlumberAccord140", 
+  "WCForm":            "WCPlumberForm",     
+  "Supplemental":      "PlumberSupp",       
   
-  // Self-referencing aliases for safety (so code finds them even if full name is sent)
+  // Self-referencing aliases for safety
   "PlumberAccord125":  "PlumberAccord125",
   "PlumberAccord126":  "PlumberAccord126",
   "PlumberAccord140":  "PlumberAccord140",
 };
 
-// 2. Map Folder Names to Pretty Output Filenames (for the client email)
+// 2. Map Folder Names to Pretty Output Filenames
 const FILENAME_MAP = {
   "PlumberAccord125": "ACORD-125.pdf",
   "PlumberAccord126": "ACORD-126.pdf",
   "PlumberAccord140": "ACORD-140.pdf",
   "PlumberSupp":      "Supplemental-Application.pdf",
-  "WCPlumberForm":       "WC-Application.pdf"
+  "WCPlumberForm":    "WC-Application.pdf"
 };
 
 /* ============================================================
@@ -156,9 +153,7 @@ APP.post("/render-bundle", async (req, res) => {
 APP.post("/submit-quote", async (req, res) => {
   try {
     let { formData = {}, segments = [], email } = req.body || {};
-    // Optional: Run Enricher if you imported it
-    // formData = enrichFormData(formData);
-
+    
     const templates = (segments || []).map((name) => ({
       name, 
       filename: FILENAME_MAP[resolveTemplate(name)] || `${name}.pdf`,
@@ -232,6 +227,7 @@ APP.get("/bind-quote", async (req, res) => {
 
 const PORT = process.env.PORT || 8080;
 APP.listen(PORT, () => console.log(`PDF service listening on ${PORT}`));
+
 // =====================================================
 // 🤖 THE ROBOT MANAGER (Automated Tasks)
 // =====================================================
@@ -239,7 +235,6 @@ import cron from 'node-cron';
 import { createClient } from '@supabase/supabase-js';
 
 // Initialize the Brain (Supabase)
-// Note: You need BOTH the URL and the Key here
 const supabase = createClient(
   process.env.SUPABASE_URL, 
   process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -249,7 +244,6 @@ console.log("🤖 Robot Scheduler: ONLINE and Listening...");
 
 // --- TASK 1: THE COI WATCHER (Check every 2 minutes) ---
 cron.schedule('*/2 * * * *', async () => {
-  // 1. Ask Supabase: "Any pending requests?"
   const { data: requests, error } = await supabase
     .from('coi_requests')
     .select('*')
@@ -258,15 +252,12 @@ cron.schedule('*/2 * * * *', async () => {
   if (requests && requests.length > 0) {
     console.log(`🔎 Found ${requests.length} new COI requests.`);
     
-    // 2. Loop through each request
     for (const req of requests) {
       console.log(`Processing COI for: ${req.holder_name}`);
       
       try {
-        // [PLACEHOLDER] Simulate Success for now
         const mockPdfUrl = "https://example.com/demo-cert.pdf";
         
-        // 3. Mark as Complete in Supabase
         await supabase
           .from('coi_requests')
           .update({ 
@@ -283,19 +274,26 @@ cron.schedule('*/2 * * * *', async () => {
   }
 });
 
-// --- TASK 2: THE LIBRARIAN (Check every hour) ---
-cron.schedule('0 * * * *', async () => {
-  // 1. Ask Supabase: "Any unread documents?"
-  const { data: docs } = await supabase
+// --- TASK 2: THE LIBRARIAN (Check every 10 minutes) ---
+cron.schedule('*/10 * * * *', async () => {
+  // ✅ FIX: Ensure we only look for 'plumber' docs
+  console.log("📚 Librarian: Checking for unindexed 'plumber' docs...");
+
+  const { data: docs, error } = await supabase
     .from('carrier_resources')
     .select('*')
-    .eq('is_indexed', false);
+    .eq('is_indexed', false)
+    .eq('segment', 'plumber'); // <--- CRITICAL: Segment Locked to Plumber
+
+  if (error) {
+    console.error("❌ Librarian Error:", error.message);
+    return;
+  }
 
   if (docs && docs.length > 0) {
     console.log(`📚 Found ${docs.length} new documents to learn.`);
     
     for (const doc of docs) {
-      // 2. Mark them as 'Read' (Simulated)
       await supabase
         .from('carrier_resources')
         .update({ 
@@ -304,7 +302,9 @@ cron.schedule('0 * * * *', async () => {
         })
         .eq('id', doc.id);
         
-      console.log(`🧠 Learned: ${doc.document_title}`);
+      console.log(`🧠 Learned: ${doc.document_title || doc.file_name}`);
     }
+  } else {
+    console.log("📚 No unindexed documents found.");
   }
 });
