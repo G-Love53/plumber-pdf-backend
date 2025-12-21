@@ -4,6 +4,13 @@ import pdf from 'pdf-parse/lib/pdf-parse.js';
 import OpenAI from 'openai';
 import { randomUUID } from 'crypto';
 import { loadPrompts } from "./services/promptLoader.js"; 
+import { createClient } from '@supabase/supabase-js';
+
+// ✅ Initialize Supabase
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+);
 
 /* ---------------- Configuration ---------------- */
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY; 
@@ -12,12 +19,9 @@ if (OPENAI_API_KEY) {
     openai = new OpenAI({ apiKey: OPENAI_API_KEY });
 }
 
-// 👇 THE MAGIC: Defaults to 'bar' if you forget to set it in Render
+// 👇 SAFETY CHANGE: Defaults to 'plumber' for this project
 const SEGMENT = process.env.SEGMENT_NAME || 'plumber'; 
 
-/**
- * Processes incoming emails labeled 'CID/CarrierQuotes'.
- */
 export async function processInbox(authClient) {
   console.log(`Starting Quote Ingestion for Segment: [ ${SEGMENT} ]`);
   
@@ -33,7 +37,6 @@ export async function processInbox(authClient) {
   }
 
   const combinedSystemPrompt = `${globalSystem}\n\n${segmentPersona}`;
-
   const gmail = google.gmail({ version: 'v1', auth: authClient });
   const results = [];
 
@@ -63,9 +66,10 @@ export async function processInbox(authClient) {
       const pdfData = await pdf(pdfAttachment.content);
       const rawText = pdfData.text;
 
-      // 4. AI Analysis
+      // 4. Generate ID
       const quoteId = randomUUID();
-      
+
+      // 🧠 5. AI Analysis (BEFORE DB SAVE)
       const aiResponse = await openai.chat.completions.create({
         model: "gpt-4o",
         messages: [
@@ -77,7 +81,26 @@ export async function processInbox(authClient) {
 
       const aiContent = JSON.parse(aiResponse.choices[0].message.content);
 
-      // 5. Construct the Email (With Quality Gate)
+      // 🟢 6. DATA BRIDGE: Save Quote to Supabase
+      const { error: dbError } = await supabase
+        .from('quote_opportunities')
+        .insert({
+          id: quoteId,
+          segment: SEGMENT, // Uses the safe 'plumber' variable
+          carrier_name: aiContent.carrier,
+          premium_amount: aiContent.premium, 
+          extracted_data: aiContent,
+          status: 'pending_bind',
+          original_pdf_text: rawText
+        });
+
+      if (dbError) {
+        console.error("❌ CRITICAL: Failed to save quote to DB:", dbError);
+      } else {
+        console.log(`✅ Quote saved to DB: ${quoteId}`);
+      }
+
+      // 7. Construct the Email
       const hostname = process.env.RENDER_EXTERNAL_HOSTNAME || 'localhost:10000';
       const bindUrl = `https://${hostname}/bind-quote?id=${quoteId}`;
       const bindButton = `<a href="${bindUrl}" style="background-color: #10B981; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block; margin: 20px 0;">CLICK HERE TO BIND NOW</a>`;
@@ -103,7 +126,7 @@ export async function processInbox(authClient) {
         </div>
       `;
 
-      // 6. Save Draft
+      // 8. Save Draft
       const rawDraft = makeRawEmail({
         to: parsed.from.value[0].address,
         subject: `RE: ${parsed.subject} - Proposal Ready`,
@@ -116,7 +139,7 @@ export async function processInbox(authClient) {
         requestBody: { message: { threadId: message.threadId, raw: rawDraft } }
       });
 
-      // 7. Mark Processed
+      // 9. Mark Processed
       await gmail.users.messages.modify({
         userId: 'me',
         id: message.id,
