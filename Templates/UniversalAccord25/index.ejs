@@ -1,1 +1,166 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Certificate of Liability Insurance</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Dynamic Brand Colors based on Segment */
+        :root {
+            --primary-color: <%= data.segment === 'roofer' ? '#b91c1c' : (data.segment === 'plumber' ? '#0284c7' : '#000000') %>;
+        }
+    </style>
+</head>
+<body>
 
+    <div class="header">
+        <div class="agency-box" style="border-top: 5px solid var(--primary-color);">
+            <% if (data.segment === 'plumber') { %>
+                <img src="assets/logo-plumber.png" class="logo" alt="Agency Logo">
+                <h3>PLUMBER INSURANCE DIRECT</h3>
+                <p>123 Pipe Lane<br>Water City, USA 90210</p>
+                <p class="contact">📧 support@plumberinsurancedirect.com</p>
+
+            <% } else if (data.segment === 'roofer') { %>
+                <img src="assets/logo-roofer.png" class="logo" alt="Agency Logo">
+                <h3>ROOFING INSURANCE DIRECT</h3>
+                <p>456 Shingle St<br>Top City, USA 85001</p>
+                <p class="contact">📧 support@roofinginsurancedirect.com</p>
+
+            <% } else { %>
+                <img src="assets/logo-bar.png" class="logo" alt="Agency Logo">
+                <h3>BAR INSURANCE DIRECT</h3>
+                <p>789 Pint Ave<br>Brew City, USA 10001</p>
+                <p class="contact">📧 support@barinsurancedirect.com</p>
+            <% } %>
+        </div>
+
+        <div class="title-box">
+            <h1>CERTIFICATE OF LIABILITY INSURANCE</h1>
+            <div class="date-box">
+                <strong>DATE (MM/DD/YYYY)</strong><br>
+                <%= new Date().toLocaleDateString('en-US') %>
+            </div>
+            <p class="disclaimer">
+                THIS CERTIFICATE IS ISSUED AS A MATTER OF INFORMATION ONLY AND CONFERS NO RIGHTS UPON THE CERTIFICATE HOLDER.
+            </p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="box insured-box">
+            <strong>INSURED</strong>
+            <p>
+                <%= data.insured_name || "PENDING APPLICANT NAME" %><br>
+                <%= data.insured_address || "Address on File" %><br>
+                <%= data.insured_city_state_zip || "" %>
+            </p>
+        </div>
+        <div class="box contact-box">
+            <strong>CONTACT COMPLETED BY:</strong>
+            <p>
+                Authorized AI Representative<br>
+                Phone: (555) 010-9999
+            </p>
+        </div>
+    </div>
+
+    <div class="coverage-section">
+        <div class="section-title">COVERAGES</div>
+        <p style="font-size: 7pt; margin: 2px 0;">
+            THE POLICIES OF INSURANCE LISTED BELOW HAVE BEEN ISSUED TO THE INSURED NAMED ABOVE FOR THE POLICY PERIOD INDICATED.
+        </p>
+        
+        <table class="acord-table">
+            <thead>
+                <tr>
+                    <th style="width: 30%;">TYPE OF INSURANCE</th>
+                    <th style="width: 15%;">POLICY NUMBER</th>
+                    <th style="width: 15%;">EFF (MM/DD/YYYY)</th>
+                    <th style="width: 15%;">EXP (MM/DD/YYYY)</th>
+                    <th style="width: 25%;">LIMITS</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        <strong>X</strong> COMMERCIAL GENERAL LIABILITY<br>
+                        &nbsp;&nbsp; <strong>X</strong> OCCURRENCE
+                    </td>
+                    <td><%= data.policy_number || "TBD" %></td>
+                    <td><%= data.policy_eff_date || "TBD" %></td>
+                    <td><%= data.policy_exp_date || "TBD" %></td>
+                    <td>
+                        EACH OCCURRENCE: <strong>$1,000,000</strong><br>
+                        GEN AGGREGATE: <strong>$2,000,000</strong>
+                    </td>
+                </tr>
+                
+                <tr>
+                    <td>
+                        <strong>X</strong> AUTOMOBILE LIABILITY<br>
+                        &nbsp;&nbsp; <strong>X</strong> ANY AUTO
+                    </td>
+                    <td><%= data.policy_number || "TBD" %></td>
+                    <td><%= data.policy_eff_date || "TBD" %></td>
+                    <td><%= data.policy_exp_date || "TBD" %></td>
+                    <td>
+                        COMBINED SINGLE LIMIT: <strong>$1,000,000</strong>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>
+                        <strong>X</strong> WORKERS COMPENSATION<br>
+                        &nbsp;&nbsp; PER STATUTE
+                    </td>
+                    <td><%= data.wc_policy_number || "TBD" %></td>
+                    <td><%= data.policy_eff_date || "TBD" %></td>
+                    <td><%= data.policy_exp_date || "TBD" %></td>
+                    <td>
+                        E.L. EACH ACCIDENT: <strong>$1,000,000</strong>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="description-box">
+        <strong>DESCRIPTION OF OPERATIONS / LOCATIONS / VEHICLES (ACORD 101, Additional Remarks Schedule, may be attached if more space is required)</strong>
+        <br><br>
+        <p class="special-text">
+            <%= data.description_special_text || "Proof of insurance provided for general business operations." %>
+        </p>
+        
+        <% if (data.endorsements_needed && data.endorsements_needed.length > 0) { %>
+            <br>
+            <p style="font-weight:bold; margin-top:10px;">INCLUDES ENDORSEMENTS:</p>
+            <ul>
+                <% data.endorsements_needed.forEach(function(form) { %>
+                    <li>• <%= form %> attached.</li>
+                <% }); %>
+            </ul>
+        <% } %>
+    </div>
+
+    <div class="footer-row">
+        <div class="holder-box">
+            <strong>CERTIFICATE HOLDER</strong>
+            <p style="margin-top: 10px;">
+                <%= data.holder_name || "SAMPLE HOLDER" %><br>
+                <%= data.holder_address || "123 Main Street" %><br>
+                <%= data.holder_city_state_zip || "Anytown, USA" %>
+            </p>
+        </div>
+        
+        <div class="signature-box">
+            <p class="disclaimer-small">SHOULD ANY OF THE ABOVE DESCRIBED POLICIES BE CANCELLED BEFORE THE EXPIRATION DATE THEREOF, NOTICE WILL BE DELIVERED IN ACCORDANCE WITH THE POLICY PROVISIONS.</p>
+            <br>
+            <strong>AUTHORIZED REPRESENTATIVE</strong>
+            <br><br>
+            <img src="assets/sig-generic.png" style="height:45px; opacity: 0.8;">
+        </div>
+    </div>
+
+</body>
+</html>
