@@ -244,6 +244,7 @@ console.log("🤖 Robot Scheduler: ONLINE and Listening...");
 
 // --- TASK 1: THE COI WATCHER (Check every 2 minutes) ---
 cron.schedule('*/2 * * * *', async () => {
+  // 1. Ask Supabase: "Any pending requests?"
   const { data: requests, error } = await supabase
     .from('coi_requests')
     .select('*')
@@ -253,22 +254,74 @@ cron.schedule('*/2 * * * *', async () => {
     console.log(`🔎 Found ${requests.length} new COI requests.`);
     
     for (const req of requests) {
-      console.log(`Processing COI for: ${req.holder_name}`);
+      console.log(`Processing COI for: ${req.holder_name} (${req.segment})`);
       
       try {
-        const mockPdfUrl = "https://example.com/demo-cert.pdf";
+        // A. PREPARE THE DATA
+        const templateName = "UniversalAccord25";
+        const templateData = {
+            segment: req.segment, // 'plumber', 'roofer', or 'bar'
+            insured_name: "John Doe Plumbing Inc.", // Placeholder (later comes from DB)
+            insured_address: "123 Worker Rd, Trade City, USA",
+            holder_name: req.holder_name,
+            holder_address: req.holder_address,
+            description_special_text: req.description_special_text,
+            endorsements_needed: req.endorsements_needed || [],
+            policy_number: "GL-999888777",
+            policy_eff_date: "01/01/2025",
+            policy_exp_date: "01/01/2026"
+        };
+
+        // B. RENDER THE PDF
+        const htmlPath = path.join(TPL_DIR, templateName, "index.ejs");
+        const cssPath  = path.join(TPL_DIR, templateName, "styles.css");
         
+        // Check if template exists first
+        try {
+            await fs.access(htmlPath);
+        } catch (e) {
+            throw new Error(`Template ${templateName} missing!`);
+        }
+
+        const pdfBuffer = await renderPdf({ 
+            htmlPath, 
+            cssPath, 
+            data: templateData 
+        });
+
+        // C. EMAIL IT (Since we don't have S3 storage yet)
+        const recipient = req.user_email || process.env.GMAIL_USER;
+        console.log(`📧 Emailing PDF to: ${recipient}`);
+
+        await sendWithGmail({
+            to: [recipient],
+            subject: `Your Certificate of Insurance - ${req.holder_name}`,
+            html: `
+                <h3>Certificate Generated</h3>
+                <p>Attached is the COI you requested for <b>${req.holder_name}</b>.</p>
+                <p><b>Special Wording Included:</b><br><em>${req.description_special_text || "None"}</em></p>
+            `,
+            attachments: [{
+                filename: `COI-${req.holder_name.replace(/ /g,'_')}.pdf`,
+                content: pdfBuffer // Pass the raw buffer directly
+            }]
+        });
+        
+        // D. UPDATE DATABASE (Mark as Done)
         await supabase
           .from('coi_requests')
           .update({ 
             status: 'completed', 
-            generated_file_url: mockPdfUrl 
+            updated_at: new Date()
           })
           .eq('id', req.id);
           
-        console.log(`✅ Request ${req.id} marked COMPLETED.`);
+        console.log(`✅ Request ${req.id} COMPLETED.`);
+
       } catch (err) {
-        console.error("❌ Error processing COI:", err);
+        console.error(`❌ Error processing COI ${req.id}:`, err);
+        // Mark as failed so we don't loop forever
+        await supabase.from('coi_requests').update({ status: 'failed' }).eq('id', req.id);
       }
     }
   }
