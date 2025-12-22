@@ -161,6 +161,85 @@
             <img src="assets/sig-generic.png" style="height:45px; opacity: 0.8;">
         </div>
     </div>
+<% if (data.endorsements_needed && data.endorsements_needed.length > 0) { %>
+        
+        <% data.endorsements_needed.forEach(function(form) { %>
+            
+            <% if (form === 'CG2010') { %>
+                <div class="page-break"></div>
+                <div class="form-container">
+                    <img src="assets/form-cg2010.png" class="full-page-form">
+                    <div class="form-overlay" style="top: 45px; right: 40px;">
+                        <%= data.policy_number %>
+                    </div>
+                </div>
+            <% } %>
 
+            <% if (form === 'CG2037') { %>
+                <div class="page-break"></div>
+                <div class="form-container">
+                    <img src="assets/form-cg2037-0704_Page_1.png" class="full-page-form">
+                    <div class="form-overlay" style="top: 50px; left: 160px;">
+                        <%= data.policy_number %>
+                    </div>
+                </div>
+                <div class="page-break"></div>
+                <div class="form-container">
+                    <img src="assets/form-cg2037-0704_Page_2.png" class="full-page-form">
+                </div>
+            <% } %>
+
+            <% if (form === 'CG2001') { %>
+                <div class="page-break"></div>
+                <div class="form-container">
+                    <img src="assets/form-cg2001-0413.png" class="full-page-form">
+                    <div class="form-overlay" style="top: 50px; right: 40px;">
+                        <%= data.policy_number %>
+                    </div>
+                </div>
+            <% } %>
+
+            <% if (form === 'CG2011') { %>
+                <div class="page-break"></div>
+                <div class="form-container">
+                    <img src="assets/form-cg2011-0413.png" class="full-page-form">
+                    <div class="form-overlay" style="top: 50px; left: 150px;">
+                        <%= data.policy_number %>
+                    </div>
+                </div>
+            <% } %>
+
+            <% if (form === 'CG2026') { %>
+                <div class="page-break"></div>
+                <div class="form-container">
+                    <img src="assets/form-cg2026-0413.png" class="full-page-form">
+                    <div class="form-overlay" style="top: 50px; left: 150px;">
+                        <%= data.policy_number %>
+                    </div>
+                </div>
+            <% } %>
+
+            <% if (form === 'Waiver' || form === 'CG2404') { %>
+                <div class="page-break"></div>
+                <div class="form-container">
+                    <img src="assets/form-cg2404-0509.png" class="full-page-form">
+                    <div class="form-overlay" style="top: 50px; left: 150px;">
+                        <%= data.policy_number %>
+                    </div>
+                </div>
+            <% } %>
+
+            <% if (form === 'WC000302') { %>
+                <div class="page-break"></div>
+                <div class="form-container">
+                    <img src="assets/form-wc000302.png" class="full-page-form">
+                    <div class="form-overlay" style="top: 800px; left: 350px;">
+                        <%= data.wc_policy_number || data.policy_number %>
+                    </div>
+                </div>
+            <% } %>
+
+        <% }); %>
+    <% } %>
 </body>
 </html>
