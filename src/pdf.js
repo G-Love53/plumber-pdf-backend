@@ -7,8 +7,8 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-/* ---------- SVG Pre-Loader ---------- */
-const loadSvg = async (filename) => {
+/* ---------- Improved SVG Loader (Inline vs Data URI) ---------- */
+const loadSvg = async (filename, { asDataUri = false } = {}) => {
   const searchPaths = [
     path.join(__dirname, "../Templates/UniversalAccord25/assets"),
     path.join(__dirname, "../public/assets/forms"),
@@ -18,15 +18,27 @@ const loadSvg = async (filename) => {
     const testPath = path.join(dir, filename);
     try {
       await fs.access(testPath);
-      const fileBuffer = await fs.readFile(testPath);
-      // Return the full Data URI string
-      return `data:image/svg+xml;base64,${fileBuffer.toString('base64')}`;
+      const svgText = await fs.readFile(testPath, "utf8");
+
+      if (!asDataUri) {
+        // Return Raw SVG Code (Cleaner for Forms)
+        // Removes XML headers so it fits inside HTML without breaking it
+        return svgText
+          .replace(/<\?xml[\s\S]*?\?>/g, "")
+          .replace(/<!DOCTYPE[\s\S]*?>/g, "")
+          .trim();
+      }
+
+      // Return Base64 Data URI (Better for Logos/Images)
+      const b64 = Buffer.from(svgText, "utf8").toString("base64");
+      return `data:image/svg+xml;base64,${b64}`;
     } catch (e) {
-      // Keep searching
+      // Continue searching
     }
   }
+
   console.warn(`⚠️ Asset Missing: ${filename}`);
-  return ""; // Return empty string if missing
+  return ""; 
 };
 
 /* ---------- Main Renderer ---------- */
@@ -34,24 +46,23 @@ export async function renderPdf({ htmlPath, cssPath, data = {} }) {
   console.log("PDF Render - Starting...");
   
   // 1. PRE-LOAD ASSETS
-  // We only enable the files that currently exist in your assets folder.
   const assets = {
-    // Logos
-    logoPlumber: await loadSvg('logo-plumber.svg'),
+    // LOGOS: Keep as Data URI (Images)
+    logoPlumber: await loadSvg('logo-plumber.svg', { asDataUri: true }),
     
     // Commented out until you upload them:
-    // logoRoofer:  await loadSvg('logo-roofer.svg'), 
-    // logoBar:     await loadSvg('logo-bar.svg'),
-    // sigGeneric:  await loadSvg('sig-generic.svg'),
+    // logoRoofer:  await loadSvg('logo-roofer.svg', { asDataUri: true }), 
+    // logoBar:     await loadSvg('logo-bar.svg', { asDataUri: true }),
+    // sigGeneric:  await loadSvg('sig-generic.svg', { asDataUri: true }),
 
-    // Forms
-    'CG2010': await loadSvg('form-cg2010-0413.svg'),
+    // FORMS: Load as INLINE SVG (Raw Code)
+    'CG2010': await loadSvg('form-cg2010-0413.svg', { asDataUri: false }),
     
     // Commented out until uploaded:
-    // 'CG2037_1': await loadSvg('form-cg2037-0704_Page_1.svg'),
-    // 'CG2037_2': await loadSvg('form-cg2037-0704_Page_2.svg'),
-    // 'Waiver':   await loadSvg('form-cg2404-0509.svg'),
-    // 'WC':       await loadSvg('form-wc000302.svg')
+    // 'CG2037_1': await loadSvg('form-cg2037-0704_Page_1.svg', { asDataUri: false }),
+    // 'CG2037_2': await loadSvg('form-cg2037-0704_Page_2.svg', { asDataUri: false }),
+    // 'Waiver':   await loadSvg('form-cg2404-0509.svg', { asDataUri: false }),
+    // 'WC':       await loadSvg('form-wc000302.svg', { asDataUri: false })
   };
 
   console.log("✅ Assets Pre-Loaded. Generating HTML...");
@@ -69,7 +80,7 @@ export async function renderPdf({ htmlPath, cssPath, data = {} }) {
     data,
     formData: data,
     styles: cssStr,
-    assets: assets, // Passing the pre-loaded images
+    assets: assets, // Passing the pre-loaded content
     helpers: {
       formatDate: (d) => new Date(d).toLocaleDateString('en-US'),
     }
@@ -84,12 +95,16 @@ export async function renderPdf({ htmlPath, cssPath, data = {} }) {
   
   try {
     const page = await browser.newPage();
-    await page.setContent(html, { waitUntil: ["load", "networkidle0"], timeout: 60000 });
+    
+    // Wait for DOM + Fonts
+    await page.setContent(html, { waitUntil: "domcontentloaded", timeout: 60000 });
+    await page.evaluateHandle("document.fonts.ready");
     
     const pdfBuffer = await page.pdf({
       format: 'Letter',
       printBackground: true, 
-      margin: { top: '0.5in', right: '0.5in', bottom: '0.5in', left: '0.5in' }
+      // ZERO MARGINS (Crucial for full-page SVG forms)
+      margin: { top: "0in", right: "0in", bottom: "0in", left: "0in" }
     });
     
     console.log(`📄 PDF Generated Successfully! Size: ${pdfBuffer.length} bytes`);
