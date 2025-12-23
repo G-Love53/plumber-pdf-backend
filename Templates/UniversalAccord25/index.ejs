@@ -3,9 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <title>Certificate of Liability Insurance</title>
-    <link rel="stylesheet" href="styles.css">
     <style>
-        /* Dynamic Brand Colors based on Segment */
+        /* INJECT CSS */
+        <%- styles %>
+        
+        /* Segment Branding */
         :root {
             --primary-color: <%= data.segment === 'roofer' ? '#b91c1c' : (data.segment === 'plumber' ? '#0284c7' : '#000000') %>;
         }
@@ -20,13 +22,11 @@
                 <h3>PLUMBER INSURANCE DIRECT</h3>
                 <p>123 Pipe Lane<br>Water City, USA 90210</p>
                 <p class="contact">📧 support@plumberinsurancedirect.com</p>
-
             <% } else if (data.segment === 'roofer') { %>
                 <img src="assets/logo-roofer.png" class="logo" alt="Agency Logo">
                 <h3>ROOFING INSURANCE DIRECT</h3>
                 <p>456 Shingle St<br>Top City, USA 85001</p>
                 <p class="contact">📧 support@roofinginsurancedirect.com</p>
-
             <% } else { %>
                 <img src="assets/logo-bar.png" class="logo" alt="Agency Logo">
                 <h3>BAR INSURANCE DIRECT</h3>
@@ -58,18 +58,13 @@
         </div>
         <div class="box contact-box">
             <strong>CONTACT COMPLETED BY:</strong>
-            <p>
-                Authorized AI Representative<br>
-                Phone: (555) 010-9999
-            </p>
+            <p>Authorized AI Representative<br>Phone: (555) 010-9999</p>
         </div>
     </div>
 
     <div class="coverage-section">
         <div class="section-title">COVERAGES</div>
-        <p style="font-size: 7pt; margin: 2px 0;">
-            THE POLICIES OF INSURANCE LISTED BELOW HAVE BEEN ISSUED TO THE INSURED NAMED ABOVE FOR THE POLICY PERIOD INDICATED.
-        </p>
+        <p style="font-size: 7pt; margin: 2px 0;">THE POLICIES OF INSURANCE LISTED BELOW HAVE BEEN ISSUED TO THE INSURED NAMED ABOVE FOR THE POLICY PERIOD INDICATED.</p>
         
         <table class="acord-table">
             <thead>
@@ -83,58 +78,36 @@
             </thead>
             <tbody>
                 <tr>
-                    <td>
-                        <strong>X</strong> COMMERCIAL GENERAL LIABILITY<br>
-                        &nbsp;&nbsp; <strong>X</strong> OCCURRENCE
-                    </td>
+                    <td><strong>X</strong> COMMERCIAL GENERAL LIABILITY<br>&nbsp;&nbsp; <strong>X</strong> OCCURRENCE</td>
                     <td><%= data.policy_number || "TBD" %></td>
                     <td><%= data.policy_eff_date || "TBD" %></td>
                     <td><%= data.policy_exp_date || "TBD" %></td>
-                    <td>
-                        EACH OCCURRENCE: <strong>$1,000,000</strong><br>
-                        GEN AGGREGATE: <strong>$2,000,000</strong>
-                    </td>
+                    <td>EACH OCCURRENCE: <strong>$1,000,000</strong><br>GEN AGGREGATE: <strong>$2,000,000</strong></td>
                 </tr>
-                
                 <tr>
-                    <td>
-                        <strong>X</strong> AUTOMOBILE LIABILITY<br>
-                        &nbsp;&nbsp; <strong>X</strong> ANY AUTO
-                    </td>
+                    <td><strong>X</strong> AUTOMOBILE LIABILITY<br>&nbsp;&nbsp; <strong>X</strong> ANY AUTO</td>
                     <td><%= data.policy_number || "TBD" %></td>
                     <td><%= data.policy_eff_date || "TBD" %></td>
                     <td><%= data.policy_exp_date || "TBD" %></td>
-                    <td>
-                        COMBINED SINGLE LIMIT: <strong>$1,000,000</strong>
-                    </td>
+                    <td>COMBINED SINGLE LIMIT: <strong>$1,000,000</strong></td>
                 </tr>
-
                 <tr>
-                    <td>
-                        <strong>X</strong> WORKERS COMPENSATION<br>
-                        &nbsp;&nbsp; PER STATUTE
-                    </td>
+                    <td><strong>X</strong> WORKERS COMPENSATION<br>&nbsp;&nbsp; PER STATUTE</td>
                     <td><%= data.wc_policy_number || "TBD" %></td>
                     <td><%= data.policy_eff_date || "TBD" %></td>
                     <td><%= data.policy_exp_date || "TBD" %></td>
-                    <td>
-                        E.L. EACH ACCIDENT: <strong>$1,000,000</strong>
-                    </td>
+                    <td>E.L. EACH ACCIDENT: <strong>$1,000,000</strong></td>
                 </tr>
             </tbody>
         </table>
     </div>
 
     <div class="description-box">
-        <strong>DESCRIPTION OF OPERATIONS / LOCATIONS / VEHICLES (ACORD 101, Additional Remarks Schedule, may be attached if more space is required)</strong>
-        <br><br>
-        <p class="special-text">
-            <%= data.description_special_text || "Proof of insurance provided for general business operations." %>
-        </p>
+        <strong>DESCRIPTION OF OPERATIONS / LOCATIONS / VEHICLES</strong><br><br>
+        <p class="special-text"><%= data.description_special_text || "Proof of insurance provided for general business operations." %></p>
         
         <% if (data.endorsements_needed && data.endorsements_needed.length > 0) { %>
-            <br>
-            <p style="font-weight:bold; margin-top:10px;">INCLUDES ENDORSEMENTS:</p>
+            <br><p style="font-weight:bold; margin-top:10px;">INCLUDES ENDORSEMENTS:</p>
             <ul>
                 <% data.endorsements_needed.forEach(function(form) { %>
                     <li>• <%= form %> attached.</li>
@@ -152,23 +125,20 @@
                 <%= data.holder_city_state_zip || "Anytown, USA" %>
             </p>
         </div>
-        
         <div class="signature-box">
-            <p class="disclaimer-small">SHOULD ANY OF THE ABOVE DESCRIBED POLICIES BE CANCELLED BEFORE THE EXPIRATION DATE THEREOF, NOTICE WILL BE DELIVERED IN ACCORDANCE WITH THE POLICY PROVISIONS.</p>
-            <br>
-            <strong>AUTHORIZED REPRESENTATIVE</strong>
-            <br><br>
+            <p class="disclaimer-small">SHOULD ANY OF THE ABOVE DESCRIBED POLICIES BE CANCELLED...</p>
+            <br><strong>AUTHORIZED REPRESENTATIVE</strong><br><br>
             <img src="assets/sig-generic.png" style="height:45px; opacity: 0.8;">
         </div>
     </div>
-<% if (data.endorsements_needed && data.endorsements_needed.length > 0) { %>
-        
-        <% data.endorsements_needed.forEach(function(form) { %>
+
+    <% if (data.endorsements_needed && data.endorsements_needed.length > 0) { %>
+        <% for (let form of data.endorsements_needed) { %>
             
             <% if (form === 'CG2010') { %>
                 <div class="page-break"></div>
                 <div class="form-container">
-                    <img src="assets/form-cg2010.png" class="full-page-form">
+                    <div class="form-bg" style="background-image: url('<%= await helpers.loadSvg('form-cg2010.svg') %>');"></div>
                     <div class="form-overlay" style="top: 45px; right: 40px;">
                         <%= data.policy_number %>
                     </div>
@@ -178,21 +148,21 @@
             <% if (form === 'CG2037') { %>
                 <div class="page-break"></div>
                 <div class="form-container">
-                    <img src="assets/form-cg2037-0704_Page_1.png" class="full-page-form">
+                    <div class="form-bg" style="background-image: url('<%= await helpers.loadSvg('form-cg2037-0704_Page_1.svg') %>');"></div>
                     <div class="form-overlay" style="top: 50px; left: 160px;">
                         <%= data.policy_number %>
                     </div>
                 </div>
                 <div class="page-break"></div>
                 <div class="form-container">
-                    <img src="assets/form-cg2037-0704_Page_2.png" class="full-page-form">
+                     <div class="form-bg" style="background-image: url('<%= await helpers.loadSvg('form-cg2037-0704_Page_2.svg') %>');"></div>
                 </div>
             <% } %>
 
             <% if (form === 'CG2001') { %>
                 <div class="page-break"></div>
                 <div class="form-container">
-                    <img src="assets/form-cg2001-0413.png" class="full-page-form">
+                    <div class="form-bg" style="background-image: url('<%= await helpers.loadSvg('form-cg2001-0413.svg') %>');"></div>
                     <div class="form-overlay" style="top: 50px; right: 40px;">
                         <%= data.policy_number %>
                     </div>
@@ -202,17 +172,17 @@
             <% if (form === 'CG2011') { %>
                 <div class="page-break"></div>
                 <div class="form-container">
-                    <img src="assets/form-cg2011-0413.png" class="full-page-form">
+                    <div class="form-bg" style="background-image: url('<%= await helpers.loadSvg('form-cg2011-0413.svg') %>');"></div>
                     <div class="form-overlay" style="top: 50px; left: 150px;">
                         <%= data.policy_number %>
                     </div>
                 </div>
             <% } %>
-
+            
             <% if (form === 'CG2026') { %>
                 <div class="page-break"></div>
                 <div class="form-container">
-                    <img src="assets/form-cg2026-0413.png" class="full-page-form">
+                    <div class="form-bg" style="background-image: url('<%= await helpers.loadSvg('form-cg2026-0413.svg') %>');"></div>
                     <div class="form-overlay" style="top: 50px; left: 150px;">
                         <%= data.policy_number %>
                     </div>
@@ -222,7 +192,7 @@
             <% if (form === 'Waiver' || form === 'CG2404') { %>
                 <div class="page-break"></div>
                 <div class="form-container">
-                    <img src="assets/form-cg2404-0509.png" class="full-page-form">
+                    <div class="form-bg" style="background-image: url('<%= await helpers.loadSvg('form-cg2404-0509.svg') %>');"></div>
                     <div class="form-overlay" style="top: 50px; left: 150px;">
                         <%= data.policy_number %>
                     </div>
@@ -232,14 +202,14 @@
             <% if (form === 'WC000302') { %>
                 <div class="page-break"></div>
                 <div class="form-container">
-                    <img src="assets/form-wc000302.png" class="full-page-form">
+                     <div class="form-bg" style="background-image: url('<%= await helpers.loadSvg('form-wc000302.svg') %>');"></div>
                     <div class="form-overlay" style="top: 800px; left: 350px;">
                         <%= data.wc_policy_number || data.policy_number %>
                     </div>
                 </div>
             <% } %>
 
-        <% }); %>
+        <% } %>
     <% } %>
 </body>
 </html>
