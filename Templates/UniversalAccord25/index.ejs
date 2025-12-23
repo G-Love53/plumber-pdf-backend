@@ -18,7 +18,7 @@
     <div class="header">
         <div class="agency-box" style="border-top: 5px solid var(--primary-color);">
             <% if (data.segment === 'plumber') { %>
-                <img src="assets/logo-plumber.png" class="logo" alt="Agency Logo">
+                <img src="<%- assets.logoPlumber %>" class="logo" alt="Agency Logo">
                 <h3>PLUMBER INSURANCE DIRECT</h3>
                 <p>123 Pipe Lane<br>Water City, USA 90210</p>
                 <p class="contact">📧 support@plumberinsurancedirect.com</p>
@@ -126,9 +126,8 @@
             </p>
         </div>
         <div class="signature-box">
-            <p class="disclaimer-small">SHOULD ANY OF THE ABOVE DESCRIBED POLICIES BE CANCELLED...</p>
-            <br><strong>AUTHORIZED REPRESENTATIVE</strong><br><br>
-            <img src="assets/sig-generic.png" style="height:45px; opacity: 0.8;">
+            <br><br>
+            <img src="<%- assets.sigGeneric %>" style="height:45px; opacity: 0.8;">
         </div>
     </div>
 
