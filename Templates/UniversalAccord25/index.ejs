@@ -137,33 +137,17 @@
             <% if (form === 'CG2010') { %>
                 <div class="page-break"></div>
                 <div class="form-container">
-                    <img src="<%- assets['CG2010'] %>" class="form-bg-img">
+                    <div class="form-bg-svg">
+                        <%- assets['CG2010'] %>
+                    </div>
+                    
                     <div class="form-overlay" style="top: 45px; right: 40px;">
                         <%= data.policy_number %>
                     </div>
                 </div>
             <% } %>
 
-            <% if (form === 'CG2037') { %>
-                <% if (assets['CG2037_1']) { %>
-                    <div class="page-break"></div>
-                    <div class="form-container">
-                        <img src="<%- assets['CG2037_1'] %>" class="form-bg-img">
-                        <div class="form-overlay" style="top: 50px; left: 160px;">
-                            <%= data.policy_number %>
-                        </div>
-                    </div>
-                    <div class="page-break"></div>
-                    <div class="form-container">
-                         <img src="<%- assets['CG2037_2'] %>" class="form-bg-img">
-                    </div>
-                <% } else { %>
-                    <p style="page-break-before: always; color: red;">ERROR: CG2037 SVG Missing</p>
-                <% } %>
-            <% } %>
-
             <% } %>
     <% } %>
-
 </body>
 </html>
