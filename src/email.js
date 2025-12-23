@@ -27,10 +27,16 @@ export const sendWithGmail = async ({ to, subject, html, attachments }) => {
       // 2. Ensure it is a valid Buffer
       const safeBuf = Buffer.isBuffer(raw) ? raw : Buffer.from(raw || "");
 
-      // 3. Safety Check: Log if the buffer is empty (helps debugging)
-      if (safeBuf.length < 100) {
-          console.warn(`⚠️ Warning: Attachment ${att.filename} is empty or too small (${safeBuf.length} bytes).`);
-      }
+      // 3. HARD PROOF CHECKS (adds certainty)
+const magic = safeBuf.slice(0, 5).toString("utf8");
+if (magic !== "%PDF-") {
+  console.warn(`⚠️ Attachment ${att.filename} is NOT a valid PDF. Magic=${magic}`);
+}
+
+if (safeBuf.length < 100) {
+  console.warn(`⚠️ Warning: Attachment ${att.filename} is empty or too small (${safeBuf.length} bytes).`);
+}
+
 
       // 4. Return the format Nodemailer expects
       return {
