@@ -33,24 +33,25 @@ const loadSvg = async (filename) => {
 export async function renderPdf({ htmlPath, cssPath, data = {} }) {
   console.log("PDF Render - Starting...");
   
-  // 1. PRE-LOAD ASSETS (The New Stability Layer)
-  // We load these BEFORE asking Puppeteer to start.
-  // This ensures the data is ready and valid.
+  // 1. PRE-LOAD ASSETS
+  // We only enable the files that currently exist in your assets folder.
   const assets = {
     // Logos
     logoPlumber: await loadSvg('logo-plumber.svg'),
-    logoRoofer:  await loadSvg('logo-roofer.svg'),
-    logoBar:     await loadSvg('logo-bar.svg'),
-    sigGeneric:  await loadSvg('sig-generic.svg'),
-    // Forms - Map specific filenames to keys
+    
+    // Commented out until you upload them:
+    // logoRoofer:  await loadSvg('logo-roofer.svg'), 
+    // logoBar:     await loadSvg('logo-bar.svg'),
+    // sigGeneric:  await loadSvg('sig-generic.svg'),
+
+    // Forms
     'CG2010': await loadSvg('form-cg2010-0413.svg'),
-    'CG2037_1': await loadSvg('form-cg2037-0704_Page_1.svg'),
-    'CG2037_2': await loadSvg('form-cg2037-0704_Page_2.svg'),
-    'CG2001': await loadSvg('form-cg2001-0413.svg'),
-    'CG2011': await loadSvg('form-cg2011-0413.svg'),
-    'CG2026': await loadSvg('form-cg2026-0413.svg'),
-    'Waiver': await loadSvg('form-cg2404-0509.svg'),
-    'WC':     await loadSvg('form-wc000302.svg')
+    
+    // Commented out until uploaded:
+    // 'CG2037_1': await loadSvg('form-cg2037-0704_Page_1.svg'),
+    // 'CG2037_2': await loadSvg('form-cg2037-0704_Page_2.svg'),
+    // 'Waiver':   await loadSvg('form-cg2404-0509.svg'),
+    // 'WC':       await loadSvg('form-wc000302.svg')
   };
 
   console.log("✅ Assets Pre-Loaded. Generating HTML...");
@@ -63,15 +64,13 @@ export async function renderPdf({ htmlPath, cssPath, data = {} }) {
   } catch (err) { console.error("CSS Load Error:", err.message); }
 
   // 3. Render EJS
-  // We pass 'assets' directly to the template
   const html = await ejs.render(templateStr, {
     ...data,
     data,
     formData: data,
     styles: cssStr,
-    assets: assets, // <--- The Golden Ticket
+    assets: assets, // Passing the pre-loaded images
     helpers: {
-      // Basic formatters only
       formatDate: (d) => new Date(d).toLocaleDateString('en-US'),
     }
   }, { async: true });
@@ -85,23 +84,15 @@ export async function renderPdf({ htmlPath, cssPath, data = {} }) {
   
   try {
     const page = await browser.newPage();
+    await page.setContent(html, { waitUntil: ["load", "networkidle0"], timeout: 60000 });
     
-    // Set Content
-    await page.setContent(html, { 
-        waitUntil: ["load", "networkidle0"], 
-        timeout: 60000 
-    });
-
-    // Print
     const pdfBuffer = await page.pdf({
       format: 'Letter',
       printBackground: true, 
       margin: { top: '0.5in', right: '0.5in', bottom: '0.5in', left: '0.5in' }
     });
     
-    // 5. CRITICAL LOG: Verify output size
     console.log(`📄 PDF Generated Successfully! Size: ${pdfBuffer.length} bytes`);
-    
     return pdfBuffer;
   } finally {
     await browser.close();
