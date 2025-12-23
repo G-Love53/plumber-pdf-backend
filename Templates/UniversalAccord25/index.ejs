@@ -137,7 +137,7 @@
             <% if (form === 'CG2010') { %>
                 <div class="page-break"></div>
                 <div class="form-container">
-                    <img src="<%= await helpers.loadSvg('form-cg2010-0413.svg') %>" class="form-bg-img">
+                    <img src="<%- assets['CG2010'] %>" class="form-bg-img">
                     <div class="form-overlay" style="top: 45px; right: 40px;">
                         <%= data.policy_number %>
                     </div>
@@ -145,70 +145,25 @@
             <% } %>
 
             <% if (form === 'CG2037') { %>
-                <div class="page-break"></div>
-                <div class="form-container">
-                    <img src="<%= await helpers.loadSvg('form-cg2037-0704_Page_1.svg') %>" class="form-bg-img">
-                    <div class="form-overlay" style="top: 50px; left: 160px;">
-                        <%= data.policy_number %>
+                <% if (assets['CG2037_1']) { %>
+                    <div class="page-break"></div>
+                    <div class="form-container">
+                        <img src="<%- assets['CG2037_1'] %>" class="form-bg-img">
+                        <div class="form-overlay" style="top: 50px; left: 160px;">
+                            <%= data.policy_number %>
+                        </div>
                     </div>
-                </div>
-                <div class="page-break"></div>
-                <div class="form-container">
-                     <img src="<%= await helpers.loadSvg('form-cg2037-0704_Page_2.svg') %>" class="form-bg-img">
-                </div>
+                    <div class="page-break"></div>
+                    <div class="form-container">
+                         <img src="<%- assets['CG2037_2'] %>" class="form-bg-img">
+                    </div>
+                <% } else { %>
+                    <p style="page-break-before: always; color: red;">ERROR: CG2037 SVG Missing</p>
+                <% } %>
             <% } %>
 
-            <% if (form === 'CG2001') { %>
-                <div class="page-break"></div>
-                <div class="form-container">
-                    <img src="<%= await helpers.loadSvg('form-cg2001-0413.svg') %>" class="form-bg-img">
-                    <div class="form-overlay" style="top: 50px; right: 40px;">
-                        <%= data.policy_number %>
-                    </div>
-                </div>
             <% } %>
-
-            <% if (form === 'CG2011') { %>
-                <div class="page-break"></div>
-                <div class="form-container">
-                    <img src="<%= await helpers.loadSvg('form-cg2011-0413.svg') %>" class="form-bg-img">
-                    <div class="form-overlay" style="top: 50px; left: 150px;">
-                        <%= data.policy_number %>
-                    </div>
-                </div>
-            <% } %>
-            
-            <% if (form === 'CG2026') { %>
-                <div class="page-break"></div>
-                <div class="form-container">
-                    <img src="<%= await helpers.loadSvg('form-cg2026-0413.svg') %>" class="form-bg-img">
-                    <div class="form-overlay" style="top: 50px; left: 150px;">
-                        <%= data.policy_number %>
-                    </div>
-                </div>
-            <% } %>
-
-            <% if (form === 'Waiver' || form === 'CG2404') { %>
-                <div class="page-break"></div>
-                <div class="form-container">
-                    <img src="<%= await helpers.loadSvg('form-cg2404-0509.svg') %>" class="form-bg-img">
-                    <div class="form-overlay" style="top: 50px; left: 150px;">
-                        <%= data.policy_number %>
-                    </div>
-                </div>
-            <% } %>
-
-            <% if (form === 'WC000302') { %>
-                <div class="page-break"></div>
-                <div class="form-container">
-                     <img src="<%= await helpers.loadSvg('form-wc000302.svg') %>" class="form-bg-img">
-                    <div class="form-overlay" style="top: 800px; left: 350px;">
-                        <%= data.wc_policy_number || data.policy_number %>
-                    </div>
-                </div>
-            <% } %>
-
-        <% } %>
     <% } %>
+
 </body>
 </html>
