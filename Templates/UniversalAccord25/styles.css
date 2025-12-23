@@ -1,7 +1,8 @@
 /* =========================================
    1. GLOBAL & RESET
    ========================================= */
-@page @page { size: letter; margin: 0; }
+/* Fix: Removed double '@page' typo */
+@page { size: letter; margin: 0; } 
 
 body {
     font-family: Arial, Helvetica, sans-serif;
@@ -9,6 +10,14 @@ body {
     margin: 0;
     padding: 0;
     -webkit-print-color-adjust: exact;
+}
+
+/* NEW: Wrapper for the Certificate Page (Page 1) */
+/* Since global margins are 0, we add padding here manually */
+.cert-page {
+    width: 100%;
+    padding: 0.5in; 
+    box-sizing: border-box;
 }
 
 /* =========================================
@@ -41,7 +50,6 @@ body {
 /* =========================================
    7. SVG ENDORSEMENT STYLING (INLINE FIX)
    ========================================= */
-
 .page-break { 
     page-break-before: always; 
     height: 0; 
@@ -49,22 +57,21 @@ body {
 
 .form-container {
     position: relative;
-    width: 8.5in;  /* Exact Letter Width */
-    height: 11in;  /* Exact Letter Height */
+    width: 8.5in;  
+    height: 11in;  
     overflow: hidden;
     page-break-inside: avoid;
+    padding: 0;
+    margin: 0;
 }
 
 .form-bg-svg {
     position: absolute;
-    left: 0; 
-    top: 0;
-    width: 8.5in;
-    height: 11in;
+    left: 0; top: 0;
+    width: 8.5in; height: 11in;
     z-index: 1;
 }
 
-/* Force the inline SVG to stretch perfectly */
 .form-bg-svg svg {
     width: 100%;
     height: 100%;
