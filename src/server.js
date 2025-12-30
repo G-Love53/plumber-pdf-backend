@@ -4,7 +4,9 @@ import fs from "fs/promises";
 import { fileURLToPath } from "url";
 import { renderPdf } from "./pdf.js";
 import { sendWithGmail } from "./email.js";
-import { generateDocument } from "./generators/index.js";
+import factory from "./generators/index.js";
+const { generateDocument } = factory;
+
 
 
 // --- LEG 2 / LEG 3 IMPORTS ---
