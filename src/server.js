@@ -4,8 +4,10 @@ import fs from "fs/promises";
 import { fileURLToPath } from "url";
 import { renderPdf } from "./pdf.js";
 import { sendWithGmail } from "./email.js";
-import factory from "./generators/index.js";
-const { generateDocument } = factory;
+import { createRequire } from "module";
+const require = createRequire(import.meta.url);
+
+const { generateDocument } = require("./generators");
 
 
 
