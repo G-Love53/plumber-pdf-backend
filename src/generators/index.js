@@ -1,12 +1,21 @@
-// src/generators/index.js
-const forms = require("../config/forms.json");
-const { getSegmentAssets } = require("../utils/assets");
-const { loadGlobalCss } = require("../utils/css");
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 
-const svgEngine = require("./svg-engine");
-const htmlEngine = require("./html-engine");
+import { getSegmentAssets } from "../utils/assets.js";
+import { loadGlobalCss } from "../utils/css.js";
 
-async function generateDocument(requestRow) {
+import { generate as svgGenerate } from "./svg-engine.js";
+import { generate as htmlGenerate } from "./html-engine.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Load forms.json safely (no JSON import headaches)
+const formsPath = path.join(__dirname, "../config/forms.json");
+const forms = JSON.parse(fs.readFileSync(formsPath, "utf8"));
+
+export async function generateDocument(requestRow) {
   const formId = requestRow.form_id || "acord25_v1";
   const formConfig = forms[formId];
 
@@ -19,22 +28,21 @@ async function generateDocument(requestRow) {
     requestRow,
     assets,
     templatePath: formConfig.templatePath,
-    globalCss: null,
+    globalCss: null
   };
 
   console.log(
     `[Factory] Processing ${requestRow.id} (${formId}) seg=${requestRow.segment || "default"} engine=${formConfig.engine}`
   );
 
-  if (formConfig.engine === "svg") return svgEngine.generate(jobData);
+  if (formConfig.engine === "svg") {
+    return await svgGenerate(jobData);
+  }
 
   if (formConfig.engine === "html") {
     jobData.globalCss = loadGlobalCss();
-    return htmlEngine.generate(jobData);
+    return await htmlGenerate(jobData);
   }
 
   throw new Error(`Unknown engine type: ${formConfig.engine}`);
 }
-
-module.exports = { generateDocument };
-
