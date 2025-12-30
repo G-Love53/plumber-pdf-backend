@@ -1,27 +1,37 @@
-const fs = require('fs');
-const path = require('path');
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 
-const loadBase64 = (p) => {
-  if (!fs.existsSync(p)) return null;
-  const ext = path.extname(p).toLowerCase();
-  const data = fs.readFileSync(p).toString('base64');
-  if (ext === '.png') return `data:image/png;base64,${data}`;
-  if (ext === '.svg') return `data:image/svg+xml;base64,${data}`;
-  return null;
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const loadAssetBase64 = (fullPath) => {
+  try {
+    if (fs.existsSync(fullPath)) {
+      const ext = path.extname(fullPath).toLowerCase();
+      const base64 = fs.readFileSync(fullPath).toString("base64");
+      if (ext === ".svg") return `data:image/svg+xml;base64,${base64}`;
+      if (ext === ".png") return `data:image/png;base64,${base64}`;
+    }
+    return null;
+  } catch (err) {
+    console.warn(`Asset load warning: ${fullPath} - ${err.message}`);
+    return null;
+  }
 };
 
-const getSegmentAssets = (segment = 'default') => {
-  const root = path.join(__dirname, '../../templates/assets/segments');
-  const seg = segment.toLowerCase();
-  return {
-    logo:
-      loadBase64(path.join(root, seg, 'logo.png')) ||
-      loadBase64(path.join(root, 'default', 'logo.png')),
-    signature:
-      loadBase64(path.join(root, seg, 'signature.svg')) ||
-      loadBase64(path.join(root, 'default', 'signature.svg'))
+export function getSegmentAssets(segment) {
+  const targetSegment = segment ? segment.toLowerCase().trim() : "default";
+  const assetsRoot = path.join(__dirname, "../../templates/assets/segments");
+
+  const resolveAsset = (filename) => {
+    const specificPath = path.join(assetsRoot, targetSegment, filename);
+    const defaultPath = path.join(assetsRoot, "default", filename);
+    return loadAssetBase64(specificPath) || loadAssetBase64(defaultPath);
   };
-};
 
-module.exports = { getSegmentAssets };
-
+  return {
+    logo: resolveAsset("logo.png") || resolveAsset("logo.svg"),
+    signature: resolveAsset("signature.svg")
+  };
+}
