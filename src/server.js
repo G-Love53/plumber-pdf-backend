@@ -4,6 +4,8 @@ import fs from "fs/promises";
 import { fileURLToPath } from "url";
 import { renderPdf } from "./pdf.js";
 import { sendWithGmail } from "./email.js";
+import { generateDocument } from "./generators/index.js";
+
 
 // --- LEG 2 / LEG 3 IMPORTS ---
 import { processInbox } from "./quote-processor.js";
@@ -283,11 +285,12 @@ cron.schedule('*/2 * * * *', async () => {
             throw new Error(`Template ${templateName} missing!`);
         }
 
-        const pdfBuffer = await renderPdf({ 
-            htmlPath, 
-            cssPath, 
-            data: templateData 
+        const { buffer: pdfBuffer, meta } = await generateDocument({
+        ...req,
+        form_id: req.form_id || "acord25_v1"
         });
+
+
 
         // C. EMAIL IT (Since we don't have S3 storage yet)
         const recipient = req.user_email || process.env.GMAIL_USER;
@@ -302,8 +305,12 @@ cron.schedule('*/2 * * * *', async () => {
                 <p><b>Special Wording Included:</b><br><em>${req.description_special_text || "None"}</em></p>
             `,
             attachments: [{
-                filename: `COI-${req.holder_name.replace(/ /g,'_')}.pdf`,
-                content: pdfBuffer // Pass the raw buffer directly
+                filename:
+  meta?.filename ||
+  `COI-${String(req.holder_name || "Holder")
+    .replace(/[^a-z0-9]/gi, "_")
+    .substring(0, 50)}.pdf`,
+
             }]
         });
         
