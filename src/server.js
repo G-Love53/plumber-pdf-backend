@@ -258,6 +258,25 @@ cron.schedule('*/2 * * * *', async () => {
     console.error("❌ DB Error:", error);
     return;
   }
+   // DIAG 1: count rows and show distinct statuses
+const { data: statusCounts, error: statusErr } = await supabase
+  .from('coi_requests')
+  .select('status', { count: 'exact' });
+
+console.log('[Robot][DIAG] select(status) error:', statusErr || 'none');
+console.log('[Robot][DIAG] sample status values:', statusCounts?.slice(0, 10));
+
+// DIAG 2: fetch the specific stuck row by ID
+const stuckId = '8e428...'; // <-- paste full UUID from Supabase
+const { data: stuckRow, error: stuckErr } = await supabase
+  .from('coi_requests')
+  .select('id,status,segment,created_at')
+  .eq('id', stuckId)
+  .maybeSingle();
+
+console.log('[Robot][DIAG] stuck row lookup error:', stuckErr || 'none');
+console.log('[Robot][DIAG] stuck row:', stuckRow || 'NOT FOUND');
+
 
   // LOG 1: PROOF THE ROBOT IS CHECKING
   console.log(`[Robot] Poll complete. Pending rows found: ${requests ? requests.length : 0}`);
