@@ -253,7 +253,12 @@ cron.schedule('*/2 * * * *', async () => {
     .from('coi_requests')
     .select('*')
     .like('status', 'pending%')
-
+console.log(`[COI] Pending rows found: ${requests?.length || 0}`);
+if (requests?.length) {
+  console.log(
+    `[COI] First pending id: ${requests[0].id} status="${requests[0].status}"`
+  );
+}
 
   if (error) {
     console.error("❌ DB Error:", error);
