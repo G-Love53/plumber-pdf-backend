@@ -253,47 +253,40 @@ cron.schedule('*/2 * * * *', async () => {
     .select('*')
     .eq('status', 'pending');
 
+  if (error) {
+    console.error("❌ DB Error:", error);
+    return;
+  }
+
+  // LOG 1: PROOF THE ROBOT IS CHECKING
+  console.log(`[Robot] Poll complete. Pending rows found: ${requests ? requests.length : 0}`);
+
   if (requests && requests.length > 0) {
-    console.log(`🔎 Found ${requests.length} new COI requests.`);
     
     for (const req of requests) {
-      console.log(`Processing COI for: ${req.holder_name} (${req.segment})`);
+      // LOG 2: PROOF THE ROBOT IS ENGAGING A SPECIFIC ROW
+      console.log(`[Robot] Processing Row ID: ${req.id} | Segment: ${req.segment}`);
       
       try {
         // A. PREPARE THE DATA
         const templateName = "UniversalAccord25";
-        const templateData = {
-            segment: req.segment, // 'plumber', 'roofer', or 'bar'
-            insured_name: "John Doe Plumbing Inc.", // Placeholder (later comes from DB)
-            insured_address: "123 Worker Rd, Trade City, USA",
-            holder_name: req.holder_name,
-            holder_address: req.holder_address,
-            description_special_text: req.description_special_text,
-            endorsements_needed: req.endorsements_needed || [],
-            policy_number: "GL-999888777",
-            policy_eff_date: "01/01/2025",
-            policy_exp_date: "01/01/2026"
-        };
-
+        
         // B. RENDER THE PDF
         const htmlPath = path.join(TPL_DIR, templateName, "index.ejs");
-        const cssPath  = path.join(TPL_DIR, templateName, "styles.css");
         
         // Check if template exists first
         try {
             await fs.access(htmlPath);
         } catch (e) {
-            throw new Error(`Template ${templateName} missing!`);
+            throw new Error(`Template ${templateName} missing at ${htmlPath}!`);
         }
 
         const { buffer: pdfBuffer, meta } = await generateDocument({
-        ...req,
-        form_id: req.form_id || "acord25_v1"
+           ...req,
+           form_id: req.form_id || "acord25_v1"
         });
 
-
-
-        // C. EMAIL IT (Since we don't have S3 storage yet)
+        // C. EMAIL IT
         const recipient = req.user_email || process.env.GMAIL_USER;
         console.log(`📧 Emailing PDF to: ${recipient}`);
 
@@ -306,12 +299,8 @@ cron.schedule('*/2 * * * *', async () => {
                 <p><b>Special Wording Included:</b><br><em>${req.description_special_text || "None"}</em></p>
             `,
             attachments: [{
-                filename:
-  meta?.filename ||
-  `COI-${String(req.holder_name || "Holder")
-    .replace(/[^a-z0-9]/gi, "_")
-    .substring(0, 50)}.pdf`,
-
+                filename: meta?.filename || `COI-${String(req.holder_name || "Holder").replace(/[^a-z0-9]/gi, "_").substring(0, 50)}.pdf`,
+                content: pdfBuffer // <--- 🛠️ CRITICAL FIX: The actual PDF data
             }]
         });
         
