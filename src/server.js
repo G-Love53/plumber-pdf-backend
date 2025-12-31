@@ -267,12 +267,12 @@ console.log('[Robot][DIAG] select(status) error:', statusErr || 'none');
 console.log('[Robot][DIAG] sample status values:', statusCounts?.slice(0, 10));
 
 // DIAG 2: fetch the specific stuck row by ID
-const stuckId = '8e428...'; // <-- paste full UUID from Supabase
-const { data: stuckRow, error: stuckErr } = await supabase
-  .from('coi_requests')
-  .select('id,status,segment,created_at')
-  .eq('id', stuckId)
-  .maybeSingle();
+const { data: pendingRows, error: pendingErr } = await supabase
+  .from("coi_requests")
+  .select("*")
+  .eq("segment", segment)
+  .or("status.eq.pending,status.eq.pending\\n,status.eq.pending\\r,status.eq.pending\\r\\n");
+
 
 console.log('[Robot][DIAG] stuck row lookup error:', stuckErr || 'none');
 console.log('[Robot][DIAG] stuck row:', stuckRow || 'NOT FOUND');
