@@ -24,6 +24,8 @@ RUN mkdir -p /app/chrome && \
     unzip chrome-linux64.zip && \
     rm chrome-linux64.zip && \
     chmod +x chrome-linux64/chrome
+RUN /app/chrome/chrome-linux64/chrome --version
+
 
 # Copy everything else (avoids case sensitivity issues)
 COPY . .
