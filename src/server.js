@@ -252,7 +252,8 @@ cron.schedule('*/2 * * * *', async () => {
   const { data: requests, error } = await supabase
     .from('coi_requests')
     .select('*')
-    .eq('status', 'pending');
+    .like('status', 'pending%')
+
 
   if (error) {
     console.error("❌ DB Error:", error);
