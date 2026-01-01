@@ -337,7 +337,8 @@ console.log('[Robot][DIAG] stuck row:', stuckRow || 'NOT FOUND');
             status: 'completed', 
             updated_at: new Date()
           })
-          .eq('id', req.id);
+           console.log(`[COI] Marking completed: ${row.id}`);
+           .eq('id', req.id);
           
         console.log(`✅ Request ${req.id} COMPLETED.`);
 
