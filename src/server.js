@@ -331,14 +331,13 @@ console.log('[Robot][DIAG] stuck row:', stuckRow || 'NOT FOUND');
         });
         
         // D. UPDATE DATABASE (Mark as Done)
-        await supabase
-          .from('coi_requests')
-          .update({ 
-            status: 'completed', 
-            updated_at: new Date()
-          })
-           console.log(`[COI] Marking completed: ${row.id}`);
-           .eq('id', req.id);
+        const { error: updErr } = await supabase
+  .from('coi_requests')
+  .update({ status: 'completed' })
+  .eq('id', row.id);   // <-- use row.id, not req.id
+
+if (updErr) console.log('[COI] update error:', updErr);
+else console.log(`[COI] Marking completed: ${row.id}`);
           
         console.log(`✅ Request ${req.id} COMPLETED.`);
 
