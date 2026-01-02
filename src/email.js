@@ -17,47 +17,42 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-export const sendWithGmail = async ({ to, subject, html, attachments }) => {
-  try {
-    // ROBUST FIX: Accepts either 'buffer' or 'content' keys from the Robot
-    const emailAttachments = (attachments || []).map((att) => {
-      // 1. Find the data (regardless of what the robot named it)
-      const raw = att.buffer || att.content; 
-      
-      // 2. Ensure it is a valid Buffer
-      const safeBuf = Buffer.isBuffer(raw) ? raw : Buffer.from(raw || "");
-
-      // 3. HARD PROOF CHECKS (adds certainty)
-const magic = safeBuf.slice(0, 5).toString("utf8");
-if (magic !== "%PDF-") {
-  console.warn(`⚠️ Attachment ${att.filename} is NOT a valid PDF. Magic=${magic}`);
+// Helper: force anything into a Buffer safely
+function toBuffer(raw) {
+  if (!raw) return Buffer.alloc(0);
+  if (Buffer.isBuffer(raw)) return raw;
+  // If someone accidentally passes a base64 string or normal string, still convert
+  return Buffer.from(raw);
 }
 
-if (safeBuf.length < 100) {
-  console.warn(`⚠️ Warning: Attachment ${att.filename} is empty or too small (${safeBuf.length} bytes).`);
+export async function sendWithGmail({ to, subject, html, attachments = [] }) {
+  const emailAttachments = (attachments || []).map((att) => {
+    const raw = att.buffer ?? att.content; // accept either key
+    const buf = toBuffer(raw);
+
+    // Sanity checks (these logs are gold while debugging)
+    const magic = buf.slice(0, 5).toString("utf8");
+    if (magic !== "%PDF-") {
+      console.warn(`⚠️ Attachment not a PDF: ${att.filename} magic="${magic}" bytes=${buf.length}`);
+    } else {
+      console.log(`✅ Attachment looks like PDF: ${att.filename} bytes=${buf.length}`);
+    }
+
+    return {
+      filename: att.filename || "attachment.pdf",
+      content: buf, // nodemailer expects "content" for Buffers
+      contentType: att.contentType || "application/pdf",
+    };
+  });
+
+  const info = await transporter.sendMail({
+    from: `"CID Service" <${GMAIL_USER}>`,
+    to: Array.isArray(to) ? to.join(", ") : to,
+    subject,
+    html,
+    attachments: emailAttachments,
+  });
+
+  console.log(`Email sent: ${info.messageId}`);
+  return info;
 }
-
-
-      // 4. Return the format Nodemailer expects
-      return {
-        filename: att.filename,
-        content: safeBuf, 
-        contentType: "application/pdf",
-      };
-    });
-
-    const info = await transporter.sendMail({
-      from: `"Plumber Insurance Direct" <${GMAIL_USER}>`,
-      to: Array.isArray(to) ? to.join(", ") : to,
-      subject,
-      html,
-      attachments: emailAttachments,
-    });
-
-    console.log(`Email sent: ${info.messageId}`);
-    return info;
-  } catch (error) {
-    console.error("Error sending email:", error);
-    throw error;
-  }
-};
