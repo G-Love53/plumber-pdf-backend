@@ -282,7 +282,7 @@ cron.schedule("*/2 * * * *", async () => {
       .eq("id", req.id)
       .eq("status", "pending")
       .select()
-      .maybesingle();
+      .maybeSingle();
 
     if (claimErr) {
       console.error("[COI] Claim error:", claimErr);
