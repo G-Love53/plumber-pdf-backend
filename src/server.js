@@ -247,108 +247,146 @@ console.log('[Robot] SUPABASE_URL:', process.env.SUPABASE_URL);
 console.log("🤖 Robot Scheduler: ONLINE and Listening...");
 
 // --- TASK 1: THE COI WATCHER (Check every 2 minutes) ---
-cron.schedule('*/2 * * * *', async () => {
-  // 1. Ask Supabase: "Any pending requests?"
-  const { data: requests, error } = await supabase
-    .from('coi_requests')
-    .select('*')
-    .like('status', 'pending%')
-console.log(`[COI] Pending rows found: ${requests?.length || 0}`);
-if (requests?.length) {
-  console.log(
-    `[COI] First pending id: ${requests[0].id} status="${requests[0].status}"`
-  );
-}
+// --- TASK 1: THE COI WATCHER (Check every 2 minutes) ---
+cron.schedule("*/2 * * * *", async () => {
+  console.log("[COI] Tick: checking pending rows...");
 
-  if (error) {
-    console.error("❌ DB Error:", error);
-    return;
-  }
-   // DIAG 1: count rows and show distinct statuses
-const { data: statusCounts, error: statusErr } = await supabase
-  .from('coi_requests')
-  .select('status', { count: 'exact' });
+  try {
+    // 1) Pull oldest pending row
+    const { data: rows, error: selErr } = await supabase
+      .from("coi_requests")
+      .select("*")
+      .eq("status", "pending")
+      .order("created_at", { ascending: true })
+      .limit(1);
 
-console.log('[Robot][DIAG] select(status) error:', statusErr || 'none');
-console.log('[Robot][DIAG] sample status values:', statusCounts?.slice(0, 10));
-
-// DIAG 2: fetch the specific stuck row by ID
-const { data: pendingRows, error: pendingErr } = await supabase
-  .from("coi_requests")
-  .select("*")
-  .eq("segment", segment)
-  .or("status.eq.pending,status.eq.pending\\n,status.eq.pending\\r,status.eq.pending\\r\\n");
-
-
-console.log('[Robot][DIAG] stuck row lookup error:', stuckErr || 'none');
-console.log('[Robot][DIAG] stuck row:', stuckRow || 'NOT FOUND');
-
-
-  // LOG 1: PROOF THE ROBOT IS CHECKING
-  console.log(`[Robot] Poll complete. Pending rows found: ${requests ? requests.length : 0}`);
-
-  if (requests && requests.length > 0) {
-    
-    for (const req of requests) {
-      // LOG 2: PROOF THE ROBOT IS ENGAGING A SPECIFIC ROW
-      console.log(`[Robot] Processing Row ID: ${req.id} | Segment: ${req.segment}`);
-      
-      try {
-        // A. PREPARE THE DATA
-        const templateName = "UniversalAccord25";
-        
-        // B. RENDER THE PDF
-        const htmlPath = path.join(TPL_DIR, templateName, "index.ejs");
-        
-        // Check if template exists first
-        try {
-            await fs.access(htmlPath);
-        } catch (e) {
-            throw new Error(`Template ${templateName} missing at ${htmlPath}!`);
-        }
-
-        const { buffer: pdfBuffer, meta } = await generateDocument({
-           ...req,
-           form_id: req.form_id || "acord25_v1"
-        });
-
-        // C. EMAIL IT
-        const recipient = req.user_email || process.env.GMAIL_USER;
-        console.log(`📧 Emailing PDF to: ${recipient}`);
-
-        await sendWithGmail({
-            to: [recipient],
-            subject: `Your Certificate of Insurance - ${req.holder_name}`,
-            html: `
-                <h3>Certificate Generated</h3>
-                <p>Attached is the COI you requested for <b>${req.holder_name}</b>.</p>
-                <p><b>Special Wording Included:</b><br><em>${req.description_special_text || "None"}</em></p>
-            `,
-            attachments: [{
-                filename: meta?.filename || `COI-${String(req.holder_name || "Holder").replace(/[^a-z0-9]/gi, "_").substring(0, 50)}.pdf`,
-                buffer: pdfBuffer // <--- 🛠️ CRITICAL FIX: The actual PDF data
-            }]
-        });
-        
-        // D. UPDATE DATABASE (Mark as Done)
-        const { error: updErr } = await supabase
-  .from('coi_requests')
-  .update({ status: 'completed' })
-  .eq('id', row.id);   // <-- use row.id, not req.id
-
-if (updErr) console.log('[COI] update error:', updErr);
-else console.log(`[COI] Marking completed: ${row.id}`);
-          
-        console.log(`✅ Request ${req.id} COMPLETED.`);
-
-      } catch (err) {
-        console.error(`❌ Error processing COI ${req.id}:`, err);
-        // Mark as failed so we don't loop forever
-        await supabase.from('coi_requests').update({ status: 'failed' }).eq('id', req.id);
-      }
+    if (selErr) {
+      console.error("[COI] DB select error:", selErr);
+      return;
     }
+
+    console.log(`[COI] Pending rows found: ${rows?.length || 0}`);
+    if (!rows || rows.length === 0) return;
+
+    const req = rows[0];
+    console.log(`[COI] Candidate id=${req.id} segment=${req.segment} status="${req.status}"`);
+
+    // 2) Claim row (pending -> processing) so we don't double-send on restarts/overlap
+    const { data: claimed, error: claimErr } = await supabase
+      .from("coi_requests")
+      .update({
+        status: "processing",
+        attempts: (req.attempts ?? 0) + 1,
+        last_attempt_at: new Date().toISOString(),
+        error_message: null,
+      })
+      .eq("id", req.id)
+      .eq("status", "pending")
+      .select()
+      .single();
+
+    if (claimErr) {
+      console.error("[COI] Claim error:", claimErr);
+      return;
+    }
+    if (!claimed) {
+      console.log(`[COI] Row ${req.id} not claimable (already claimed/processed).`);
+      return;
+    }
+
+    console.log(`[COI] Claimed id=${claimed.id} -> processing`);
+
+    // 3) Generate PDF
+    const { buffer: pdfBuffer, meta } = await generateDocument({
+      ...claimed,
+      form_id: claimed.form_id || "acord25_v1",
+    });
+
+    if (!pdfBuffer || !Buffer.isBuffer(pdfBuffer)) {
+      throw new Error("PDF generator did not return a Buffer");
+    }
+
+    const first5 = pdfBuffer.subarray(0, 5).toString("ascii");
+    console.log(`[COI] PDF generated bytes=${pdfBuffer.length} first5="${first5}"`);
+
+    // 4) Decide recipient (do NOT silently default unless you want that)
+    const recipient = claimed.user_email;
+    if (!recipient) {
+      throw new Error("Missing user_email on coi_requests row");
+    }
+
+    // 5) Prepare attachment
+    const safeHolder = String(claimed.holder_name || "Holder")
+      .replace(/[^a-z0-9]/gi, "_")
+      .substring(0, 50);
+
+    const filename =
+      meta?.filename ||
+      `COI-${safeHolder}-${String(claimed.id).substring(0, 8)}.pdf`;
+
+    console.log(`[COI] About to send email to="${recipient}" filename="${filename}"`);
+
+    // 6) Send email (email.js will log PDF magic + messageId)
+    let info;
+    try {
+      info = await sendWithGmail({
+        to: [recipient],
+        subject: `Your Certificate of Insurance - ${claimed.holder_name || ""}`.trim(),
+        html: `
+          <h3>Certificate Generated</h3>
+          <p>Attached is the COI you requested for <b>${claimed.holder_name || "your request"}</b>.</p>
+          <p><b>Special Wording Included:</b><br><em>${claimed.description_special_text || "None"}</em></p>
+        `,
+        attachments: [
+          {
+            filename,
+            buffer: pdfBuffer, // supports buffer or content in your email.js
+            contentType: "application/pdf",
+          },
+        ],
+      });
+    } catch (sendErr) {
+      // 7) If send fails, mark row error (PROOF)
+      const msg = (sendErr?.message || String(sendErr)).slice(0, 2000);
+      console.error(`[COI] EMAIL SEND FAILED id=${claimed.id} error="${msg}"`);
+      console.error(sendErr?.stack || sendErr);
+
+      const { error: updErr } = await supabase
+        .from("coi_requests")
+        .update({
+          status: "error",
+          error_message: msg,
+        })
+        .eq("id", claimed.id);
+
+      if (updErr) console.error("[COI] Failed updating status=error:", updErr);
+      return;
+    }
+
+    // 8) Only after successful send: mark completed + store proof
+    const messageId = info?.messageId || null;
+
+    const { error: doneErr } = await supabase
+      .from("coi_requests")
+      .update({
+        status: "completed",
+        gmail_message_id: messageId,
+        emailed_at: new Date().toISOString(),
+        error_message: null,
+      })
+      .eq("id", claimed.id);
+
+    if (doneErr) {
+      console.error("[COI] Email sent but failed to mark completed:", doneErr);
+    } else {
+      console.log(`[COI] COMPLETED id=${claimed.id} messageId=${messageId || "n/a"}`);
+    }
+  } catch (err) {
+    // Absolute safety net so cron tick never crashes the process
+    console.error("[COI] Tick crashed:", err?.stack || err);
   }
 });
+
 
 // --- TASK 2: THE LIBRARIAN (Check every 10 minutes) ---
 cron.schedule('*/10 * * * *', async () => {
