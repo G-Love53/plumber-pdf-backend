@@ -1,3 +1,4 @@
+// email.js
 import nodemailer from "nodemailer";
 import dotenv from "dotenv";
 
@@ -9,6 +10,7 @@ if (!GMAIL_USER || !GMAIL_APP_PASSWORD) {
   throw new Error("GMAIL_USER and GMAIL_APP_PASSWORD environment variables required");
 }
 
+// Create transporter once
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
@@ -21,38 +23,65 @@ const transporter = nodemailer.createTransport({
 function toBuffer(raw) {
   if (!raw) return Buffer.alloc(0);
   if (Buffer.isBuffer(raw)) return raw;
-  // If someone accidentally passes a base64 string or normal string, still convert
   return Buffer.from(raw);
 }
 
-export async function sendWithGmail({ to, subject, html, attachments = [] }) {
-  const emailAttachments = (attachments || []).map((att) => {
-    const raw = att.buffer ?? att.content; // accept either key
+function asRecipientString(to) {
+  if (Array.isArray(to)) return to.join(", ");
+  return to || "";
+}
+
+export async function sendWithGmail({ to, subject, html, text, attachments = [] }) {
+  const toStr = asRecipientString(to);
+
+  // ✅ Provable top-level logging
+  console.log(
+    `[EMAIL] to="${toStr}" subject="${subject || ""}" attachments=${attachments?.length || 0}`
+  );
+
+  const emailAttachments = (attachments || []).map((att, idx) => {
+    const raw = att?.buffer ?? att?.content; // accept either key
     const buf = toBuffer(raw);
 
-    // Sanity checks (these logs are gold while debugging)
-    const magic = buf.slice(0, 5).toString("utf8");
-    if (magic !== "%PDF-") {
-      console.warn(`⚠️ Attachment not a PDF: ${att.filename} magic="${magic}" bytes=${buf.length}`);
+    // ✅ Provable attachment logging (first bytes + size)
+    const first5Ascii = buf.subarray(0, 5).toString("ascii");
+    const first5Hex = buf.subarray(0, 5).toString("hex");
+    const filename = att?.filename || `attachment-${idx}.pdf`;
+
+    if (first5Ascii !== "%PDF-") {
+      console.warn(
+        `[EMAIL] ⚠️ Attachment[${idx}] not PDF-ish: filename="${filename}" first5="${first5Ascii}" hex=${first5Hex} bytes=${buf.length}`
+      );
     } else {
-      console.log(`✅ Attachment looks like PDF: ${att.filename} bytes=${buf.length}`);
+      console.log(
+        `[EMAIL] ✅ Attachment[${idx}] looks like PDF: filename="${filename}" first5="${first5Ascii}" bytes=${buf.length}`
+      );
     }
 
     return {
-      filename: att.filename || "attachment.pdf",
+      filename,
       content: buf, // nodemailer expects "content" for Buffers
-      contentType: att.contentType || "application/pdf",
+      contentType: att?.contentType || "application/pdf",
     };
   });
 
-  const info = await transporter.sendMail({
-    from: `"CID Service" <${GMAIL_USER}>`,
-    to: Array.isArray(to) ? to.join(", ") : to,
-    subject,
-    html,
-    attachments: emailAttachments,
-  });
+  try {
+    const info = await transporter.sendMail({
+      from: `"CID Service" <${GMAIL_USER}>`,
+      to: toStr,
+      subject,
+      text, // optional
+      html,
+      attachments: emailAttachments,
+    });
 
-  console.log(`Email sent: ${info.messageId}`);
-  return info;
+    // ✅ Provable success logging
+    console.log(`[EMAIL] sent ok messageId=${info.messageId}`);
+    return info;
+  } catch (err) {
+    // ✅ Provable failure logging (don’t swallow)
+    console.error(`[EMAIL] sendMail failed to="${toStr}" subject="${subject || ""}"`);
+    console.error(err?.stack || err);
+    throw err;
+  }
 }
