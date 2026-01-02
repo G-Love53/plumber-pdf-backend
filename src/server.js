@@ -326,7 +326,7 @@ console.log('[Robot][DIAG] stuck row:', stuckRow || 'NOT FOUND');
             `,
             attachments: [{
                 filename: meta?.filename || `COI-${String(req.holder_name || "Holder").replace(/[^a-z0-9]/gi, "_").substring(0, 50)}.pdf`,
-                content: pdfBuffer // <--- 🛠️ CRITICAL FIX: The actual PDF data
+                buffer: pdfBuffer // <--- 🛠️ CRITICAL FIX: The actual PDF data
             }]
         });
         
