@@ -247,7 +247,6 @@ console.log('[Robot] SUPABASE_URL:', process.env.SUPABASE_URL);
 console.log("🤖 Robot Scheduler: ONLINE and Listening...");
 
 // --- TASK 1: THE COI WATCHER (Check every 2 minutes) ---
-// --- TASK 1: THE COI WATCHER (Check every 2 minutes) ---
 cron.schedule("*/2 * * * *", async () => {
   console.log("[COI] Tick: checking pending rows...");
 
@@ -283,7 +282,7 @@ cron.schedule("*/2 * * * *", async () => {
       .eq("id", req.id)
       .eq("status", "pending")
       .select()
-      .single();
+      .maybesingle();
 
     if (claimErr) {
       console.error("[COI] Claim error:", claimErr);
@@ -295,6 +294,7 @@ cron.schedule("*/2 * * * *", async () => {
     }
 
     console.log(`[COI] Claimed id=${claimed.id} -> processing`);
+    console.log(`[COI] Claimed id=${claimed.id} attempts=${claimed.attempts} last_attempt_at=${claimed.last_attempt_at}`);
 
     // 3) Generate PDF
     const { buffer: pdfBuffer, meta } = await generateDocument({
@@ -414,7 +414,7 @@ cron.schedule('*/10 * * * *', async () => {
           is_indexed: true, 
           indexed_at: new Date() 
         })
-        .eq('id', doc.id);
+        .eq('id', claimed.id);
         
       console.log(`🧠 Learned: ${doc.document_title || doc.file_name}`);
     }
