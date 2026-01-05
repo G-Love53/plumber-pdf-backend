@@ -255,7 +255,7 @@ cron.schedule("*/2 * * * *", async () => {
     const { data: rows, error: selErr } = await supabase
       .from("coi_requests")
       .select("*")
-      .eq("status", "pending_coi_v2")
+      .eq("status", "pending")
       .order("created_at", { ascending: true })
       .limit(1);
 
@@ -280,7 +280,7 @@ cron.schedule("*/2 * * * *", async () => {
         error_message: null,
       })
       .eq("id", req.id)
-      .eq("status", "pending_coi_v2")
+      .eq("status", "pending")
       .select()
       .maybeSingle();
 
