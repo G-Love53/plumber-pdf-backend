@@ -1,19 +1,34 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8">
-    <title>Certificate of Liability Insurance</title>
-    <style>
-        /* INJECT CSS */
-        <%- (typeof styles !== "undefined" ? styles : "") %>
+  <meta charset="UTF-8">
+  <title>Certificate of Liability Insurance</title>
 
-        /* Segment Branding */
-        :root {
-            --primary-color: <%= data.segment === 'roofer' ? '#b91c1c' : (data.segment === 'plumber' ? '#0284c7' : '#000000') %>;
-        }
-    </style>
+  <%
+    const seg =
+      (typeof data !== "undefined" && data && data.segment)
+        ? data.segment
+        : "plumber";
+
+    const primary =
+      seg === "roofer" ? "#b91c1c"
+      : seg === "plumber" ? "#0284c7"
+      : "#000000";
+  %>
+
+  <style>
+    /* Segment Branding */
+    :root {
+      --primary-color: <%= primary %>;
+    }
+
+    /* INJECT CSS */
+    <%- (typeof styles !== "undefined" ? styles : "") %>
+  </style>
 </head>
+
 <body>
+
 
     <div class="cert-page">
 
