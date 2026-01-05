@@ -5,8 +5,8 @@
     <title>Certificate of Liability Insurance</title>
     <style>
         /* INJECT CSS */
-        <%- styles %>
-        
+        <%- (typeof styles !== "undefined" ? styles : "") %>
+
         /* Segment Branding */
         :root {
             --primary-color: <%= data.segment === 'roofer' ? '#b91c1c' : (data.segment === 'plumber' ? '#0284c7' : '#000000') %>;
