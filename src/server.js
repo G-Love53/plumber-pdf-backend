@@ -402,15 +402,14 @@ if (doneErr) {
 });
 
 // --- TASK 2: THE LIBRARIAN (Check every 10 minutes) ---
-cron.schedule('*/10 * * * *', async () => {
-  // ✅ FIX: Ensure we only look for 'plumber' docs
+cron.schedule("*/10 * * * *", async () => {
   console.log("📚 Librarian: Checking for unindexed 'plumber' docs...");
 
   const { data: docs, error } = await supabase
-    .from('carrier_resources')
-    .select('*')
-    .eq('is_indexed', false)
-    .eq('segment', 'plumber'); // <--- CRITICAL: Segment Locked to Plumber
+    .from("carrier_resources")
+    .select("*")
+    .eq("is_indexed", false)
+    .eq("segment", "plumber");
 
   if (error) {
     console.error("❌ Librarian Error:", error.message);
@@ -419,17 +418,18 @@ cron.schedule('*/10 * * * *', async () => {
 
   if (docs && docs.length > 0) {
     console.log(`📚 Found ${docs.length} new documents to learn.`);
-    
+
     for (const doc of docs) {
-      await supabase
-        .from('carrier_resources')
-        .update({ 
-          is_indexed: true, 
-          indexed_at: new Date() 
+      const { error: updErr } = await supabase
+        .from("carrier_resources")
+        .update({
+          is_indexed: true,
+          indexed_at: new Date().toISOString(),
         })
-        .eq('id', claimed.id);
-        
-      console.log(`🧠 Learned: ${doc.document_title || doc.file_name}`);
+        .eq("id", doc.id);
+
+      if (updErr) console.error("❌ Librarian update error:", updErr);
+      else console.log(`🧠 Learned: ${doc.document_title || doc.file_name}`);
     }
   } else {
     console.log("📚 No unindexed documents found.");
