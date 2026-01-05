@@ -363,29 +363,35 @@ cron.schedule("*/2 * * * *", async () => {
       return;
     }
 
-    // 8) Only after successful send: mark completed + store proof
-    const messageId = info?.messageId || null;
+    // 8) PROOF GATE — do NOT complete without a messageId
+const messageId = info?.messageId;
+if (!messageId) {
+  const msg = "Email send returned no messageId (not provable)";
+  console.error(`[COI] ${msg} id=${claimed.id}`);
+  await supabase
+    .from("coi_requests")
+    .update({ status: "error", error_message: msg })
+    .eq("id", claimed.id);
+  return;
+}
 
-    const { error: doneErr } = await supabase
-      .from("coi_requests")
-      .update({
-        status: "completed",
-        gmail_message_id: messageId,
-        emailed_at: new Date().toISOString(),
-        error_message: null,
-      })
-      .eq("id", claimed.id);
+// Mark completed ONLY with proof
+const { error: doneErr } = await supabase
+  .from("coi_requests")
+  .update({
+    status: "completed",
+    gmail_message_id: messageId,
+    emailed_at: new Date().toISOString(),
+    error_message: null,
+  })
+  .eq("id", claimed.id);
 
-    if (doneErr) {
-      console.error("[COI] Email sent but failed to mark completed:", doneErr);
-    } else {
-      console.log(`[COI] COMPLETED id=${claimed.id} messageId=${messageId || "n/a"}`);
-    }
-  } catch (err) {
-    // Absolute safety net so cron tick never crashes the process
-    console.error("[COI] Tick crashed:", err?.stack || err);
-  }
-});
+if (doneErr) {
+  console.error("[COI] Email sent but failed to mark completed:", doneErr);
+} else {
+  console.log(`[COI] COMPLETED id=${claimed.id} messageId=${messageId}`);
+}
+
 
 
 // --- TASK 2: THE LIBRARIAN (Check every 10 minutes) ---
