@@ -5,166 +5,191 @@
   <title>Certificate of Liability Insurance</title>
 
   <%
-    const seg =
-      (typeof data !== "undefined" && data && data.segment)
-        ? data.segment
-        : "plumber";
+    // ---------------------------------------------------------
+    // UNIVERSAL SAFETY LAYER
+    // This template must NOT assume "data" exists.
+    // Your generator sometimes passes fields at top-level.
+    // ---------------------------------------------------------
+    const d =
+      (typeof data !== "undefined" && data) ? data :
+      (typeof locals !== "undefined" && locals) ? locals :
+      {};
+
+    const seg = d.segment || "plumber";
 
     const primary =
-      seg === "roofer" ? "#b91c1c"
-      : seg === "plumber" ? "#0284c7"
-      : "#000000";
+      seg === "roofer" ? "#b91c1c" :
+      seg === "plumber" ? "#0284c7" :
+      seg === "bar" ? "#16a34a" :
+      "#000000";
+
+    const safeStyles = (typeof styles !== "undefined" && styles) ? styles : "";
+    const a = (typeof assets !== "undefined" && assets) ? assets : {};
+
+    const endorsements = Array.isArray(d.endorsements_needed) ? d.endorsements_needed : [];
   %>
 
   <style>
     /* Segment Branding */
-    :root {
-      --primary-color: <%= primary %>;
-    }
+    :root { --primary-color: <%= primary %>; }
 
-    /* INJECT CSS */
-    <%- (typeof styles !== "undefined" ? styles : "") %>
+    /* INJECT CSS (if provided by renderer) */
+    <%- safeStyles %>
   </style>
 </head>
 
 <body>
+  <div class="cert-page">
 
+    <div class="header">
+      <div class="agency-box" style="border-top: 5px solid var(--primary-color);">
+        <% if (seg === "plumber") { %>
+          <% if (a.logoPlumber) { %><img src="<%- a.logoPlumber %>" class="logo" alt="Agency Logo"><% } %>
+          <h3>PLUMBER INSURANCE DIRECT</h3>
+          <p>123 Pipe Lane<br>Water City, USA 90210</p>
+          <p class="contact">📧 support@plumberinsurancedirect.com</p>
 
-    <div class="cert-page">
+        <% } else if (seg === "roofer") { %>
+          <% if (a.logoRoofer) { %><img src="<%- a.logoRoofer %>" class="logo" alt="Agency Logo"><% } %>
+          <h3>ROOFING INSURANCE DIRECT</h3>
+          <p class="contact">📧 support@roofinginsurancedirect.com</p>
 
-        <div class="header">
-            <div class="agency-box" style="border-top: 5px solid var(--primary-color);">
-                <% if (data.segment === 'plumber') { %>
-                    <img src="<%- assets.logoPlumber %>" class="logo" alt="Agency Logo">
-                    <h3>PLUMBER INSURANCE DIRECT</h3>
-                    <p>123 Pipe Lane<br>Water City, USA 90210</p>
-                    <p class="contact">📧 support@plumberinsurancedirect.com</p>
-                <% } else if (data.segment === 'roofer') { %>
-                    <% if (assets.logoRoofer) { %><img src="<%- assets.logoRoofer %>" class="logo"><% } %>
-                    <h3>ROOFING INSURANCE DIRECT</h3>
-                    <p class="contact">📧 support@roofinginsurancedirect.com</p>
-                <% } else { %>
-                    <% if (assets.logoBar) { %><img src="<%- assets.logoBar %>" class="logo"><% } %>
-                    <h3>BAR INSURANCE DIRECT</h3>
-                    <p class="contact">📧 support@barinsurancedirect.com</p>
-                <% } %>
-            </div>
+        <% } else if (seg === "bar") { %>
+          <% if (a.logoBar) { %><img src="<%- a.logoBar %>" class="logo" alt="Agency Logo"><% } %>
+          <h3>BAR INSURANCE DIRECT</h3>
+          <p class="contact">📧 support@barinsurancedirect.com</p>
 
-            <div class="title-box">
-                <h1>CERTIFICATE OF LIABILITY INSURANCE</h1>
-                <div class="date-box">
-                    <strong>DATE (MM/DD/YYYY)</strong><br>
-                    <%= new Date().toLocaleDateString('en-US') %>
-                </div>
-                <p class="disclaimer">
-                    THIS CERTIFICATE IS ISSUED AS A MATTER OF INFORMATION ONLY AND CONFERS NO RIGHTS UPON THE CERTIFICATE HOLDER.
-                </p>
-            </div>
+        <% } else { %>
+          <h3>COMMERCIAL INSURANCE DIRECT</h3>
+          <p class="contact">📧 support@commercialinsurancedirect.com</p>
+        <% } %>
+      </div>
+
+      <div class="title-box">
+        <h1>CERTIFICATE OF LIABILITY INSURANCE</h1>
+        <div class="date-box">
+          <strong>DATE (MM/DD/YYYY)</strong><br>
+          <%= new Date().toLocaleDateString("en-US") %>
         </div>
+        <p class="disclaimer">
+          THIS CERTIFICATE IS ISSUED AS A MATTER OF INFORMATION ONLY AND CONFERS NO RIGHTS UPON THE CERTIFICATE HOLDER.
+        </p>
+      </div>
+    </div>
 
-        <div class="row">
-            <div class="box insured-box">
-                <strong>INSURED</strong>
-                <p>
-                    <%= data.insured_name || "PENDING APPLICANT NAME" %><br>
-                    <%= data.insured_address || "Address on File" %><br>
-                    <%= data.insured_city_state_zip || "" %>
-                </p>
-            </div>
-            <div class="box contact-box">
-                <strong>CONTACT COMPLETED BY:</strong>
-                <p>Authorized AI Representative<br>Phone: (555) 010-9999</p>
-            </div>
+    <div class="row">
+      <div class="box insured-box">
+        <strong>INSURED</strong>
+        <p>
+          <%= d.insured_name || d.applicant_name || "PENDING APPLICANT NAME" %><br>
+          <%= d.insured_address || d.applicant_address || "Address on File" %><br>
+          <%= d.insured_city_state_zip || d.applicant_city_state_zip || "" %>
+        </p>
+      </div>
+
+      <div class="box contact-box">
+        <strong>CONTACT COMPLETED BY:</strong>
+        <p>Authorized AI Representative<br>Phone: (555) 010-9999</p>
+      </div>
+    </div>
+
+    <div class="coverage-section">
+      <div class="section-title">COVERAGES</div>
+      <p style="font-size: 7pt; margin: 2px 0;">
+        THE POLICIES OF INSURANCE LISTED BELOW HAVE BEEN ISSUED TO THE INSURED NAMED ABOVE FOR THE POLICY PERIOD INDICATED.
+      </p>
+
+      <table class="acord-table">
+        <thead>
+          <tr>
+            <th style="width: 30%;">TYPE OF INSURANCE</th>
+            <th style="width: 15%;">POLICY NUMBER</th>
+            <th style="width: 15%;">EFF (MM/DD/YYYY)</th>
+            <th style="width: 15%;">EXP (MM/DD/YYYY)</th>
+            <th style="width: 25%;">LIMITS</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>X</strong> COMMERCIAL GENERAL LIABILITY<br>&nbsp;&nbsp; <strong>X</strong> OCCURRENCE</td>
+            <td><%= d.policy_number || "TBD" %></td>
+            <td><%= d.policy_eff_date || "TBD" %></td>
+            <td><%= d.policy_exp_date || "TBD" %></td>
+            <td>EACH OCCURRENCE: <strong>$1,000,000</strong><br>GEN AGGREGATE: <strong>$2,000,000</strong></td>
+          </tr>
+          <tr>
+            <td><strong>X</strong> AUTOMOBILE LIABILITY<br>&nbsp;&nbsp; <strong>X</strong> ANY AUTO</td>
+            <td><%= d.auto_policy_number || d.policy_number || "TBD" %></td>
+            <td><%= d.policy_eff_date || "TBD" %></td>
+            <td><%= d.policy_exp_date || "TBD" %></td>
+            <td>COMBINED SINGLE LIMIT: <strong>$1,000,000</strong></td>
+          </tr>
+          <tr>
+            <td><strong>X</strong> WORKERS COMPENSATION<br>&nbsp;&nbsp; PER STATUTE</td>
+            <td><%= d.wc_policy_number || "TBD" %></td>
+            <td><%= d.wc_eff_date || d.policy_eff_date || "TBD" %></td>
+            <td><%= d.wc_exp_date || d.policy_exp_date || "TBD" %></td>
+            <td>E.L. EACH ACCIDENT: <strong>$1,000,000</strong></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="description-box">
+      <strong>DESCRIPTION OF OPERATIONS / LOCATIONS / VEHICLES</strong><br><br>
+      <p class="special-text">
+        <%= d.description_special_text || "Proof of insurance provided for general business operations." %>
+      </p>
+
+      <% if (endorsements.length > 0) { %>
+        <br>
+        <p style="font-weight:bold; margin-top:10px;">INCLUDES ENDORSEMENTS:</p>
+        <ul>
+          <% endorsements.forEach(function(form) { %>
+            <li>• <%= form %> attached.</li>
+          <% }); %>
+        </ul>
+      <% } %>
+    </div>
+
+    <div class="footer-row">
+      <div class="holder-box">
+        <strong>CERTIFICATE HOLDER</strong>
+        <p style="margin-top: 10px;">
+          <%= d.holder_name || "SAMPLE HOLDER" %><br>
+          <%= d.holder_address || "123 Main Street" %><br>
+          <%= d.holder_city_state_zip || "Anytown, USA" %>
+        </p>
+      </div>
+
+      <div class="signature-box">
+        <br><br>
+        <% if (a.sigGeneric) { %>
+          <img src="<%- a.sigGeneric %>" style="height:45px; opacity: 0.8;">
+        <% } %>
+      </div>
+    </div>
+
+  </div>
+
+  <% if (endorsements.length > 0) { %>
+    <% for (let form of endorsements) { %>
+
+      <% if (form === "CG2010" && a["CG2010"]) { %>
+        <div class="page-break"></div>
+        <div class="form-container">
+          <div class="form-bg-svg">
+            <%- a["CG2010"] %>
+          </div>
+
+          <div class="form-overlay" style="top: 45px; right: 40px;">
+            <%= d.policy_number || "" %>
+          </div>
         </div>
+      <% } %>
 
-        <div class="coverage-section">
-            <div class="section-title">COVERAGES</div>
-            <p style="font-size: 7pt; margin: 2px 0;">THE POLICIES OF INSURANCE LISTED BELOW HAVE BEEN ISSUED TO THE INSURED NAMED ABOVE FOR THE POLICY PERIOD INDICATED.</p>
-            
-            <table class="acord-table">
-                <thead>
-                    <tr>
-                        <th style="width: 30%;">TYPE OF INSURANCE</th>
-                        <th style="width: 15%;">POLICY NUMBER</th>
-                        <th style="width: 15%;">EFF (MM/DD/YYYY)</th>
-                        <th style="width: 15%;">EXP (MM/DD/YYYY)</th>
-                        <th style="width: 25%;">LIMITS</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td><strong>X</strong> COMMERCIAL GENERAL LIABILITY<br>&nbsp;&nbsp; <strong>X</strong> OCCURRENCE</td>
-                        <td><%= data.policy_number || "TBD" %></td>
-                        <td><%= data.policy_eff_date || "TBD" %></td>
-                        <td><%= data.policy_exp_date || "TBD" %></td>
-                        <td>EACH OCCURRENCE: <strong>$1,000,000</strong><br>GEN AGGREGATE: <strong>$2,000,000</strong></td>
-                    </tr>
-                    <tr>
-                        <td><strong>X</strong> AUTOMOBILE LIABILITY<br>&nbsp;&nbsp; <strong>X</strong> ANY AUTO</td>
-                        <td><%= data.policy_number || "TBD" %></td>
-                        <td><%= data.policy_eff_date || "TBD" %></td>
-                        <td><%= data.policy_exp_date || "TBD" %></td>
-                        <td>COMBINED SINGLE LIMIT: <strong>$1,000,000</strong></td>
-                    </tr>
-                    <tr>
-                        <td><strong>X</strong> WORKERS COMPENSATION<br>&nbsp;&nbsp; PER STATUTE</td>
-                        <td><%= data.wc_policy_number || "TBD" %></td>
-                        <td><%= data.policy_eff_date || "TBD" %></td>
-                        <td><%= data.policy_exp_date || "TBD" %></td>
-                        <td>E.L. EACH ACCIDENT: <strong>$1,000,000</strong></td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
-        <div class="description-box">
-            <strong>DESCRIPTION OF OPERATIONS / LOCATIONS / VEHICLES</strong><br><br>
-            <p class="special-text"><%= data.description_special_text || "Proof of insurance provided for general business operations." %></p>
-            
-            <% if (data.endorsements_needed && data.endorsements_needed.length > 0) { %>
-                <br><p style="font-weight:bold; margin-top:10px;">INCLUDES ENDORSEMENTS:</p>
-                <ul>
-                    <% data.endorsements_needed.forEach(function(form) { %>
-                        <li>• <%= form %> attached.</li>
-                    <% }); %>
-                </ul>
-            <% } %>
-        </div>
-
-        <div class="footer-row">
-            <div class="holder-box">
-                <strong>CERTIFICATE HOLDER</strong>
-                <p style="margin-top: 10px;">
-                    <%= data.holder_name || "SAMPLE HOLDER" %><br>
-                    <%= data.holder_address || "123 Main Street" %><br>
-                    <%= data.holder_city_state_zip || "Anytown, USA" %>
-                </p>
-            </div>
-            <div class="signature-box">
-                <br><br>
-                <% if (assets.sigGeneric) { %>
-                    <img src="<%- assets.sigGeneric %>" style="height:45px; opacity: 0.8;">
-                <% } %>
-            </div>
-        </div>
-
-    </div> <% if (data.endorsements_needed && data.endorsements_needed.length > 0) { %>
-        <% for (let form of data.endorsements_needed) { %>
-            
-            <% if (form === 'CG2010') { %>
-                <div class="page-break"></div>
-                <div class="form-container">
-                    <div class="form-bg-svg">
-                        <%- assets['CG2010'] %>
-                    </div>
-                    
-                    <div class="form-overlay" style="top: 45px; right: 40px;">
-                        <%= data.policy_number %>
-                    </div>
-                </div>
-            <% } %>
-
-            <% } %>
     <% } %>
+  <% } %>
+
 </body>
 </html>
