@@ -280,7 +280,7 @@ cron.schedule("*/2 * * * *", async () => {
         error_message: null,
       })
       .eq("id", req.id)
-      .eq("status", "pending")
+      .eq("status", "pending_coi_v2")
       .select()
       .maybeSingle();
 
