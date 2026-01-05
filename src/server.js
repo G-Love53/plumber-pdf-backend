@@ -365,13 +365,16 @@ cron.schedule("*/2 * * * *", async () => {
 
     // 8) PROOF GATE — do NOT complete without a messageId
 const messageId = info?.messageId;
+
 if (!messageId) {
   const msg = "Email send returned no messageId (not provable)";
   console.error(`[COI] ${msg} id=${claimed.id}`);
+
   await supabase
     .from("coi_requests")
     .update({ status: "error", error_message: msg })
     .eq("id", claimed.id);
+
   return;
 }
 
@@ -392,7 +395,11 @@ if (doneErr) {
   console.log(`[COI] COMPLETED id=${claimed.id} messageId=${messageId}`);
 }
 
-
+} catch (err) {
+  // Absolute safety net so cron tick never crashes the process
+  console.error("[COI] Tick crashed:", err?.stack || err);
+}
+});
 
 // --- TASK 2: THE LIBRARIAN (Check every 10 minutes) ---
 cron.schedule('*/10 * * * *', async () => {
