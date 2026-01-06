@@ -2,7 +2,7 @@
   "acord25_v1": {
     "enabled": true,
     "engine": "svg",
-    "templatePath": "templates/UniversalAccord25"
+    "templatePath": "ACORD25"
   }
 }
 
