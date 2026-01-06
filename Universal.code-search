@@ -1,0 +1,15 @@
+# Query: Universal
+# ContextLines: 1
+
+2 results - 2 files
+
+src/pdf.js:
+  12    const searchPaths = [
+  13:     path.join(__dirname, "../Templates/ACORD25/assets"),
+  14      path.join(__dirname, "../public/assets/forms"),
+
+src/config/forms.json:
+  4      "engine": "svg",
+  5:     "templatePath": "templates/ACORD25"
+  6    }
+
