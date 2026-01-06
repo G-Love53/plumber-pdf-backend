@@ -10,7 +10,7 @@ const __dirname = path.dirname(__filename);
 /* ---------- Improved SVG Loader (Inline vs Data URI) ---------- */
 const loadSvg = async (filename, { asDataUri = false } = {}) => {
   const searchPaths = [
-    path.join(__dirname, "../Templates/UniversalAccord25/assets"),
+    path.join(__dirname, "../Templates/ACORD25/assets"),
     path.join(__dirname, "../public/assets/forms"),
   ];
 
