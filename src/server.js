@@ -6,7 +6,7 @@ import { renderPdf } from "./pdf.js";
 import { sendWithGmail } from "./email.js";
 import { generateDocument } from "./generators/index.js";
 
-
+import { normalizeEndorsements } from "./services/endorsements/endorsementNormalizer.js";
 
 // --- LEG 2 / LEG 3 IMPORTS ---
 import { processInbox } from "./quote-processor.js";
