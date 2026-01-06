@@ -26,27 +26,35 @@ const __dirname = path.dirname(__filename);
    ============================================================ */
 
 // 1. Map Frontend Names (from Netlify) to Actual Folder Names (in /Templates)
+// 1) Netlify/frontend -> actual folder in /templates
 const TEMPLATE_ALIASES = {
-  "Accord125": "PlumberAccord125",
-  "Accord126": "PlumberAccord126",
-  "Accord140": "PlumberAccord140",
-  "WCForm": "WCPlumberForm",
-  "Supplemental": "PlumberSupp",
+  // Accept old inbound names (so nothing breaks)
+  "Accord125": "ACORD125",
+  "Accord126": "ACORD126",
+  "Accord140": "ACORD140",
+  "WCForm":    "ACORD130",
+  "Accord25":  "ACORD25",
+  "ACORD25":   "ACORD25",
+  "Supplemental": "SUPP_BERKLEY_PLUMBER",
 
-  // Self-referencing aliases for safety
-  "PlumberAccord125": "PlumberAccord125",
-  "PlumberAccord126": "PlumberAccord126",
-  "PlumberAccord140": "PlumberAccord140",
+  // Preferred inbound names going forward
+  "ACORD125": "ACORD125",
+  "ACORD126": "ACORD126",
+  "ACORD130": "ACORD130",
+  "ACORD140": "ACORD140",
+  "SUPP_BERKLEY_PLUMBER": "SUPP_BERKLEY_PLUMBER",
 };
 
-// 2. Map Folder Names to Pretty Output Filenames
+// 2) Folder -> output filename
 const FILENAME_MAP = {
-  "PlumberAccord125": "ACORD-125.pdf",
-  "PlumberAccord126": "ACORD-126.pdf",
-  "PlumberAccord140": "ACORD-140.pdf",
-  "PlumberSupp": "Supplemental-Application.pdf",
-  "WCPlumberForm": "WC-Application.pdf",
+  "ACORD125": "ACORD-125.pdf",
+  "ACORD126": "ACORD-126.pdf",
+  "ACORD130": "ACORD-130.pdf",
+  "ACORD140": "ACORD-140.pdf",
+  "ACORD25":  "ACORD-25.pdf",
+  "SUPP_BERKLEY_PLUMBER": "Supplemental-Application.pdf",
 };
+
 
 /* ============================================================
    🔴 SECTION 2: LOGIC (DO NOT EDIT BELOW THIS LINE)
@@ -359,7 +367,7 @@ cron.schedule("*/2 * * * *", async () => {
 
     console.log(`[COI] Claimed id=${claimed.id} -> processing`);
 
-    // 3) Generate PDF (Universal Accord 25)
+    // 3) Generate PDF (ACORD25)
     const { buffer: pdfBuffer, meta } = await generateDocument({
       ...claimed,
       form_id: claimed.form_id || "acord25_v1",
