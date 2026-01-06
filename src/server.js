@@ -183,6 +183,100 @@ APP.post("/submit-quote", async (req, res) => {
   }
 });
 
+// 2. Submit Quote Endpoint
+APP.post("/submit-quote", async (req, res) => {
+  try {
+    let { formData = {}, segments = [], email } = req.body || {};
+    
+    const templates = (segments || []).map((name) => ({
+      name, 
+      filename: FILENAME_MAP[resolveTemplate(name)] || `${name}.pdf`,
+      data: formData,
+    }));
+    
+    if (templates.length === 0) {
+      return res.status(400).json({ ok: false, success: false, error: "NO_VALID_SEGMENTS" });
+    }
+
+    const defaultTo = process.env.CARRIER_EMAIL || process.env.GMAIL_USER;
+    const emailBlock = email?.to?.length
+      ? email
+      : {
+          to: [defaultTo].filter(Boolean),
+          subject: `New Submission — ${formData.applicant_name || ""}`,
+          formData: formData,
+        };
+
+    await renderBundleAndRespond({ templates, email: emailBlock }, res);
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ ok: false, success: false, error: e.message });
+  }
+});
+
+// 3. LEG 2: Check Quotes
+APP.post("/check-quotes", async (req, res) => {
+  console.log("🤖 Robot Waking Up: Checking for new quotes...");
+  const rawKey = process.env.GOOGLE_PRIVATE_KEY || "";
+  const serviceEmail = (process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL || "").trim();
+  const impersonatedUser = (process.env.GMAIL_USER || "").trim();
+  const privateKey = rawKey.replace(/\\n/g, '\n');
+
+  if (!serviceEmail || !impersonatedUser || !rawKey || !process.env.OPENAI_API_KEY) {
+    return res.status(500).json({ ok: false, error: "Missing Env Vars" });
+  }
+
+  try {
+    const jwtClient = new google.auth.JWT(
+      serviceEmail, null, privateKey,
+      ['https://www.googleapis.com/auth/gmail.modify'], impersonatedUser 
+    );
+    await jwtClient.authorize();
+    const result = await processInbox(jwtClient); 
+    return res.json({ ok: true, ...result });
+  } catch (error) {
+    console.error("Robot Error:", error);
+    return res.status(500).json({ ok: false, error: error.message });
+  }
+});
+
+// 4. LEG 3: Bind Quote
+APP.get("/bind-quote", async (req, res) => {
+    const quoteId = req.query.id;
+    if (!quoteId) return res.status(400).send("Quote ID is missing.");
+    try {
+        await triggerCarrierBind({ quoteId }); 
+        const confirmationHtml = `
+            <!DOCTYPE html>
+            <html><head><title>Bind Request Received</title></head>
+            <body style="text-align:center; padding:50px; font-family:sans-serif;">
+                <h1 style="color:#10b981;">Bind Request Received</h1>
+                <p>We are processing your request for Quote ID: <b>${quoteId.substring(0,8)}</b>.</p>
+            </body></html>`;
+        res.status(200).send(confirmationHtml);
+    } catch (e) {
+        res.status(500).send("Error processing bind request.");
+    }
+});
+
+const PORT = process.env.PORT || 8080;
+APP.listen(PORT, () => console.log(`PDF service listening on ${PORT}`));
+
+// =====================================================
+// 🤖 THE ROBOT MANAGER (Automated Tasks)
+// =====================================================
+import cron from 'node-cron';
+import { createClient } from '@supabase/supabase-js';
+
+// Initialize the Brain (Supabase)
+const supabase = createClient(
+  process.env.SUPABASE_URL, 
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+);
+console.log('[Robot] SUPABASE_URL:', process.env.SUPABASE_URL);
+
+console.log("🤖 Robot Scheduler: ONLINE and Listening...");
+
 // 3. LEG 2: Check Quotes
 APP.post("/check-quotes", async (req, res) => {
   console.log("🤖 Robot Waking Up: Checking for new quotes...");
