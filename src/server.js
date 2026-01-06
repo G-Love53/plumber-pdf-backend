@@ -322,8 +322,6 @@ APP.get("/bind-quote", async (req, res) => {
     }
 });
 
-const PORT = process.env.PORT || 8080;
-APP.listen(PORT, () => console.log(`PDF service listening on ${PORT}`));
 
 // =====================================================
 // 🤖 THE ROBOT MANAGER (Automated Tasks)
