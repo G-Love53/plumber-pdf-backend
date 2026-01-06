@@ -331,10 +331,14 @@ cron.schedule("*/2 * * * *", async () => {
     const { data: claimed, error: claimErr } = await supabase
       .from("coi_requests")
       .update({
-        status: "processing",
-        attempts: (reqRow.attempts ?? 0) + 1,
-        last_attempt_at: new Date().toISOString(),
-        error_message: null,
+  status: "processing",
+  attempt_count: (reqRow.attempt_count ?? 0) + 1,
+  last_attempt_at: new Date().toISOString(),
+  processing_started_at: new Date().toISOString(),
+  error_message: null,
+  error_code: null,
+  error_at: null,
+})
       })
       .eq("id", reqRow.id)
       .eq("status", "pending")
@@ -427,7 +431,12 @@ cron.schedule("*/2 * * * *", async () => {
 
       await supabase
         .from("coi_requests")
-        .update({ status: "error", error_message: msg })
+        .update({
+  status: "error",
+  error_message: msg,
+  error_code: "COI_SEND_FAILED",
+  error_at: new Date().toISOString(),
+})
         .eq("id", claimed.id);
 
       return;
@@ -436,10 +445,14 @@ cron.schedule("*/2 * * * *", async () => {
     const { error: doneErr } = await supabase
       .from("coi_requests")
       .update({
-        status: "completed",
-        gmail_message_id: messageId,
-        emailed_at: new Date().toISOString(),
-        error_message: null,
+  status: "completed",
+  gmail_message_id: messageId,
+  emailed_at: new Date().toISOString(),
+  completed_at: new Date().toISOString(),
+  error_message: null,
+  error_code: null,
+  error_at: null,
+})
       })
       .eq("id", claimed.id);
 
