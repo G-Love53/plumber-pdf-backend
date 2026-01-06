@@ -1,0 +1,89 @@
+/* =========================================
+   1. GLOBAL & RESET
+   ========================================= */
+/* Fix: Removed double '@page' typo */
+@page { size: letter; margin: 0; } 
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 8pt;
+    margin: 0;
+    padding: 0;
+    -webkit-print-color-adjust: exact;
+}
+
+/* NEW: Wrapper for the Certificate Page (Page 1) */
+/* Since global margins are 0, we add padding here manually */
+.cert-page {
+    width: 100%;
+    padding: 0.5in; 
+    box-sizing: border-box;
+}
+
+/* =========================================
+   2-6. UTILITIES (UNCHANGED)
+   ========================================= */
+.header { width: 100%; margin-bottom: 10px; display: flex; flex-direction: row; justify-content: space-between; }
+.agency-box { width: 45%; border: 1px solid #000; padding: 10px; box-sizing: border-box; }
+.title-box { width: 50%; text-align: right; }
+.title-box h1 { font-size: 16pt; font-weight: bold; margin: 0 0 10px 0; }
+.date-box { float: right; border: 1px solid #000; padding: 5px; width: 120px; text-align: center; margin-bottom: 10px; }
+.disclaimer { clear: both; font-size: 7pt; font-style: italic; margin-top: 50px; text-align: justify; }
+.logo { max-height: 50px; max-width: 100%; display: block; margin-bottom: 5px; }
+.contact { font-size: 7pt; margin-top: 5px; }
+.row { display: flex; flex-direction: row; width: 100%; margin-bottom: 5px; }
+.box { border: 1px solid #000; padding: 5px; box-sizing: border-box; font-size: 9pt; }
+.insured-box { width: 50%; margin-right: 5px; height: 100px; }
+.contact-box { width: 49%; height: 100px; }
+.holder-box { width: 50%; border: 1px solid #000; padding: 5px; height: 120px; margin-right: 5px; float: left; }
+.signature-box { width: 49%; float: left; height: 120px; position: relative; padding: 5px; }
+.coverage-section { width: 100%; border: 1px solid #000; margin-bottom: 5px; padding: 5px; }
+.section-title { font-weight: bold; font-size: 10pt; margin-bottom: 5px; }
+.acord-table { width: 100%; border-collapse: collapse; margin-top: 5px; font-size: 7pt; }
+.acord-table th { border-bottom: 1px solid #000; text-align: left; padding: 2px; }
+.acord-table td { border-bottom: 1px solid #ccc; padding: 4px 2px; vertical-align: top; }
+.description-box { width: 100%; border: 1px solid #000; min-height: 120px; padding: 5px; box-sizing: border-box; margin-bottom: 5px; font-size: 8pt; }
+.special-text { white-space: pre-wrap; }
+.footer-row { width: 100%; overflow: hidden; }
+.disclaimer-small { font-size: 6pt; text-align: justify; }
+
+/* =========================================
+   7. SVG ENDORSEMENT STYLING (INLINE FIX)
+   ========================================= */
+.page-break { 
+    page-break-before: always; 
+    height: 0; 
+}
+
+.form-container {
+    position: relative;
+    width: 8.5in;  
+    height: 11in;  
+    overflow: hidden;
+    page-break-inside: avoid;
+    padding: 0;
+    margin: 0;
+}
+
+.form-bg-svg {
+    position: absolute;
+    left: 0; top: 0;
+    width: 8.5in; height: 11in;
+    z-index: 1;
+}
+
+.form-bg-svg svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.form-overlay {
+    position: absolute;
+    z-index: 2;
+    font-size: 11pt;
+    font-family: Arial, Helvetica, sans-serif;
+    color: #000;
+    background: transparent;
+    font-weight: bold;
+}
