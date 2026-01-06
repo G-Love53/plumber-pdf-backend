@@ -325,20 +325,23 @@ cron.schedule("*/2 * * * *", async () => {
     if (!rows || rows.length === 0) return;
 
     const reqRow = rows[0];
-    console.log(`[COI] Candidate id=${reqRow.id} segment=${reqRow.segment} status="${reqRow.status}"`);
+    console.log(
+      `[COI] Candidate id=${reqRow.id} segment=${reqRow.segment} status="${reqRow.status}"`
+    );
 
     // 2) Claim row (pending -> processing)
+    const nowIso = new Date().toISOString();
+
     const { data: claimed, error: claimErr } = await supabase
       .from("coi_requests")
       .update({
-  status: "processing",
-  attempt_count: (reqRow.attempt_count ?? 0) + 1,
-  last_attempt_at: new Date().toISOString(),
-  processing_started_at: new Date().toISOString(),
-  error_message: null,
-  error_code: null,
-  error_at: null,
-})
+        status: "processing",
+        attempt_count: (reqRow.attempt_count ?? 0) + 1,
+        last_attempt_at: nowIso,
+        processing_started_at: nowIso,
+        error_message: null,
+        error_code: null,
+        error_at: null,
       })
       .eq("id", reqRow.id)
       .eq("status", "pending")
@@ -410,15 +413,16 @@ cron.schedule("*/2 * * * *", async () => {
       console.error(`[COI] EMAIL SEND FAILED id=${claimed.id} error="${msg}"`);
       console.error(sendErr?.stack || sendErr);
 
-      const { error: updErr } = await supabase
+      await supabase
         .from("coi_requests")
         .update({
           status: "error",
           error_message: msg,
+          error_code: "COI_SEND_FAILED",
+          error_at: new Date().toISOString(),
         })
         .eq("id", claimed.id);
 
-      if (updErr) console.error("[COI] Failed updating status=error:", updErr);
       return;
     }
 
@@ -432,27 +436,28 @@ cron.schedule("*/2 * * * *", async () => {
       await supabase
         .from("coi_requests")
         .update({
-  status: "error",
-  error_message: msg,
-  error_code: "COI_SEND_FAILED",
-  error_at: new Date().toISOString(),
-})
+          status: "error",
+          error_message: msg,
+          error_code: "NO_GMAIL_MESSAGE_ID",
+          error_at: new Date().toISOString(),
+        })
         .eq("id", claimed.id);
 
       return;
     }
 
+    // Mark completed
+    const doneIso = new Date().toISOString();
     const { error: doneErr } = await supabase
       .from("coi_requests")
       .update({
-  status: "completed",
-  gmail_message_id: messageId,
-  emailed_at: new Date().toISOString(),
-  completed_at: new Date().toISOString(),
-  error_message: null,
-  error_code: null,
-  error_at: null,
-})
+        status: "completed",
+        gmail_message_id: messageId,
+        emailed_at: doneIso,
+        completed_at: doneIso,
+        error_message: null,
+        error_code: null,
+        error_at: null,
       })
       .eq("id", claimed.id);
 
@@ -463,6 +468,8 @@ cron.schedule("*/2 * * * *", async () => {
     }
   } catch (err) {
     console.error("[COI] Tick crashed:", err?.stack || err);
+
+    // Don't guess the row id here (we may not have it). This just keeps the process alive.
   }
 });
 
