@@ -309,13 +309,33 @@ APP.listen(PORT, () => console.log(`PDF service listening on ${PORT}`));
 // =====================================================
 // 🤖 THE ROBOT MANAGER (Automated Tasks)
 // =====================================================
-console.log("🤖 Robot Scheduler: ONLINE and Listening...");
+// ---- COI Scheduler (SRS-safe) -----------------------------------
+let COI_TICK_RUNNING = false;
 
-// --- TASK 1: THE COI WATCHER (Check every 2 minutes) ---
 cron.schedule("*/2 * * * *", async () => {
+  if (COI_TICK_RUNNING) {
+    console.log("[COI] Tick skipped (already running)");
+    return;
+  }
+  COI_TICK_RUNNING = true;
+
   console.log("[COI] Tick: checking pending rows...");
 
   try {
+    // 0) (Optional but recommended) Requeue stale "processing" rows (crash/redeploy safety)
+    // If a row has been "processing" > 10 minutes, move it back to pending
+    const tenMinAgo = new Date(Date.now() - 10 * 60 * 1000).toISOString();
+    await supabase
+      .from("coi_requests")
+      .update({
+        status: "pending",
+        error_message: "Re-queued after stale processing timeout",
+        error_code: "STALE_PROCESSING_REQUEUE",
+        error_at: new Date().toISOString(),
+      })
+      .eq("status", "processing")
+      .lt("processing_started_at", tenMinAgo);
+
     // 1) Pull oldest pending row
     const { data: rows, error: selErr } = await supabase
       .from("coi_requests")
@@ -337,13 +357,14 @@ cron.schedule("*/2 * * * *", async () => {
       `[COI] Candidate id=${reqRow.id} segment=${reqRow.segment} status="${reqRow.status}"`
     );
 
-    // 2) Claim row (pending -> processing)
+    // 2) Claim row (pending -> processing) ATOMIC
     const nowIso = new Date().toISOString();
 
     const { data: claimed, error: claimErr } = await supabase
       .from("coi_requests")
       .update({
         status: "processing",
+        // Don't depend on reqRow being fresh; just increment from DB value if present
         attempt_count: (reqRow.attempt_count ?? 0) + 1,
         last_attempt_at: nowIso,
         processing_started_at: nowIso,
@@ -368,9 +389,10 @@ cron.schedule("*/2 * * * *", async () => {
     console.log(`[COI] Claimed id=${claimed.id} -> processing`);
 
     // 3) Generate PDF (ACORD25)
+    // IMPORTANT: If your table does NOT have form_id, DO NOT reference claimed.form_id here.
     const { buffer: pdfBuffer, meta } = await generateDocument({
       ...claimed,
-      form_id: claimed.form_id || "acord25_v1",
+      form_id: "acord25_v1",
     });
 
     if (!pdfBuffer || !Buffer.isBuffer(pdfBuffer)) {
@@ -386,14 +408,13 @@ cron.schedule("*/2 * * * *", async () => {
       throw new Error("Missing user_email on coi_requests row");
     }
 
-    // 5) Prepare attachment
+    // 5) Prepare attachment filename
     const safeHolder = String(claimed.holder_name || "Holder")
       .replace(/[^a-z0-9]/gi, "_")
       .substring(0, 50);
 
     const filename =
-      meta?.filename ||
-      `COI-${safeHolder}-${String(claimed.id).substring(0, 8)}.pdf`;
+      meta?.filename || `COI-${safeHolder}-${String(claimed.id).substring(0, 8)}.pdf`;
 
     console.log(`[COI] About to send email to="${recipient}" filename="${filename}"`);
 
@@ -436,7 +457,6 @@ cron.schedule("*/2 * * * *", async () => {
 
     // 7) PROOF GATE — do NOT complete without a messageId
     const messageId = info?.messageId;
-
     if (!messageId) {
       const msg = "Email send returned no messageId (not provable)";
       console.error(`[COI] ${msg} id=${claimed.id}`);
@@ -454,7 +474,7 @@ cron.schedule("*/2 * * * *", async () => {
       return;
     }
 
-    // Mark completed
+    // 8) Mark completed
     const doneIso = new Date().toISOString();
     const { error: doneErr } = await supabase
       .from("coi_requests")
@@ -476,10 +496,11 @@ cron.schedule("*/2 * * * *", async () => {
     }
   } catch (err) {
     console.error("[COI] Tick crashed:", err?.stack || err);
-
-    // Don't guess the row id here (we may not have it). This just keeps the process alive.
+  } finally {
+    COI_TICK_RUNNING = false;
   }
 });
+
 
 // --- TASK 2: THE LIBRARIAN (Check every 10 minutes) ---
 cron.schedule("*/10 * * * *", async () => {
