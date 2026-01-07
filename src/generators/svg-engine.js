@@ -10,84 +10,79 @@ const __dirname = path.dirname(__filename);
 const sanitizeFilename = (str = "") =>
   String(str).replace(/[^a-z0-9]/gi, "_").substring(0, 50);
 
+/**
+ * templatePath examples we support:
+ * - "ACORD25"                  -> /app/templates/ACORD25
+ * - "templates/ACORD25"        -> /app/templates/ACORD25
+ * - "/app/templates/ACORD25"   -> /app/templates/ACORD25
+ */
 function resolveTemplateDir(templatePath = "") {
-  // Project root: /app
-  const projectRoot = path.join(__dirname, "..", "..");
+  const projectRoot = path.join(__dirname, "..", ".."); // -> /app
+  const tp = String(templatePath || "").replace(/\\/g, "/").trim();
 
-  const tp = String(templatePath || "").replace(/\\/g, "/"); // normalize slashes
+  if (!tp) return path.join(projectRoot, "templates");
 
-  // If already "templates/ACORD25" -> join to /app/templates/ACORD25
+  if (tp.startsWith("/")) return tp;
+
   if (tp.toLowerCase().startsWith("templates/")) {
     return path.join(projectRoot, "templates", tp.slice("templates/".length));
   }
 
-  // If absolute path passed, use as-is
-  if (tp.startsWith("/")) return tp;
-
-  // Otherwise treat as folder name inside /app/templates
   return path.join(projectRoot, "templates", tp);
 }
 
 export async function generate(jobData) {
-  const { requestRow, assets, templatePath } = jobData;
+  const { requestRow = {}, assets = {}, templatePath = "" } = jobData || {};
   let browser = null;
 
   try {
     const templateDir = resolveTemplateDir(templatePath);
 
     const templateFile = path.join(templateDir, "index.ejs");
+    const cssFile = path.join(templateDir, "styles.css");
+    const bgFile = path.join(templateDir, "background.svg");
+
+    // Fail fast if template missing
     if (!fs.existsSync(templateFile)) {
       throw new Error(`[SVG Engine] Missing template file: ${templateFile}`);
     }
 
-    // optional background.svg
-    const bgPath = path.join(templateDir, "background.svg");
+    // optional background.svg -> embed as base64 data URL
     let backgroundSvg = "";
-    if (fs.existsSync(bgPath)) {
-      backgroundSvg = `data:image/svg+xml;base64,${fs.readFileSync(bgPath).toString("base64")}`;
+    if (fs.existsSync(bgFile)) {
+      backgroundSvg = `data:image/svg+xml;base64,${fs
+        .readFileSync(bgFile)
+        .toString("base64")}`;
     } else {
-      console.warn(`[SVG Engine] Warning: Background SVG not found at ${bgPath}`);
+      console.warn(`[SVG Engine] Warning: Background SVG not found at ${bgFile}`);
     }
 
-    // inline template css (fixes: styles is not defined)
-    const cssPath = path.join(templateDir, "styles.css");
-    const styles = fs.existsSync(cssPath) ? fs.readFileSync(cssPath, "utf8") : "";
+    // inline CSS (fixes: styles is not defined)
+    const styles = fs.existsSync(cssFile) ? fs.readFileSync(cssFile, "utf8") : "";
 
-    // Fixes: data.segment etc + keeps backward-compat by also spreading requestRow
-    const viewModel = {
+    // Render with a stable contract expected by ACORD25.ejs:
+    // - data (object)
+    // - styles (string)
+    // - assets (object)
+    const html = await ejs.renderFile(templateFile, {
       data: requestRow,
-      ...requestRow,
       styles,
-      assets: {
-        ...assets,
-        background: backgroundSvg,
-      },
-      formatDate: (d) => (d ? new Date(d).toLocaleDateString() : ""),
-    };
+      assets: { ...assets, background: backgroundSvg },
+      formatDate: (d) => (d ? new Date(d).toLocaleDateString("en-US") : ""),
+    });
 
-
-// Fail fast if template missing
-if (!fs.existsSync(templateFile)) {
-  throw new Error(`[SVG Engine] Missing template file: ${templateFile}`);
-}
-
-// Load CSS safely
-let styles = "";
-if (fs.existsSync(cssFile)) {
-  styles = fs.readFileSync(cssFile, "utf8");
-}
-
-// Render with a stable contract
-const html = await ejs.renderFile(templateFile, {
-  data: requestRow,   // 👈 REQUIRED by ACORD25.ejs
-  styles,             // 👈 REQUIRED by <%- styles %>
-  assets: {
-    ...assets,
-    background: backgroundSvg
-  },
-  formatDate: (d) => (d ? new Date(d).toLocaleDateString() : "")
-});
-
+    // Launch Puppeteer
+    browser = await puppeteer.launch({
+      executablePath:
+        process.env.PUPPETEER_EXECUTABLE_PATH || puppeteer.executablePath(),
+      headless: "new",
+      args: [
+        "--no-sandbox",
+        "--disable-setuid-sandbox",
+        "--disable-dev-shm-usage",
+        "--disable-gpu",
+      ],
+    });
 
     const page = await browser.newPage();
     await page.setContent(html, { waitUntil: "domcontentloaded", timeout: 30000 });
@@ -104,7 +99,7 @@ const html = await ejs.renderFile(templateFile, {
     return {
       buffer,
       meta: {
-        filename: `COI_${safeSegment}_${safeHolder}_${requestRow.id}.pdf`,
+        filename: `COI_${safeSegment}_${safeHolder}_${requestRow.id || "noid"}.pdf`,
         contentType: "application/pdf",
       },
     };
