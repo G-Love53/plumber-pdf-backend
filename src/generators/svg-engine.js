@@ -10,13 +10,22 @@ const __dirname = path.dirname(__filename);
 const sanitizeFilename = (str = "") =>
   String(str).replace(/[^a-z0-9]/gi, "_").substring(0, 50);
 
-// IMPORTANT:
-// templatePath should be the folder name like "ACORD25" (not a full path).
-// This engine always resolves it under /Templates/<templatePath>/
 function resolveTemplateDir(templatePath = "") {
-  // From /src/generators -> project root is ../../
-  // Then Templates/<templatePath>
-  return path.join(__dirname, "..", "..", "Templates", templatePath);
+  // /app/src/generators -> project root is /app
+  const projectRoot = path.join(__dirname, "..", "..");
+
+  const tp = String(templatePath || "").replace(/\\/g, "/"); // normalize windows slashes
+
+  // If caller already passes "templates/ACORD25" (or "Templates/ACORD25"), use it directly (but force lowercase folder name)
+  if (tp.toLowerCase().startsWith("templates/")) {
+    return path.join(projectRoot, "templates", tp.slice("templates/".length));
+  }
+
+  // If caller passes "/app/templates/ACORD25" style absolute, just use it
+  if (tp.startsWith("/")) return tp;
+
+  // Normal case: caller passes "ACORD25"
+  return path.join(projectRoot, "templates", tp);
 }
 
 export async function generate(jobData) {
@@ -40,7 +49,6 @@ export async function generate(jobData) {
 
     // --- EJS template (required) ---
     const templateFile = path.join(templateDir, "index.ejs");
-
     if (!fs.existsSync(templateFile)) {
       throw new Error(`[SVG Engine] Missing template file: ${templateFile}`);
     }
