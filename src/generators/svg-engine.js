@@ -65,9 +65,6 @@ export async function generate(jobData) {
       formatDate: (d) => (d ? new Date(d).toLocaleDateString() : ""),
     };
 
-    const templateDir = resolveTemplateDir(templatePath);
-const templateFile = path.join(templateDir, "index.ejs");
-const cssFile = path.join(templateDir, "styles.css");
 
 // Fail fast if template missing
 if (!fs.existsSync(templateFile)) {
