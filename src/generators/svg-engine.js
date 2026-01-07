@@ -65,19 +65,32 @@ export async function generate(jobData) {
       formatDate: (d) => (d ? new Date(d).toLocaleDateString() : ""),
     };
 
-    const html = await ejs.renderFile(templateFile, viewModel);
+    const templateDir = resolveTemplateDir(templatePath);
+const templateFile = path.join(templateDir, "index.ejs");
+const cssFile = path.join(templateDir, "styles.css");
 
-    browser = await puppeteer.launch({
-      executablePath:
-        process.env.PUPPETEER_EXECUTABLE_PATH || puppeteer.executablePath(),
-      headless: "new",
-      args: [
-        "--no-sandbox",
-        "--disable-setuid-sandbox",
-        "--disable-dev-shm-usage",
-        "--disable-gpu",
-      ],
-    });
+// Fail fast if template missing
+if (!fs.existsSync(templateFile)) {
+  throw new Error(`[SVG Engine] Missing template file: ${templateFile}`);
+}
+
+// Load CSS safely
+let styles = "";
+if (fs.existsSync(cssFile)) {
+  styles = fs.readFileSync(cssFile, "utf8");
+}
+
+// Render with a stable contract
+const html = await ejs.renderFile(templateFile, {
+  data: requestRow,   // 👈 REQUIRED by ACORD25.ejs
+  styles,             // 👈 REQUIRED by <%- styles %>
+  assets: {
+    ...assets,
+    background: backgroundSvg
+  },
+  formatDate: (d) => (d ? new Date(d).toLocaleDateString() : "")
+});
+
 
     const page = await browser.newPage();
     await page.setContent(html, { waitUntil: "domcontentloaded", timeout: 30000 });
