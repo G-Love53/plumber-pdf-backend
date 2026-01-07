@@ -48,19 +48,23 @@ export async function generate(jobData) {
     }
 
     // --- EJS template (required) ---
-    const templateFile = path.join(templateDir, "index.ejs");
-    if (!fs.existsSync(templateFile)) {
-      throw new Error(`[SVG Engine] Missing template file: ${templateFile}`);
-    }
+    const templateFile = path.join(__dirname, "../../", templatePath, "index.ejs");
 
-    const html = await ejs.renderFile(templateFile, {
-      ...requestRow,
-      assets: {
-        ...assets,
-        background: backgroundSvg,
-      },
-      formatDate: (d) => (d ? new Date(d).toLocaleDateString() : ""),
-    });
+// Always load template CSS if present (so templates can safely inject it)
+const cssPath = path.join(__dirname, "../../", templatePath, "styles.css");
+const styles = fs.existsSync(cssPath) ? fs.readFileSync(cssPath, "utf8") : "";
+
+const html = await ejs.renderFile(templateFile, {
+  // Standard contract for ALL templates:
+  data: requestRow,          // templates should read from data
+  styles,                   // templates can safely inject <%- styles %>
+  assets: {
+    ...assets,
+    background: backgroundSvg,
+  },
+  formatDate: (d) => (d ? new Date(d).toLocaleDateString() : ""),
+});
+
 
     browser = await puppeteer.launch({
       executablePath:
