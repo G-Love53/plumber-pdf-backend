@@ -37,6 +37,11 @@ const TEMPLATE_ALIASES = {
   "ACORD25":   "ACORD25",
   "Supplemental": "SUPP_BERKLEY_PLUMBER",
 
+     // ---- legacy plumber-prefixed inbound names (Netlify old build) ----
+  "PlumberAccord125": "ACORD125",
+  "PlumberAccord126": "ACORD126",
+  "PlumberSupp": "SUPP_BERKLEY_PLUMBER",
+
   // Preferred inbound names going forward
   "ACORD125": "ACORD125",
   "ACORD126": "ACORD126",
