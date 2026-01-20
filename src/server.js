@@ -80,8 +80,10 @@ APP.use((req, res, next) => {
   next();
 });
 
-const TPL_DIR = path.join(__dirname, "..", "Templates");
-const MAP_DIR = path.join(__dirname, "..", "mapping");
+const HOMEBASE_DIR = path.join(__dirname, "..", "vendor", "CID_HomeBase");
+const TPL_DIR = path.join(HOMEBASE_DIR, "templates");
+const MAP_DIR = path.join(HOMEBASE_DIR, "mapping");
+
 
 // =====================================================
 // 🧠 Supabase (Single Source of Truth)
