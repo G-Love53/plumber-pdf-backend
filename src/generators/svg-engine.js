@@ -12,14 +12,13 @@ const sanitizeFilename = (str = "") =>
 
 /**
  * templatePath examples we support:
- * - "ACORD25"                  -> /app/templates/ACORD25
- * - "templates/ACORD25"        -> /app/templates/ACORD25
- * - "/app/templates/ACORD25"   -> /app/templates/ACORD25
+ * - "ACORD25"                                -> <repo>/templates/ACORD25
+ * - "templates/ACORD25"                      -> <repo>/templates/ACORD25
+ * - "vendor/CID_HomeBase/templates/ACORD25"  -> <repo>/vendor/CID_HomeBase/templates/ACORD25
+ * - "/app/vendor/CID_HomeBase/templates/ACORD25" -> absolute path
  */
-  
-}
 function resolveTemplateDir(templatePath = "") {
-  const projectRoot = path.join(__dirname, "..", ".."); // repo root
+  const projectRoot = path.join(__dirname, "..", ".."); // repo root (/app on Render)
   const tp = String(templatePath || "").replace(/\\/g, "/").trim();
 
   if (!tp) return path.join(projectRoot, "templates");
@@ -34,6 +33,7 @@ function resolveTemplateDir(templatePath = "") {
   // Back-compat: "ACORD25" means /templates/ACORD25
   return path.join(projectRoot, "templates", tp);
 }
+
 
 export async function generate(jobData) {
   const { requestRow = {}, assets = {}, templatePath = "" } = jobData || {};
