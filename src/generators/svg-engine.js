@@ -16,11 +16,6 @@ const sanitizeFilename = (str = "") =>
  * - "templates/ACORD25"        -> /app/templates/ACORD25
  * - "/app/templates/ACORD25"   -> /app/templates/ACORD25
  */
-function resolveTemplateDir(templatePath = "") {
-  const projectRoot = path.join(__dirname, "..", ".."); // repo root
-  const tp = String(templatePath || "").replace(/\\/g, "/").trim();
-
-  if (!tp) return path.join(projectRoot, "templates");
   
 }
 function resolveTemplateDir(templatePath = "") {
