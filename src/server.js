@@ -102,21 +102,32 @@ async function maybeMapData(templateName, rawData) {
   try {
     const mapPath = path.join(MAP_DIR, `${templateName}.json`);
     const mapping = JSON.parse(await fs.readFile(mapPath, "utf8"));
-    const mapped = {};
+
+    const mapped = JSON.parse(JSON.stringify(rawData)); // deep clone
+
     for (const [tplKey, formKey] of Object.entries(mapping)) {
-      mapped[tplKey] = rawData?.[formKey] ?? "";
+      const value = rawData?.[formKey] ?? "";
+
+      // support nested EJS paths like agent_applicant.applicant_name
+      const parts = tplKey.split(".");
+      let cursor = mapped;
+
+      while (parts.length > 1) {
+        const p = parts.shift();
+        cursor[p] = cursor[p] || {};
+        cursor = cursor[p];
+      }
+
+      cursor[parts[0]] = value;
     }
-    return { ...rawData, ...mapped };
-  } catch {
+
+    return mapped;
+  } catch (e) {
+    console.warn(`⚠️ No mapping applied for ${templateName}`);
     return rawData;
   }
 }
 
-// Helper: Render Bundle
-async function renderBundleAndRespond({ templates, email }, res) {
-  if (!Array.isArray(templates) || templates.length === 0) {
-    return res.status(400).json({ ok: false, error: "NO_TEMPLATES" });
-  }
 
   const results = [];
 
