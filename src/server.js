@@ -261,15 +261,35 @@ APP.post("/submit-quote", async (req, res) => {
 APP.post("/request-coi", async (req, res) => {
   try {
     const {
-      segment,
-      holder_name,
-      holder_address,
-      holder_city_state_zip,
-      holder_email,
-      description_special_text,
-      policy_id,
-      user_email,
-    } = req.body || {};
+  segment,
+  policy_id,
+
+  // holder
+  holder_name,
+  holder_address,
+  holder_city_state_zip,
+  holder_email,
+
+  // delivery
+  user_email,
+
+  // legacy free text (keep)
+  description_special_text,
+
+  // ✅ NEW (safe defaults)
+  bundle_id = "coi_standard_v1",
+  additional_insureds = [],
+  special_wording_text = "",
+  special_wording_confirmed = false,
+  supporting_uploads = [],
+} = req.body || {};
+if (special_wording_text && !special_wording_confirmed) {
+  return res.status(400).json({
+    ok: false,
+    error: "WORDING_NOT_CONFIRMED",
+  });
+}
+
 
     if (!segment) return res.status(400).json({ ok: false, error: "MISSING_SEGMENT" });
 
@@ -281,17 +301,33 @@ APP.post("/request-coi", async (req, res) => {
     const { data, error } = await supabase
       .from("coi_requests")
       .insert({
-        segment,
-        user_email: recipientEmail,
-        policy_id: policy_id || null,
-        holder_name: holder_name || null,
-        holder_address: holder_address || null,
-        holder_city_state_zip: holder_city_state_zip || null,
-        holder_email: holder_email || null,
-        description_special_text: description_special_text || null,
-        endorsements_needed: endorsements_needed?.length ? endorsements_needed : null,
-        status: "pending",
-      })
+  segment: segment || SEGMENT,
+  bundle_id,
+
+  user_email: recipientEmail,
+  policy_id: policy_id || null,
+
+  holder_name: holder_name || null,
+  holder_address: holder_address || null,
+  holder_city_state_zip: holder_city_state_zip || null,
+  holder_email: holder_email || null,
+
+  description_special_text: description_special_text || null,
+  endorsements_needed: endorsements_needed?.length ? endorsements_needed : null,
+
+  // ✅ NEW (already added to DB)
+  additional_insureds: Array.isArray(additional_insureds)
+    ? additional_insureds
+    : [],
+  special_wording_text: special_wording_text || null,
+  special_wording_confirmed: !!special_wording_confirmed,
+  supporting_uploads: Array.isArray(supporting_uploads)
+    ? supporting_uploads
+    : [],
+
+  status: "pending",
+})
+
       .select()
       .single();
 
