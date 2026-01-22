@@ -1,3 +1,4 @@
+// src/generators/index.js
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -15,34 +16,53 @@ const __dirname = path.dirname(__filename);
 const formsPath = path.join(__dirname, "../config/forms.json");
 const forms = JSON.parse(fs.readFileSync(formsPath, "utf8"));
 
+function getFormConfigOrThrow(formId) {
+  if (!formId) {
+    throw new Error(
+      "[Factory] Missing form_id on requestRow. Set requestRow.form_id explicitly (e.g., acord25_v1, acord125_v1)."
+    );
+  }
+
+  const cfg = forms[formId];
+
+  if (!cfg) throw new Error(`[Factory] Configuration missing for form_id: ${formId}`);
+  if (cfg.enabled === false) throw new Error(`[Factory] Form ${formId} is disabled.`);
+
+  const engine = String(cfg.engine || "").toLowerCase();
+  if (engine !== "svg" && engine !== "html") {
+    throw new Error(`[Factory] Unknown engine type for ${formId}: ${cfg.engine}`);
+  }
+
+  if (!cfg.templatePath || typeof cfg.templatePath !== "string") {
+    throw new Error(`[Factory] Missing templatePath for form_id: ${formId}`);
+  }
+
+  return { ...cfg, engine };
+}
+
 export async function generateDocument(requestRow) {
-  const formId = requestRow.form_id || "acord25_v1";
-  const formConfig = forms[formId];
+  const formId = requestRow?.form_id; // NO FALLBACK. Prevents wrong-template routing.
+  const formConfig = getFormConfigOrThrow(formId);
 
-  if (!formConfig) throw new Error(`Configuration missing for form_id: ${formId}`);
-  if (formConfig.enabled === false) throw new Error(`Form ${formId} is disabled.`);
-
-  const assets = getSegmentAssets(requestRow.segment);
+  const assets = getSegmentAssets(requestRow?.segment);
 
   const jobData = {
     requestRow,
     assets,
     templatePath: formConfig.templatePath,
-    globalCss: null
+    globalCss: null,
   };
 
   console.log(
-    `[Factory] Processing ${requestRow.id} (${formId}) seg=${requestRow.segment || "default"} engine=${formConfig.engine}`
+    `[Factory] id=${requestRow?.id} form_id=${formId} seg=${requestRow?.segment || "default"} engine=${formConfig.engine} templatePath=${formConfig.templatePath}`
   );
 
   if (formConfig.engine === "svg") {
     return await svgGenerate(jobData);
   }
 
-  if (formConfig.engine === "html") {
-    jobData.globalCss = loadGlobalCss();
-    return await htmlGenerate(jobData);
-  }
-
-  throw new Error(`Unknown engine type: ${formConfig.engine}`);
+  // html
+  jobData.globalCss = loadGlobalCss();
+  return await htmlGenerate(jobData);
 }
+
