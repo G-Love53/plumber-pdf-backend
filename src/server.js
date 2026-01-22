@@ -158,13 +158,14 @@ async function renderBundleAndRespond({ templates, email }, res) {
     }
 
     const rawData = t.data || {};
-    const unified = await maybeMapData(name, rawData);
+const unified = await maybeMapData(name, rawData);
 
-    // REQUIRED: ensure correct form_id so generators/index.js does NOT default to acord25_v1
-    unified.form_id = unified.form_id || formIdForTemplateFolder(name);
+// GOLD STANDARD: template folder decides form_id (no caller/mapping overrides)
+unified.form_id = formIdForTemplateFolder(name);
 
-    // Good defaults
-    unified.segment = unified.segment || SEGMENT;
+// GOLD STANDARD: backend decides segment (no caller overrides)
+unified.segment = SEGMENT;
+
 
     try {
       const { buffer } = await generateDocument(unified);
