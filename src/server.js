@@ -151,7 +151,11 @@ async function renderBundleAndRespond({ templates, email }, res) {
     const unified = await maybeMapData(name, rawData);
 
     try {
-      const buffer = await renderPdf({ htmlPath, cssPath, data: unified });
+      const { buffer } = await generateDocument({
+  requestRow: unified,
+  templatePath: `vendor/CID_HomeBase/templates/${name}`
+});
+
       const prettyName = FILENAME_MAP[name] || t.filename || `${name}.pdf`;
       results.push({ status: "fulfilled", value: { filename: prettyName, buffer } });
     } catch (err) {
