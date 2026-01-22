@@ -3,11 +3,8 @@
 import express from "express";
 import path from "path";
 import fs from "fs/promises";
-import { fileURLToPath } from "url";
-// Load bundles.json safely
 import fssync from "fs";
-const bundlesPath = path.join(__dirname, "config", "bundles.json");
-const bundles = JSON.parse(fssync.readFileSync(bundlesPath, "utf8"));
+import { fileURLToPath } from "url";
 
 import cron from "node-cron";
 import { createClient } from "@supabase/supabase-js";
@@ -21,8 +18,20 @@ import { normalizeEndorsements } from "./services/endorsements/endorsementNormal
 import { processInbox } from "./quote-processor.js";
 import { triggerCarrierBind } from "./bind-processor.js";
 
+/* ============================================================
+   📍 ESM PATH SETUP (MUST COME FIRST)
+   ============================================================ */
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+/* ============================================================
+   📦 LOAD BUNDLES (NOW SAFE)
+   ============================================================ */
+
+const bundlesPath = path.join(__dirname, "config", "bundles.json");
+const bundles = JSON.parse(fssync.readFileSync(bundlesPath, "utf8"));
+
 
 /* ============================================================
    🟢 CONFIG
