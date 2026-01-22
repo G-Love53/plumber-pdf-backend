@@ -8,23 +8,30 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Repo root (/app on Render)
+const PROJECT_ROOT = path.join(__dirname, "..", "..");
+
 const sanitizeFilename = (str = "") =>
-  String(str || "")
+  String(str ?? "")
     .replace(/[^a-z0-9]+/gi, "_")
     .replace(/^_+|_+$/g, "")
     .substring(0, 80);
 
 function resolveTemplateDir(templatePath = "") {
-  const projectRoot = path.join(__dirname, "..", ".."); // repo root (/app on Render)
-  const tp = String(templatePath || "").replace(/\\/g, "/").trim();
+  const tp = String(templatePath ?? "").replace(/\\/g, "/").trim();
 
-  if (!tp) return path.join(projectRoot, "templates");
+  // Default templates dir (rarely used in your current architecture, but safe)
+  if (!tp) return path.join(PROJECT_ROOT, "templates");
+
+  // Absolute path (advanced use)
   if (tp.startsWith("/")) return tp;
 
-  if (tp.toLowerCase().startsWith("vendor/")) return path.join(projectRoot, tp);
-  if (tp.toLowerCase().startsWith("templates/")) return path.join(projectRoot, tp);
+  // Canonical paths (vendor/CID_HomeBase/... or templates/...)
+  if (tp.toLowerCase().startsWith("vendor/")) return path.join(PROJECT_ROOT, tp);
+  if (tp.toLowerCase().startsWith("templates/")) return path.join(PROJECT_ROOT, tp);
 
-  return path.join(projectRoot, "templates", tp);
+  // Otherwise treat as subfolder under /templates
+  return path.join(PROJECT_ROOT, "templates", tp);
 }
 
 function readIfExists(p) {
@@ -44,15 +51,35 @@ function readSvgAsDataUriIfExists(p) {
   }
 }
 
+/**
+ * Permanent EJS safety:
+ * - EJS uses `with (locals) { ... }`
+ * - `has: () => true` makes every identifier "exist" to avoid ReferenceError
+ * - missing values return "" (blank)
+ */
+function safeLocals(obj = {}) {
+  const base = obj && typeof obj === "object" ? obj : {};
+  return new Proxy(base, {
+    has: () => true,
+    get: (target, prop) => {
+      if (typeof prop === "symbol") return target[prop];
+      if (Object.prototype.hasOwnProperty.call(target, prop)) {
+        const v = target[prop];
+        return v === undefined || v === null ? "" : v;
+      }
+      return "";
+    },
+  });
+}
+
 function buildLocals({ requestRow = {}, assets = {}, backgroundSvg = "", styles = "" }) {
-  // IMPORTANT CONTRACT (works for ALL templates going forward):
-  // - Top-level locals: every requestRow key is available directly (holder_name, applicant_name, etc.)
-  // - data: requestRow (so templates can use data.holder_name style too)
-  // - formData: alias to requestRow (back-compat for older templates)
-  // - assets: passed through + background
-  // - styles: inline CSS
+  // Contract:
+  // - flat locals: holder_name, applicant_name, etc (legacy templates)
+  // - data: requestRow (preferred style: data.holder_name)
+  // - formData: alias to requestRow (older templates)
+  // - assets/background/styles/helpers available to all templates
   return {
-    ...requestRow, // <-- fixes "holder_name is not defined" everywhere
+    ...requestRow,
     data: requestRow,
     formData: requestRow,
     styles,
@@ -72,9 +99,7 @@ async function launchBrowser() {
     process.env.PUPPETEER_EXECUTABLE_PATH || puppeteer.executablePath?.();
 
   if (!executablePath) {
-    throw new Error(
-      "[SVG Engine] No Chrome executable found. Set PUPPETEER_EXECUTABLE_PATH."
-    );
+    throw new Error("[SVG Engine] No Chrome executable found. Set PUPPETEER_EXECUTABLE_PATH.");
   }
 
   return puppeteer.launch({
@@ -90,9 +115,20 @@ async function launchBrowser() {
   });
 }
 
+function assertValidPdfBuffer(buffer) {
+  if (!buffer || buffer.length < 4) {
+    throw new Error("[SVG Engine] PDF generation failed (empty/short buffer)");
+  }
+  const sig = buffer.subarray(0, 4).toString("utf8");
+  if (sig !== "%PDF") {
+    throw new Error("[SVG Engine] PDF generation failed (invalid PDF signature)");
+  }
+}
+
 export async function generate(jobData) {
   const { requestRow = {}, assets = {}, templatePath = "" } = jobData || {};
   let browser = null;
+  let page = null;
 
   try {
     const templateDir = resolveTemplateDir(templatePath);
@@ -108,17 +144,21 @@ export async function generate(jobData) {
     const styles = readIfExists(cssFile);
     const backgroundSvg = readSvgAsDataUriIfExists(bgFile);
 
-    const locals = buildLocals({ requestRow, assets, backgroundSvg, styles });
+    const rawLocals = buildLocals({ requestRow, assets, backgroundSvg, styles });
+    const locals = safeLocals(rawLocals);
 
-    // Render HTML
-    const html = await ejs.renderFile(templateFile, locals, { async: true });
+    // Render HTML (keep strict:false so Proxy.has() works with EJS `with()`)
+    const html = await ejs.renderFile(templateFile, locals, {
+      async: true,
+      strict: false,
+    });
 
     // PDF
     browser = await launchBrowser();
-    const page = await browser.newPage();
+    page = await browser.newPage();
 
-    // More reliable than domcontentloaded for SVG-heavy pages
-    await page.setContent(html, { waitUntil: "networkidle0", timeout: 60000 });
+    // Best for SVG-heavy pages; avoids hanging on networkidle0
+    await page.setContent(html, { waitUntil: "load", timeout: 60000 });
     await page.evaluateHandle("document.fonts.ready");
 
     const buffer = await page.pdf({
@@ -128,7 +168,8 @@ export async function generate(jobData) {
       margin: { top: 0, right: 0, bottom: 0, left: 0 },
     });
 
-    // Filename: if this is a COI request we keep COI naming; otherwise a generic safe name.
+    assertValidPdfBuffer(buffer);
+
     const safeSegment = sanitizeFilename(requestRow.segment || "default");
     const safeHolder =
       sanitizeFilename(requestRow.holder_name) ||
@@ -146,6 +187,9 @@ export async function generate(jobData) {
     console.error("[SVG Engine Error]", err);
     throw err;
   } finally {
+    try {
+      if (page) await page.close();
+    } catch {}
     try {
       if (browser) await browser.close();
     } catch (e) {
