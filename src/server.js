@@ -128,6 +128,8 @@ async function maybeMapData(templateName, rawData) {
   }
 }
 
+// Helper: Render Bundle
+async function renderBundleAndRespond({ templates, email }, res) {
 
   const results = [];
 
