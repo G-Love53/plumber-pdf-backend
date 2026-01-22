@@ -3,11 +3,13 @@
     "enabled": true,
     "engine": "svg",
     "templatePath": "vendor/CID_HomeBase/templates/ACORD25"
+    "mappingPath": "vendor/CID_HomeBase/mapping/ACORD25.json"
   },
   "acord125_v1": {
     "enabled": true,
     "engine": "svg",
     "templatePath": "vendor/CID_HomeBase/templates/ACORD125"
+    "mappingPath": "vendor/CID_HomeBase/mapping/ACORD125.json"
   }
 }
 
