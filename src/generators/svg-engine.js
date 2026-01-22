@@ -16,18 +16,27 @@ const sanitizeFilename = (str = "") =>
  * - "templates/ACORD25"        -> /app/templates/ACORD25
  * - "/app/templates/ACORD25"   -> /app/templates/ACORD25
  */
+ffunction resolveTemplateDir(templatePath = "") {
+  const projectRoot = path.join(__dirname, "..", ".."); // repo root
+  const tp = String(templatePath || "").replace(/\\/g, "/").trim();
+
+  if (!tp) return path.join(projectRoot, "templates");
+  
+}
 function resolveTemplateDir(templatePath = "") {
-  const projectRoot = path.join(__dirname, "..", ".."); // -> /app
+  const projectRoot = path.join(__dirname, "..", ".."); // repo root
   const tp = String(templatePath || "").replace(/\\/g, "/").trim();
 
   if (!tp) return path.join(projectRoot, "templates");
 
+  // Absolute path stays absolute
   if (tp.startsWith("/")) return tp;
 
-  if (tp.toLowerCase().startsWith("templates/")) {
-    return path.join(projectRoot, "templates", tp.slice("templates/".length));
-  }
+  // Allow direct repo-relative paths
+  if (tp.toLowerCase().startsWith("vendor/")) return path.join(projectRoot, tp);
+  if (tp.toLowerCase().startsWith("templates/")) return path.join(projectRoot, tp);
 
+  // Back-compat: "ACORD25" means /templates/ACORD25
   return path.join(projectRoot, "templates", tp);
 }
 
