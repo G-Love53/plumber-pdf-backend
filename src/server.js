@@ -4,6 +4,10 @@ import express from "express";
 import path from "path";
 import fs from "fs/promises";
 import { fileURLToPath } from "url";
+// Load bundles.json safely
+import fssync from "fs";
+const bundlesPath = path.join(__dirname, "config", "bundles.json");
+const bundles = JSON.parse(fssync.readFileSync(bundlesPath, "utf8"));
 
 import cron from "node-cron";
 import { createClient } from "@supabase/supabase-js";
@@ -66,6 +70,51 @@ function formIdForTemplateFolder(folderName) {
   if (/^SUPP_/i.test(folderName)) return `supp_${SEGMENT}_v1`;
   return null;
 }
+function templateFolderForFormId(formId) {
+  const m = String(formId || "").match(/^acord(\d+)_v1$/i);
+  if (m) return `ACORD${m[1]}`; // acord25_v1 -> ACORD25
+  return null;
+}
+
+async function renderTemplatesToAttachments(templateFolders, data) {
+  const results = [];
+
+  for (const folderName of templateFolders) {
+    const name = resolveTemplate(folderName);
+
+    try {
+      await fs.access(path.join(TPL_DIR, name));
+    } catch {
+      results.push({ status: "rejected", reason: `Template ${name} not found` });
+      continue;
+    }
+
+    const unified = await maybeMapData(name, data);
+
+    // GOLD STANDARD: template decides form_id; backend decides segment
+    unified.form_id = formIdForTemplateFolder(name);
+    unified.segment = SEGMENT;
+
+    try {
+      const { buffer } = await generateDocument(unified);
+      const filename = FILENAME_MAP[name] || `${name}.pdf`;
+
+      results.push({
+        status: "fulfilled",
+        value: { filename, buffer, contentType: "application/pdf" },
+      });
+    } catch (err) {
+      results.push({ status: "rejected", reason: err?.message || String(err) });
+    }
+  }
+
+  const attachments = results
+    .filter((r) => r.status === "fulfilled")
+    .map((r) => r.value);
+
+  return { attachments, results };
+}
+
 
 // --- Paths (HomeBase mounted as vendor) ---
 const HOMEBASE_DIR = path.join(__dirname, "..", "vendor", "CID_HomeBase");
@@ -449,33 +498,53 @@ cron.schedule("*/2 * * * *", async () => {
 
     if (claimErr || !claimed) return;
 
-    // COI is always acord25_v1
-    const { buffer: pdfBuffer, meta } = await generateDocument({
-      ...claimed,
-      segment: claimed.segment || SEGMENT,
-      form_id: "acord25_v1",
-    });
+    // Bundle-based COI render (no hardcoded form_id)
+const bundleId = claimed.bundle_id || "coi_standard_v1";
+const formIds = bundles[bundleId];
 
-    const recipient = claimed.user_email;
-    if (!recipient) throw new Error("Missing user_email on coi_requests row");
+if (!Array.isArray(formIds) || formIds.length === 0) {
+  throw new Error(`Unknown/empty bundle_id: ${bundleId}`);
+}
 
-    const safeHolder = String(claimed.holder_name || "Holder")
-      .replace(/[^a-z0-9]/gi, "_")
-      .substring(0, 50);
+const templateFolders = formIds
+  .map(templateFolderForFormId)
+  .filter(Boolean);
 
-    const filename =
-      meta?.filename || `COI-${safeHolder}-${String(claimed.id).substring(0, 8)}.pdf`;
+if (!templateFolders.length) {
+  throw new Error(`Bundle "${bundleId}" produced no template folders`);
+}
 
-    const info = await sendWithGmail({
-      to: [recipient],
-      subject: `Your Certificate of Insurance - ${claimed.holder_name || ""}`.trim(),
-      html: `
-        <h3>Certificate Generated</h3>
-        <p>Attached is the COI you requested for <b>${claimed.holder_name || "your request"}</b>.</p>
-        <p><b>Special Wording Included:</b><br><em>${claimed.description_special_text || "None"}</em></p>
-      `,
-      attachments: [{ filename, buffer: pdfBuffer, contentType: "application/pdf" }],
-    });
+// Build deterministic printable wording block (no extraction)
+const endorsementsText = Array.isArray(claimed.endorsements_needed)
+  ? claimed.endorsements_needed.join(", ")
+  : "";
+
+const aiText = Array.isArray(claimed.additional_insureds)
+  ? claimed.additional_insureds.map((x) => x?.name).filter(Boolean).join("; ")
+  : "";
+
+const specialWording = claimed.special_wording_text || "";
+
+const lines = [];
+if (endorsementsText) lines.push(`Endorsements: ${endorsementsText}`);
+if (aiText) lines.push(`Additional Insured(s): ${aiText}`);
+if (specialWording) lines.push(`Special Wording: ${specialWording}`);
+
+const renderData = {
+  ...claimed,
+  segment: SEGMENT, // backend decides
+  // ACORD25 already prints this today; keep contract stable
+  description_special_text: lines.length
+    ? lines.join("\n")
+    : claimed.description_special_text,
+};
+
+const { attachments } = await renderTemplatesToAttachments(templateFolders, renderData);
+
+if (!attachments.length) {
+  throw new Error("COI bundle produced no PDFs");
+}
+
 
     const messageId = info?.messageId;
     if (!messageId) throw new Error("Email send returned no messageId");
