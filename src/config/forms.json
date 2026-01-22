@@ -2,7 +2,12 @@
   "acord25_v1": {
     "enabled": true,
     "engine": "svg",
-    "templatePath": "ACORD25"
+    "templatePath": "vendor/CID_HomeBase/templates/ACORD25"
+  },
+  "acord125_v1": {
+    "enabled": true,
+    "engine": "svg",
+    "templatePath": "vendor/CID_HomeBase/templates/ACORD125"
   }
 }
 
