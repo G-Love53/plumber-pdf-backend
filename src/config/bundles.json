@@ -1,0 +1,4 @@
+{
+  "coi_standard_v1": ["acord25_v1"],
+  "coi_plus_addendum_v1": ["acord25_v1", "coi_addendum_v1"]
+}
