@@ -59,10 +59,30 @@ function readSvgAsDataUriIfExists(p) {
  */
 function safeLocals(obj = {}) {
   const base = obj && typeof obj === "object" ? obj : {};
+
+  // EJS internal identifiers we must NOT shadow
+  const RESERVED = new Set([
+    "__append",
+    "__output",
+    "__line",
+    "__lines",
+    "__filename",
+    "__dirname",
+    "__locals",
+    "include",
+    "rethrow",
+    "escapeFn",
+  ]);
+
   return new Proxy(base, {
-    has: () => true,
+    has: (target, prop) => {
+      if (typeof prop === "symbol") return prop in target;
+      if (RESERVED.has(prop)) return false; // <-- critical
+      return true; // keep "missing vars become blank" behavior
+    },
     get: (target, prop) => {
       if (typeof prop === "symbol") return target[prop];
+      if (RESERVED.has(prop)) return undefined; // <-- critical
       if (Object.prototype.hasOwnProperty.call(target, prop)) {
         const v = target[prop];
         return v === undefined || v === null ? "" : v;
@@ -71,6 +91,7 @@ function safeLocals(obj = {}) {
     },
   });
 }
+
 
 function buildLocals({ requestRow = {}, assets = {}, backgroundSvg = "", styles = "" }) {
   // Contract:
