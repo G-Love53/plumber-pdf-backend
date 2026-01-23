@@ -198,7 +198,7 @@ async function maybeMapData(templateName, rawData) {
    🧾 RENDER / EMAIL (SVG FACTORY)
    ============================================================ */
 
-async function renderBundleAndRespond({ templates, email }, res) {
+async function renderBundleAndRespond({ templates, email, debug = false }, res) {
   if (!Array.isArray(templates) || templates.length === 0) {
     return res.status(400).json({ ok: false, error: "NO_TEMPLATES" });
   }
@@ -241,6 +241,16 @@ unified.segment = SEGMENT;
   const attachments = results
     .filter((r) => r.status === "fulfilled")
     .map((r) => r.value);
+
+   // ✅ ADD THIS BLOCK
+  if (debug) {
+    return res.json({
+      ok: true,
+      debug: true,
+      fulfilled: attachments.map((a) => a.filename),
+      rejected: results.filter((r) => r.status === "rejected"),
+    });
+  }
 
   if (email?.to?.length) {
     await sendWithGmail({
