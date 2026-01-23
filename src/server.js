@@ -32,6 +32,7 @@ const __dirname = path.dirname(__filename);
 const bundlesPath = path.join(__dirname, "config", "bundles.json");
 const bundles = JSON.parse(fssync.readFileSync(bundlesPath, "utf8"));
 
+console.log("[BOOT] commit=", process.env.RENDER_GIT_COMMIT, "file=src/server.js");
 
 /* ============================================================
    🟢 CONFIG
