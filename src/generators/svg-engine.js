@@ -135,17 +135,42 @@ export async function generate(jobData) {
 
     const templateFile = path.join(templateDir, "index.ejs");
     const cssFile = path.join(templateDir, "styles.css");
+    const sharedCssFile = path.join(templateDir, "..", "_shared", "styles.css");
     const bgFile = path.join(templateDir, "background.svg");
+    const assetsDir = path.join(templateDir, "assets");
+
 
     if (!fs.existsSync(templateFile)) {
       throw new Error(`[SVG Engine] Missing template file: ${templateFile}`);
     }
 
-    const styles = readIfExists(cssFile);
+    const styles = `${readIfExists(sharedCssFile)}\n${readIfExists(cssFile)}`;
     const backgroundSvg = readSvgAsDataUriIfExists(bgFile);
 
     const rawLocals = buildLocals({ requestRow, assets, backgroundSvg, styles });
     const locals = safeLocals(rawLocals);
+    // --- Provide SVG pages[] to index.ejs (NO imports inside EJS) ---
+   let pages = [];
+   try {
+    if (fs.existsSync(assetsDir)) {
+      const files = fs
+        .readdirSync(assetsDir)
+        .filter((f) => /^page-\d+\.svg$/i.test(f))
+        .sort((a, b) => Number(a.match(/\d+/)[0]) - Number(b.match(/\d+/)[0]));
+
+      pages = files.map((f) => fs.readFileSync(path.join(assetsDir, f), "utf8"));
+  }
+} catch (e) {
+  console.error("[SVG Engine] Failed reading assets pages:", e);
+  pages = [];
+}
+
+// Template name for <title>
+locals.templateName = path.basename(templateDir);
+
+// pages for index.ejs
+locals.pages = pages;
+
 
     // Render HTML (keep strict:false so Proxy.has() works with EJS `with()`)
     const html = await ejs.renderFile(templateFile, locals, {
