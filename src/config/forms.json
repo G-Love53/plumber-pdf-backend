@@ -8,6 +8,20 @@
     "enabled": true,
     "engine": "svg",
     "templatePath": "vendor/CID_HomeBase/templates/ACORD125"
+  },
+  "acord126_v1": {
+    "enabled": true,
+    "engine": "svg",
+    "templatePath": "vendor/CID_HomeBase/templates/ACORD126"
+  },
+  "acord140_v1": {
+    "enabled": true,
+    "engine": "svg",
+    "templatePath": "vendor/CID_HomeBase/templates/ACORD140"
+  },
+  "supp_plumber_v1": {
+    "enabled": true,
+    "engine": "svg",
+    "templatePath": "vendor/CID_HomeBase/templates/SUPP_BERKLEY_PLUMBER"
   }
 }
-
