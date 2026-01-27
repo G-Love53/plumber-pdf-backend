@@ -155,11 +155,19 @@ APP.get("/healthz", (_req, res) => res.status(200).send("ok"));
    🧠 SUPABASE
    ============================================================ */
 
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-);
-console.log("[Robot] SUPABASE_URL:", process.env.SUPABASE_URL);
+let supabase = null;
+
+if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
+  supabase = createClient(
+    process.env.SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_ROLE_KEY
+  );
+  console.log("[Robot] SUPABASE_URL:", process.env.SUPABASE_URL);
+} else {
+  console.warn(
+    "[Robot] Supabase ENV missing — local render-only mode enabled"
+  );
+}
 
 /* ============================================================
    🧩 MAPPING
