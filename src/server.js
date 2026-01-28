@@ -129,7 +129,7 @@ async function renderTemplatesToAttachments(templateFolders, data) {
 // --- Paths (HomeBase mounted as vendor) ---
 const HOMEBASE_DIR = path.join(__dirname, "..", "vendor", "CID_HomeBase");
 const TPL_DIR = path.join(HOMEBASE_DIR, "templates");
-const MAP_DIR = path.join(HOMEBASE_DIR, "mapping");
+
 
 /* ============================================================
    🔴 APP
@@ -172,35 +172,12 @@ if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
 /* ============================================================
    🧩 MAPPING
    ============================================================ */
-
-async function maybeMapData(templateName, rawData) {
-  try {
-    const mapPath = path.join(MAP_DIR, `${templateName}.json`);
-    const mapping = JSON.parse(await fs.readFile(mapPath, "utf8"));
-
-    const mapped = JSON.parse(JSON.stringify(rawData || {})); // deep clone
-
-    for (const [tplKey, formKey] of Object.entries(mapping)) {
-      const value = rawData?.[formKey] ?? "";
-
-      // support nested keys like "insured.name"
-      const parts = tplKey.split(".");
-      let cursor = mapped;
-
-      while (parts.length > 1) {
-        const p = parts.shift();
-        cursor[p] = cursor[p] || {};
-        cursor = cursor[p];
-      }
-
-      cursor[parts[0]] = value;
-    }
-
-    return mapped;
-  } catch {
-    return rawData || {};
-  }
+  async function maybeMapData(templateName, rawData) {
+  // RSS LOCK: Legacy mapping disabled.
+  // SVG engine owns mapping via templateDir/mapping/page-*.map.json
+  return rawData || {};
 }
+
 
 /* ============================================================
    🧾 RENDER / EMAIL (SVG FACTORY)
@@ -679,9 +656,6 @@ if (!attachments.length) {
   throw new Error("COI bundle produced no PDFs");
 }
 
-
-    const messageId = info?.messageId;
-    if (!messageId) throw new Error("Email send returned no messageId");
 
     const doneIso = new Date().toISOString();
     await supabase
