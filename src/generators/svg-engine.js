@@ -77,20 +77,7 @@ function ensureXmlSpace(svg) {
   return svg.replace(/<svg\b/, '<svg xml:space="preserve"');
 }
 
-// Coordinate overlay mapping (matches your mapper output)
-function escapeXml(s = "") {
-  return String(s)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&apos;");
-}
 
-function ensureXmlSpace(svg) {
-  if (/xml:space\s*=\s*["']preserve["']/.test(svg)) return svg;
-  return svg.replace(/<svg\b/, '<svg xml:space="preserve"');
-}
 
 // Coordinate overlay mapping (matches your mapper output)
 function applyMapping(svg, pageMap, data) {
