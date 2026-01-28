@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>CID Mapper</title>
+  <style>
+    body { font-family: Arial, Helvetica, sans-serif; margin: 16px; display:flex; gap:16px; }
+    .left { width: 380px; }
+    label { display:block; font-size:12px; margin:10px 0 4px; }
+    input, select, textarea, button { width:100%; box-sizing:border-box; padding:8px; font-size:13px; }
+    textarea { height: 520px; font-family: ui-monospace, Menlo, Monaco, Consolas, "Liberation Mono", monospace; }
+    .row { display:flex; gap:10px; }
+    .row > * { flex:1; }
+    .btnrow { display:flex; gap:10px; margin-top:10px; }
+    .btnrow button { flex:1; cursor:pointer; }
+
+    /* IMPORTANT: Fixed coordinate space for Puppeteer: Letter @ 96 CSS px/in */
+    :root { --pageW: 816px; --pageH: 1056px; }
+
+    #page {
+      position: relative;
+      width: var(--pageW);
+      height: var(--pageH);
+      border: 2px solid #111;
+      box-shadow: 0 2px 14px rgba(0,0,0,.15);
+      background: #fff;
+      overflow: hidden;
+      user-select: none;
+    }
+
+    #bg {
+      position:absolute;
+      inset:0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      pointer-events: none;
+    }
+
+    #overlay { position:absolute; inset:0; pointer-events:none; }
+
+    .dot {
+      position:absolute;
+      width: 8px; height: 8px;
+      background: red;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+    }
+    .tag {
+      position:absolute;
+      transform: translate(8px, -18px);
+      background:#111; color:#fff;
+      font-size:10px;
+      padding:2px 4px;
+      border-radius:3px;
+      white-space:nowrap;
+    }
+
+    .hint { font-size:12px; color:#444; margin-top:8px; line-height:1.35; }
+    code { background:#f4f4f4; padding:1px 4px; border-radius:3px; }
+  </style>
+</head>
+<body>
+  <div class="left">
+    <h3 style="margin:0 0 8px;">CID Click Mapper (816×1056)</h3>
+
+    <label>Background SVG</label>
+    <input id="file" type="file" accept=".svg,image/svg+xml" />
+
+    <div class="row">
+      <div>
+        <label>Template</label>
+        <input id="template" value="ACORD140" />
+      </div>
+      <div>
+        <label>Page</label>
+        <input id="pageId" value="page-1" />
+      </div>
+    </div>
+
+    <label>Field name (prompt overrides if blank)</label>
+    <input id="fieldName" value="policy_number" />
+
+    <div class="row">
+      <div>
+        <label>Type</label>
+        <select id="type">
+          <option value="text">text</option>
+          <option value="checkbox">checkbox</option>
+          <option value="multiline">multiline</option>
+        </select>
+      </div>
+      <div>
+        <label>Font size</label>
+        <input id="fontSize" type="number" value="9" />
+      </div>
+    </div>
+
+    <div class="row">
+      <div>
+        <label>W (text)</label>
+        <input id="w" type="number" value="220" />
+      </div>
+      <div>
+        <label>H (text)</label>
+        <input id="h" type="number" value="14" />
+      </div>
+    </div>
+
+    <div class="row">
+      <div>
+        <label>Checkbox size</label>
+        <input id="cbSize" type="number" value="10" />
+      </div>
+      <div>
+        <label>Anchor</label>
+        <select id="anchor">
+          <option value="tl">top-left</option>
+          <option value="center">center</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="btnrow">
+      <button id="undo" type="button">Undo</button>
+      <button id="clear" type="button">Clear</button>
+      <button id="copy" type="button">Copy JSON</button>
+    </div>
+
+    <label>Output JSON</label>
+    <textarea id="output" spellcheck="false"></textarea>
+
+    <div class="hint">
+      Coordinates are stored in <b>CSS pixels</b> for Letter: <code>816×1056</code>.<br/>
+      Keep Puppeteer at <code>scale: 1</code> and PDF margins <code>0</code> to match exactly.
+    </div>
+  </div>
+
+  <div>
+    <div id="page" title="Click to map fields">
+      <img id="bg" alt="Background SVG" />
+      <div id="overlay"></div>
+    </div>
+  </div>
+
+<script>
+  const PAGE_W = 816;
+  const PAGE_H = 1056;
+
+  const el = {
+    file: document.getElementById("file"),
+    bg: document.getElementById("bg"),
+    page: document.getElementById("page"),
+    overlay: document.getElementById("overlay"),
+    template: document.getElementById("template"),
+    pageId: document.getElementById("pageId"),
+    fieldName: document.getElementById("fieldName"),
+    type: document.getElementById("type"),
+    fontSize: document.getElementById("fontSize"),
+    w: document.getElementById("w"),
+    h: document.getElementById("h"),
+    cbSize: document.getElementById("cbSize"),
+    anchor: document.getElementById("anchor"),
+    output: document.getElementById("output"),
+    undo: document.getElementById("undo"),
+    clear: document.getElementById("clear"),
+    copy: document.getElementById("copy"),
+  };
+
+  const map = {
+    schema: "cid.map.v1",
+    units: "css_px",
+    page: { width: PAGE_W, height: PAGE_H },
+    template: el.template.value,
+    pageId: el.pageId.value,
+    fields: []
+  };
+
+  function n(v, d=0) { const x = Number(v); return Number.isFinite(x) ? x : d; }
+
+  function refresh() {
+    map.template = el.template.value.trim() || map.template;
+    map.pageId = el.pageId.value.trim() || map.pageId;
+    el.output.value = JSON.stringify(map, null, 2);
+  }
+
+  function addDot(f) {
+    const dot = document.createElement("div");
+    dot.className = "dot";
+    dot.style.left = f.x + "px";
+    dot.style.top = f.y + "px";
+    dot.title = f.name;
+
+    const tag = document.createElement("div");
+    tag.className = "tag";
+    tag.textContent = `${f.name} @ ${Math.round(f.x)},${Math.round(f.y)}`;
+    dot.appendChild(tag);
+
+    el.overlay.appendChild(dot);
+  }
+
+  function rebuildOverlay() {
+    el.overlay.innerHTML = "";
+    map.fields.forEach(addDot);
+  }
+
+  // Load SVG
+  el.file.addEventListener("change", (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const url = URL.createObjectURL(file);
+    el.bg.src = url;
+  });
+
+  // CLICK HANDLER (normalized into 816×1056 space)
+  el.page.addEventListener("click", (e) => {
+    const rect = el.page.getBoundingClientRect();
+
+    // Normalize click -> fixed page coordinates
+    const nx = (e.clientX - rect.left) / rect.width;
+    const ny = (e.clientY - rect.top) / rect.height;
+
+    let x = Math.round(nx * PAGE_W);
+    let y = Math.round(ny * PAGE_H);
+
+    // Field name: use input, else prompt
+    let name = (el.fieldName.value || "").trim();
+    if (!name) {
+      name = prompt("Enter Field Name (e.g., policy_number):")?.trim();
+      if (!name) return;
+    }
+
+    const type = el.type.value;
+    const anchor = el.anchor.value;
+
+    // Optional sizing
+    const w = n(el.w.value, 120);
+    const h = n(el.h.value, 12);
+    const fontSize = n(el.fontSize.value, 9);
+    const cbSize = n(el.cbSize.value, 10);
+
+    // Anchor support
+    if (anchor === "center") {
+      if (type === "checkbox") {
+        x = Math.round(x - cbSize/2);
+        y = Math.round(y - cbSize/2);
+      } else {
+        x = Math.round(x - w/2);
+        y = Math.round(y - h/2);
+      }
+    }
+
+    const field = { name, type, x, y };
+
+    if (type === "checkbox") {
+      field.size = cbSize;
+    } else {
+      field.w = w;
+      field.h = h;
+      field.fontSize = fontSize;
+    }
+
+    map.fields.push(field);
+    rebuildOverlay();
+    refresh();
+  });
+
+  el.undo.addEventListener("click", () => {
+    map.fields.pop();
+    rebuildOverlay();
+    refresh();
+  });
+
+  el.clear.addEventListener("click", () => {
+    map.fields.length = 0;
+    rebuildOverlay();
+    refresh();
+  });
+
+  el.copy.addEventListener("click", async () => {
+    refresh();
+    await navigator.clipboard.writeText(el.output.value);
+  });
+
+  // Keep output current if template/page changes
+  el.template.addEventListener("input", refresh);
+  el.pageId.addEventListener("input", refresh);
+
+  refresh();
+</script>
+</body>
+</html>
