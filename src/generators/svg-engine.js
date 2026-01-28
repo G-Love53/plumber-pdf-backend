@@ -51,15 +51,44 @@ function loadSvgPages(assetsDir) {
 
 function loadMaps(mappingDir) {
   const maps = {};
-  if (!fs.existsSync(mappingDir)) return maps;
-
-  for (const file of fs.readdirSync(mappingDir)) {
-    if (!file.endsWith(".map.json")) continue;
-    const map = JSON.parse(
-      fs.readFileSync(path.join(mappingDir, file), "utf8")
-    );
-    if (map.pageId) maps[map.pageId] = map;
+  if (!fs.existsSync(mappingDir)) {
+    throw new Error(`[SVG] mappingDir does not exist: ${mappingDir}`);
   }
+
+  const files = fs.readdirSync(mappingDir);
+
+  if (!files.length) {
+    throw new Error(`[SVG] mappingDir empty: ${mappingDir}`);
+  }
+
+  for (const file of files) {
+    if (!file.endsWith(".map.json")) continue;
+
+    const full = path.join(mappingDir, file);
+    const raw = fs.readFileSync(full, "utf8");
+
+    if (!raw || !raw.trim()) {
+      throw new Error(`[SVG] EMPTY MAP FILE: ${full}`);
+    }
+
+    let map;
+    try {
+      map = JSON.parse(raw);
+    } catch (e) {
+      throw new Error(`[SVG] BAD JSON: ${full} :: ${e.message}`);
+    }
+
+    if (!map.pageId) {
+      throw new Error(`[SVG] map missing pageId: ${full}`);
+    }
+
+    maps[map.pageId] = map;
+  }
+
+  if (!Object.keys(maps).length) {
+    throw new Error(`[SVG] No valid page maps loaded from ${mappingDir}`);
+  }
+
   return maps;
 }
 
