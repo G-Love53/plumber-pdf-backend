@@ -54,7 +54,16 @@ function readSvgAsDataUriIfExists(p) {
     return "";
   }
 }
+// after: const svg = await fs.promises.readFile(svgPath, "utf8");
+let svg = await fs.promises.readFile(svgPath, "utf8");
 
+// Ensure SVG preserves spaces inside <text> nodes
+if (!/xml:space\s*=\s*["']preserve["']/.test(svg)) {
+  svg = svg.replace(
+    /<svg(\s[^>]*)?>/,
+    (m) => m.replace("<svg", '<svg xml:space="preserve"')
+  );
+}
 /**
  * Permanent EJS safety:
  * - EJS uses `with (locals) { ... }`
@@ -195,6 +204,8 @@ export async function generate(jobData) {
       throw new Error(`[SVG Engine] Missing template file: ${templateFile}`);
     }
 
+    // Used only when SVG must be embedded as a data URI (HTML/img contexts)
+    // NOT required for inline SVG rendering
     // RSS RULE: Styles are universal + live in HomeBase _shared only
     const styles = readIfExists(sharedCssFile);
     const backgroundSvg = readSvgAsDataUriIfExists(bgFile);
