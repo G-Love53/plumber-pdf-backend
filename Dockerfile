@@ -28,7 +28,6 @@ RUN /app/chrome/chrome-linux64/chrome --version
 
 # Copy everything else (avoids case sensitivity issues)
 COPY . .
-RUN git submodule update --init --recursive
 
 # Set environment variables
 ENV NODE_ENV=production
