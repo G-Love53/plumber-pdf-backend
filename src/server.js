@@ -302,6 +302,112 @@ APP.post("/render-bundle", async (req, res) => {
   }
 });
 
+// Render PDF Endpoint (returns binary PDF for curl > file.pdf)
+APP.post("/render-pdf", async (req, res) => {
+  try {
+    // Expect same payload shape as render-bundle:
+    // { templates:[{name,data}], debug?:true }
+    const body = req.body || {};
+    const templates = Array.isArray(body.templates) ? body.templates : [];
+
+    if (!templates.length) {
+      return res.status(400).json({ ok: false, error: "MISSING_TEMPLATES" });
+    }
+
+    // If your system supports multiple templates, we keep it simple:
+    // return the FIRST rendered PDF as the response body.
+    // (You can extend later for ZIP or merged PDFs, but RSS says keep it simple.)
+    const first = templates[0];
+
+    // IMPORTANT: use the SAME rendering path the bundle uses
+    // We call your existing bundle renderer in a "capture" mode.
+    // -----
+    // This assumes you already have a helper that can render templates into attachments/buffers.
+    // In your codebase, you already use: renderTemplatesToAttachments(templateFolders, renderData)
+    // So we reuse that.
+    // -----
+
+    // Resolve the template folder(s) exactly like Factory would.
+    // Your Factory path is driven by form_id and templatePath in config.
+    // For this endpoint, we rely on your existing "resolveTemplate" + "FILENAME_MAP"
+    // and the same "renderBundleAndRespond" logic would pick.
+    //
+    // BUT we want a direct PDF return, so we call the same internal renderer
+    // you already use for COI: renderTemplatesToAttachments()
+
+    const templateName = first.name;
+    const renderData = first.data || {};
+
+    // This must exist in your server.js already (it does, because COI uses it)
+    const templateFolder = resolveTemplate(templateName); // e.g. "ACORD125"
+    if (!templateFolder) {
+      return res.status(400).json({ ok: false, error: "UNKNOWN_TEMPLATE", template: templateName });
+    }
+
+    // Convert form_id/template name to the folder path list expected by renderer
+    // In your code you used templateFolders = formIds.map(templateFolderForFormId)
+    // For a direct template, we just pass [templateFolder]
+    const templateFolders = [templateFolder];
+
+    const { attachments } = await renderTemplatesToAttachments(templateFolders, renderData);
+
+    if (!attachments || !attachments.length) {
+      return res.status(500).json({ ok: false, error: "NO_PDF_RETURNED" });
+    }
+
+    // attachments items typically look like: { filename, contentType, content/base64/buffer }
+    const a0 = attachments[0];
+
+    // Normalize to Buffer (handles Buffer, base64 string, or { data: [...] } cases)
+let pdfBuffer = null;
+
+// Sometimes attachments[0] is already a Buffer
+if (Buffer.isBuffer(a0)) {
+  pdfBuffer = a0;
+}
+
+// Most common: a0.content is Buffer or base64 string
+else if (Buffer.isBuffer(a0.content)) {
+  pdfBuffer = a0.content;
+} else if (typeof a0.content === "string") {
+  pdfBuffer = Buffer.from(a0.content, "base64");
+}
+
+// Some libs use a0.buffer
+else if (Buffer.isBuffer(a0.buffer)) {
+  pdfBuffer = a0.buffer;
+} else if (typeof a0.buffer === "string") {
+  pdfBuffer = Buffer.from(a0.buffer, "base64");
+}
+
+// Some libs use a0.data
+else if (Buffer.isBuffer(a0.data)) {
+  pdfBuffer = a0.data;
+} else if (typeof a0.data === "string") {
+  pdfBuffer = Buffer.from(a0.data, "base64");
+} else if (Array.isArray(a0.data)) {
+  pdfBuffer = Buffer.from(a0.data);
+}
+
+// Validate
+if (
+  !pdfBuffer ||
+  pdfBuffer.length < 4 ||
+  pdfBuffer.subarray(0, 4).toString("utf8") !== "%PDF"
+) {
+  return res.status(500).json({ ok: false, error: "INVALID_PDF_BUFFER" });
+}
+
+    const outName = a0.filename || `${templateName}.pdf`;
+
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", `inline; filename="${outName}"`);
+    return res.status(200).send(pdfBuffer);
+  } catch (e) {
+    return res.status(500).json({ ok: false, error: e.message });
+  }
+});
+
 // Submit Quote Endpoint (LEG 1)
 APP.post("/submit-quote", async (req, res) => {
   try {
