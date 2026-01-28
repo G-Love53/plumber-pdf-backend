@@ -37,6 +37,24 @@ function resolveTemplateDir(templatePath = "") {
   // Otherwise treat as subfolder under /templates
   return path.join(PROJECT_ROOT, "templates", tp);
 }
+const templateDir = resolveTemplateDir(templatePath);
+const assetsDir  = path.join(templateDir, "assets");
+const mappingDir = path.join(templateDir, "mapping");
+// Load ALL page maps (multi-page support)
+const mapsByPage = {};
+
+if (fs.existsSync(mappingDir)) {
+  for (const file of fs.readdirSync(mappingDir)) {
+    if (!file.endsWith(".map.json")) continue;
+
+    const map = JSON.parse(
+      fs.readFileSync(path.join(mappingDir, file), "utf8")
+    );
+
+    if (!map.pageId) continue;
+    mapsByPage[map.pageId] = map;
+  }
+}
 
 function readIfExists(p) {
   try {
