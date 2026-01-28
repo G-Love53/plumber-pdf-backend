@@ -163,10 +163,15 @@ export async function generate(jobData) {
 
   // Render HTML
   const html = await ejs.renderFile(
-    templateFile,
-    { pages: finalPages },
-    { async: true, strict: false }
-  );
+  templateFile,
+  {
+    pages: finalPages,
+    templateName: jobData?.templateName || jobData?.name || path.basename(templateDir),
+    data: requestRow,
+    formData: requestRow,
+  },
+  { async: true, strict: false }
+);
 
   const browser = await launchBrowser();
   const page = await browser.newPage();
