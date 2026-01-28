@@ -63,28 +63,50 @@ function loadMaps(mappingDir) {
   return maps;
 }
 
-function applyMapping(svg, pageMap, data) {
-  if (!pageMap?.fields?.length) return svg;
+function escapeXml(s = "") {
+  return String(s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
+}
 
-  let out = svg;
+function ensureXmlSpace(svg) {
+  if (/xml:space\s*=\s*["']preserve["']/.test(svg)) return svg;
+  return svg.replace(/<svg\b/, '<svg xml:space="preserve"');
+}
+
+// Coordinate overlay mapping (matches your mapper output)
+function applyMapping(svg, pageMap, data) {
+  if (!pageMap?.fields?.length) return ensureXmlSpace(svg);
+
+  const overlay = [];
+  overlay.push(`<g id="cid-overlay" font-family="Arial, Helvetica, sans-serif" fill="#000">`);
 
   for (const f of pageMap.fields) {
-    const val = data[f.name] ?? "";
-    out = out.replace(
-      new RegExp(
-        `(<text[^>]*data-field="${f.name}"[^>]*>)([\\s\\S]*?)(</text>)`,
-        "g"
-      ),
-      `$1${String(val)}$3`
+    const raw = data?.[f.name];
+    const val = raw === undefined || raw === null ? "" : String(raw);
+    if (!val) continue;
+
+    const x = Number(f.x ?? 0);
+    const y = Number(f.y ?? 0);
+    const fontSize = Number(f.fontSize ?? 9);
+
+    // default baseline: alphabetic (mapper can override with f.baseline="hanging")
+    const baseline = f.baseline === "hanging" ? "hanging" : "alphabetic";
+
+    overlay.push(
+      `<text x="${x}" y="${y}" font-size="${fontSize}" dominant-baseline="${baseline}">${escapeXml(val)}</text>`
     );
   }
 
-  // Preserve spacing
-  if (!/xml:space=/.test(out)) {
-    out = out.replace("<svg", '<svg xml:space="preserve"');
-  }
+  overlay.push(`</g>`);
+  const overlayBlock = overlay.join("");
 
-  return out;
+  // insert overlay before closing </svg>
+  const out = svg.replace(/<\/svg>\s*$/i, `${overlayBlock}</svg>`);
+  return ensureXmlSpace(out);
 }
 
 /* ---------------------------- BROWSER ---------------------------- */
