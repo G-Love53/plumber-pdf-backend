@@ -78,6 +78,21 @@ function ensureXmlSpace(svg) {
 }
 
 // Coordinate overlay mapping (matches your mapper output)
+function escapeXml(s = "") {
+  return String(s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
+}
+
+function ensureXmlSpace(svg) {
+  if (/xml:space\s*=\s*["']preserve["']/.test(svg)) return svg;
+  return svg.replace(/<svg\b/, '<svg xml:space="preserve"');
+}
+
+// Coordinate overlay mapping (matches your mapper output)
 function applyMapping(svg, pageMap, data) {
   if (!pageMap?.fields?.length) return ensureXmlSpace(svg);
 
@@ -92,8 +107,6 @@ function applyMapping(svg, pageMap, data) {
     const x = Number(f.x ?? 0);
     const y = Number(f.y ?? 0);
     const fontSize = Number(f.fontSize ?? 9);
-
-    // default baseline: alphabetic (mapper can override with f.baseline="hanging")
     const baseline = f.baseline === "hanging" ? "hanging" : "alphabetic";
 
     overlay.push(
@@ -104,7 +117,6 @@ function applyMapping(svg, pageMap, data) {
   overlay.push(`</g>`);
   const overlayBlock = overlay.join("");
 
-  // insert overlay before closing </svg>
   const out = svg.replace(/<\/svg>\s*$/i, `${overlayBlock}</svg>`);
   return ensureXmlSpace(out);
 }
