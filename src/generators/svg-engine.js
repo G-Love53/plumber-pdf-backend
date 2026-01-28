@@ -165,7 +165,10 @@ export async function generate(jobData) {
   // Load assets + maps
   const pages = loadSvgPages(assetsDir);
   const mapsByPage = loadMaps(mappingDir);
-
+  
+  console.log("[SVG] Pages:", pages.map(p => p.pageId));
+  console.log("[SVG] Maps:", Object.keys(mapsByPage));
+  
   // Apply mapping per page
   const finalPages = pages.map(p =>
     applyMapping(p.svg, mapsByPage[p.pageId], requestRow)
