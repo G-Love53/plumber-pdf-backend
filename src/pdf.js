@@ -95,17 +95,37 @@ export async function renderPdf({ htmlPath, cssPath, data = {} }) {
   
   try {
     const page = await browser.newPage();
-    
-    // Wait for DOM + Fonts
-    await page.setContent(html, { waitUntil: "domcontentloaded", timeout: 60000 });
-    await page.evaluateHandle("document.fonts.ready");
-    
-    const pdfBuffer = await page.pdf({
-      format: 'Letter',
-      printBackground: true, 
-      // ZERO MARGINS (Crucial for full-page SVG forms)
-      margin: { top: "0in", right: "0in", bottom: "0in", left: "0in" }
-    });
+
+// LOCK VIEWPORT to mapper coordinate space (Letter @ 96 CSS px/in)
+await page.setViewport({
+  width: 816,
+  height: 1056,
+  deviceScaleFactor: 1,
+});
+
+// Load HTML
+await page.setContent(html, { waitUntil: "domcontentloaded", timeout: 60000 });
+
+// Wait for fonts (safe even if no custom fonts)
+await page.evaluateHandle("document.fonts.ready");
+
+// OPTIONAL: hard assert page size so we fail fast if a template breaks it
+await page.evaluate(() => {
+  const el = document.querySelector(".page");
+  if (!el) throw new Error("Missing .page container in template");
+  const r = el.getBoundingClientRect();
+  if (Math.round(r.width) !== 816 || Math.round(r.height) !== 1056) {
+    throw new Error(`.page must be 816x1056, got ${r.width}x${r.height}`);
+  }
+});
+
+const pdfBuffer = await page.pdf({
+  format: "Letter",
+  printBackground: true,
+  scale: 1,
+  preferCSSPageSize: true,
+  margin: { top: "0in", right: "0in", bottom: "0in", left: "0in" },
+});
     
     console.log(`📄 PDF Generated Successfully! Size: ${pdfBuffer.length} bytes`);
     return pdfBuffer;
