@@ -2,11 +2,11 @@
 <html>
 <head>
   <meta charset="utf-8" />
-  <title><%= templateName || "CID Document" %></title>
+  <title><%= ((typeof templateName !== "undefined" && templateName) ? templateName : "CID Document") %></title>
 
   <!-- Inline CSS injected by svg-engine -->
   <style>
-    <%- styles || "" %>
+    <%- (typeof styles !== "undefined" ? styles : "") %>
   </style>
 </head>
 <body>
