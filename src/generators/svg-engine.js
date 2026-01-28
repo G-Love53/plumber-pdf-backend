@@ -11,6 +11,10 @@ const __dirname = path.dirname(__filename);
 // Repo root (/app on Render)
 const PROJECT_ROOT = path.join(__dirname, "..", "..");
 
+// Letter @ 96 CSS px/in (LOCKED mapper + puppeteer contract)
+const PAGE_W = 816;
+const PAGE_H = 1056;
+
 const sanitizeFilename = (str = "") =>
   String(str ?? "")
     .replace(/[^a-z0-9]+/gi, "_")
@@ -77,12 +81,12 @@ function safeLocals(obj = {}) {
   return new Proxy(base, {
     has: (target, prop) => {
       if (typeof prop === "symbol") return prop in target;
-      if (RESERVED.has(prop)) return false; // <-- critical
+      if (RESERVED.has(prop)) return false; // critical
       return true; // keep "missing vars become blank" behavior
     },
     get: (target, prop) => {
       if (typeof prop === "symbol") return target[prop];
-      if (RESERVED.has(prop)) return undefined; // <-- critical
+      if (RESERVED.has(prop)) return undefined; // critical
       if (Object.prototype.hasOwnProperty.call(target, prop)) {
         const v = target[prop];
         return v === undefined || v === null ? "" : v;
@@ -91,7 +95,6 @@ function safeLocals(obj = {}) {
     },
   });
 }
-
 
 function buildLocals({ requestRow = {}, assets = {}, backgroundSvg = "", styles = "" }) {
   // Contract:
@@ -146,6 +149,35 @@ function assertValidPdfBuffer(buffer) {
   }
 }
 
+function loadPagesFromAssetsDir(assetsDir) {
+  try {
+    if (!fs.existsSync(assetsDir)) return [];
+    const files = fs
+      .readdirSync(assetsDir)
+      .filter((f) => /^page-\d+\.svg$/i.test(f))
+      .sort((a, b) => Number(a.match(/\d+/)?.[0] || 0) - Number(b.match(/\d+/)?.[0] || 0));
+
+    return files.map((f) => fs.readFileSync(path.join(assetsDir, f), "utf8"));
+  } catch (e) {
+    console.error("[SVG Engine] Failed reading assets pages:", e);
+    return [];
+  }
+}
+
+async function assertPageContract(page) {
+  await page.evaluate(
+    ({ w, h }) => {
+      const el = document.querySelector(".page");
+      if (!el) throw new Error("[SVG Engine] Missing .page container in template");
+      const r = el.getBoundingClientRect();
+      if (Math.round(r.width) !== w || Math.round(r.height) !== h) {
+        throw new Error(`[SVG Engine] .page must be ${w}x${h}, got ${r.width}x${r.height}`);
+      }
+    },
+    { w: PAGE_W, h: PAGE_H }
+  );
+}
+
 export async function generate(jobData) {
   const { requestRow = {}, assets = {}, templatePath = "" } = jobData || {};
   let browser = null;
@@ -155,43 +187,24 @@ export async function generate(jobData) {
     const templateDir = resolveTemplateDir(templatePath);
 
     const templateFile = path.join(templateDir, "index.ejs");
-    const cssFile = path.join(templateDir, "styles.css");
     const sharedCssFile = path.join(templateDir, "..", "_shared", "styles.css");
     const bgFile = path.join(templateDir, "background.svg");
     const assetsDir = path.join(templateDir, "assets");
-
 
     if (!fs.existsSync(templateFile)) {
       throw new Error(`[SVG Engine] Missing template file: ${templateFile}`);
     }
 
-    const styles = `${readIfExists(sharedCssFile)}\n${readIfExists(cssFile)}`;
+    // RSS RULE: Styles are universal + live in HomeBase _shared only
+    const styles = readIfExists(sharedCssFile);
     const backgroundSvg = readSvgAsDataUriIfExists(bgFile);
 
     const rawLocals = buildLocals({ requestRow, assets, backgroundSvg, styles });
     const locals = safeLocals(rawLocals);
-    // --- Provide SVG pages[] to index.ejs (NO imports inside EJS) ---
-   let pages = [];
-   try {
-    if (fs.existsSync(assetsDir)) {
-      const files = fs
-        .readdirSync(assetsDir)
-        .filter((f) => /^page-\d+\.svg$/i.test(f))
-        .sort((a, b) => Number(a.match(/\d+/)[0]) - Number(b.match(/\d+/)[0]));
 
-      pages = files.map((f) => fs.readFileSync(path.join(assetsDir, f), "utf8"));
-  }
-} catch (e) {
-  console.error("[SVG Engine] Failed reading assets pages:", e);
-  pages = [];
-}
-
-// Template name for <title>
-locals.templateName = path.basename(templateDir);
-
-// pages for index.ejs
-locals.pages = pages;
-
+    // Provide SVG pages[] to index.ejs (NO imports inside EJS)
+    locals.templateName = path.basename(templateDir);
+    locals.pages = loadPagesFromAssetsDir(assetsDir);
 
     // Render HTML (keep strict:false so Proxy.has() works with EJS `with()`)
     const html = await ejs.renderFile(templateFile, locals, {
@@ -203,14 +216,21 @@ locals.pages = pages;
     browser = await launchBrowser();
     page = await browser.newPage();
 
-    // Best for SVG-heavy pages; avoids hanging on networkidle0
-    await page.setContent(html, { waitUntil: "load", timeout: 60000 });
+    // LOCK VIEWPORT to mapper coordinate space (Letter @ 96 CSS px/in)
+    await page.setViewport({ width: PAGE_W, height: PAGE_H, deviceScaleFactor: 1 });
+
+    // Load HTML
+    await page.setContent(html, { waitUntil: "domcontentloaded", timeout: 60000 });
     await page.evaluateHandle("document.fonts.ready");
+
+    // Fail fast if any template breaks the coordinate contract
+    await assertPageContract(page);
 
     const buffer = await page.pdf({
       format: "Letter",
       printBackground: true,
       preferCSSPageSize: true,
+      scale: 1,
       margin: { top: 0, right: 0, bottom: 0, left: 0 },
     });
 
