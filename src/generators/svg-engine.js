@@ -10,9 +10,10 @@ const __dirname = path.dirname(__filename);
 // Render root (/app on Render)
 const PROJECT_ROOT = path.join(__dirname, "..", "..");
 
-// Letter @ 96dpi (LOCKED)
-const PAGE_W = 816;
-const PAGE_H = 1056;
+// Letter (LOCKED) — 612×792 truth (points, matches mapper + SVG viewBox)
+const PAGE_W = 612;
+const PAGE_H = 792;
+
 
 /* ---------------------------- PATH RESOLUTION ---------------------------- */
 
@@ -216,10 +217,14 @@ export async function generate(jobData) {
     await page.evaluateHandle("document.fonts.ready");
 
     const buffer = await page.pdf({
-      format: "Letter",
-      printBackground: true,
-      margin: { top: 0, right: 0, bottom: 0, left: 0 },
-    });
+  width: "612pt",
+  height: "792pt",
+  printBackground: true,
+  margin: { top: 0, right: 0, bottom: 0, left: 0 },
+  preferCSSPageSize: true,
+  scale: 1,
+});
+
 
     if (buffer.subarray(0, 4).toString() !== "%PDF") {
       throw new Error("[SVG Engine] Invalid PDF output");
