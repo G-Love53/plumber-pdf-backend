@@ -218,14 +218,14 @@ const html = await ejs.renderFile(
     await page.setContent(html, { waitUntil: "domcontentloaded" });
     await page.evaluateHandle("document.fonts.ready");
 
-    const buffer = await page.pdf({
-  width: "612pt",
-  height: "792pt",
+   const buffer = await page.pdf({
+  width: "8.5in",
+  height: "11in",
   printBackground: true,
   margin: { top: 0, right: 0, bottom: 0, left: 0 },
-  preferCSSPageSize: true,
   scale: 1,
 });
+
 
 
     if (buffer.subarray(0, 4).toString() !== "%PDF") {
