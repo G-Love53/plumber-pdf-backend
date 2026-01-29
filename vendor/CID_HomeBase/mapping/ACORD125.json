@@ -1,6 +1,84 @@
 {
-  "insured_name": "applicant_name",
-  "insured_address": "applicant_address",
-  "insured_city_state_zip": "applicant_city_state_zip"
+  "schema": "cid.map.v1",
+  "units": "css_px",
+  "page": {
+    "width": 816,
+    "height": 1056
+  },
+  "template": "ACORD125",
+  "pageId": "page-1",
+  "fields": [
+    {
+      "name": "eff_date",
+      "type": "text",
+      "x": 33,
+      "y": 709,
+      "w": 30,
+      "h": 14,
+      "fontSize": 9
+    },
+    {
+      "name": "applicant_name",
+      "type": "text",
+      "x": 32,
+      "y": 772,
+      "w": 180,
+      "h": 14,
+      "fontSize": 9
+    },
+    {
+      "name": "applicant_address",
+      "type": "text",
+      "x": 31,
+      "y": 790,
+      "w": 180,
+      "h": 14,
+      "fontSize": 9
+    },
+    {
+      "name": "applicant_city",
+      "type": "text",
+      "x": 32,
+      "y": 808,
+      "w": 100,
+      "h": 14,
+      "fontSize": 9
+    },
+    {
+      "name": "applicant_state",
+      "type": "text",
+      "x": 239,
+      "y": 807,
+      "w": 100,
+      "h": 14,
+      "fontSize": 9
+    },
+    {
+      "name": "applicant_zip",
+      "type": "text",
+      "x": 337,
+      "y": 806,
+      "w": 30,
+      "h": 14,
+      "fontSize": 9
+    },
+    {
+      "name": "bus_phone",
+      "type": "text",
+      "x": 501,
+      "y": 790,
+      "w": 120,
+      "h": 14,
+      "fontSize": 9
+    },
+    {
+      "name": "web_address",
+      "type": "text",
+      "x": 418,
+      "y": 819,
+      "w": 120,
+      "h": 14,
+      "fontSize": 9
+    }
+  ]
 }
-
