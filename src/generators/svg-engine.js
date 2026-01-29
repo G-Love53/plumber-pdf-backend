@@ -192,16 +192,18 @@ export async function generate(jobData) {
   );
 
   // Render HTML
-  const html = await ejs.renderFile(
+const html = await ejs.renderFile(
   templateFile,
   {
     pages: finalPages,
     templateName: jobData?.templateName || jobData?.name || path.basename(templateDir),
     data: requestRow,
     formData: requestRow,
+    styles: "", // ✅ prevent EJS "styles is not defined"
   },
   { async: true, strict: false }
 );
+
 
   const browser = await launchBrowser();
   const page = await browser.newPage();
