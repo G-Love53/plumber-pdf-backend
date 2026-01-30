@@ -6,13 +6,33 @@ RUN apt-get update && apt-get install -y \
     libxext6 libxfixes3 libxi6 libxrandr2 libxrender1 libxss1 libxtst6 \
     libdrm2 libgbm1 libasound2 libnss3 libnspr4 \
     libatk-bridge2.0-0 libgtk-3-0 libpango-1.0-0 libpangocairo-1.0-0 \
-    libcups2 libdbus-1-3 libxshmfence1 ca-certificates wget gnupg xz-utils unzip \
+    libcups2 libdbus-1-3 libxshmfence1 ca-certificates wget gnupg xz-utils unzip git \
  && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
 # Copy package files first
 COPY package*.json ./
+
+# Install dependencies INCLUDING puppeteer
+RUN npm ci --omit=dev || npm install --omit=dev
+
+# Install Chrome directly in a known location
+RUN mkdir -p /app/chrome && \
+    cd /app/chrome && \
+    wget -q https://storage.googleapis.com/chrome-for-testing-public/123.0.6312.122/linux64/chrome-linux64.zip && \
+    unzip chrome-linux64.zip && \
+    rm chrome-linux64.zip && \
+    chmod +x chrome-linux64/chrome
+RUN /app/chrome/chrome-linux64/chrome --version
+
+# Copy everything else
+COPY . .
+
+# 🔑 ENSURE CID_HomeBase EXISTS IN CLOUD
+RUN rm -rf vendor/CID_HomeBase \
+ && git clone --depth 1 https://github.com/G-Love53/CID_HomeBase vendor/CID_HomeBase
+
 
 # Install dependencies INCLUDING puppeteer
 RUN npm ci --omit=dev || npm install --omit=dev
