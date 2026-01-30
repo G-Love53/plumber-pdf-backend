@@ -1,5 +1,6 @@
 FROM node:20-bullseye
-# Install Chrome dependencies AND unzip
+
+# System deps (chrome runtime + fonts) + tools (wget/unzip/git)
 RUN apt-get update && apt-get install -y \
     fonts-noto fonts-noto-cjk fonts-noto-color-emoji \
     libx11-6 libx11-xcb1 libxcb1 libxcomposite1 libxcursor1 libxdamage1 \
@@ -11,45 +12,27 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /app
 
-# Copy package files first
+# Install node deps first for caching
 COPY package*.json ./
-
-# Install dependencies INCLUDING puppeteer
 RUN npm ci --omit=dev || npm install --omit=dev
 
-# Install Chrome directly in a known location
+# Install Chrome in a known location
 RUN mkdir -p /app/chrome && \
     cd /app/chrome && \
     wget -q https://storage.googleapis.com/chrome-for-testing-public/123.0.6312.122/linux64/chrome-linux64.zip && \
-    unzip chrome-linux64.zip && \
+    unzip -o chrome-linux64.zip && \
     rm chrome-linux64.zip && \
     chmod +x chrome-linux64/chrome
 RUN /app/chrome/chrome-linux64/chrome --version
 
-# Copy everything else
+# Copy app source
 COPY . .
 
-# 🔑 ENSURE CID_HomeBase EXISTS IN CLOUD
+# Ensure CID_HomeBase exists in cloud builds (Render doesn't fetch submodules)
 RUN rm -rf vendor/CID_HomeBase \
  && git clone --depth 1 https://github.com/G-Love53/CID_HomeBase vendor/CID_HomeBase
 
-
-# Install dependencies INCLUDING puppeteer
-RUN npm ci --omit=dev || npm install --omit=dev
-
-# Install Chrome directly in a known location
-RUN mkdir -p /app/chrome && \
-    cd /app/chrome && \
-    wget -q https://storage.googleapis.com/chrome-for-testing-public/123.0.6312.122/linux64/chrome-linux64.zip && \
-    unzip chrome-linux64.zip && \
-    rm chrome-linux64.zip && \
-    chmod +x chrome-linux64/chrome
-RUN /app/chrome/chrome-linux64/chrome --version
-
-# Copy everything else (avoids case sensitivity issues)
-COPY . .
-
-# Set environment variables
+# Env
 ENV NODE_ENV=production
 ENV PUPPETEER_SKIP_DOWNLOAD=true
 ENV PUPPETEER_EXECUTABLE_PATH=/app/chrome/chrome-linux64/chrome
