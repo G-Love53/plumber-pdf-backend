@@ -119,26 +119,36 @@ function applyMapping(svg, pageMap, data) {
   overlay.push(`<g id="cid-overlay" font-family="Arial, Helvetica, sans-serif" fill="#000">`);
 
   for (const f of pageMap.fields) {
-    const k = f.key || f.name;
-    const raw = data?.[k];
-    const val = raw === undefined || raw === null ? "" : String(raw);
-    if (!val) continue;
+  const key = f.key || f.name;
+  const raw = data?.[key];
 
-    const x = Number(f.x ?? 0);
-    const y = Number(f.y ?? 0);
-    const fontSize = Number(f.fontSize ?? 9);
-    const baseline = f.baseline === "hanging" ? "hanging" : "alphabetic";
-
-    overlay.push(
-      `<text x="${x}" y="${y}" font-size="${fontSize}" dominant-baseline="${baseline}">${escapeXml(val)}</text>`
-    );
+  if (f.type === "checkbox") {
+    if (raw === true || raw === "true" || raw === "X") {
+      overlay.push(
+        `<text x="${f.x}" y="${f.y}" font-size="${f.size || 10}" dominant-baseline="hanging">X</text>`
+      );
+    }
+    continue;
   }
+
+  const val = raw === undefined || raw === null ? "" : String(raw);
+  if (!val) continue;
+
+  overlay.push(
+    `<text x="${f.x}" y="${f.y}" font-size="${f.fontSize || 8}" dominant-baseline="alphabetic">
+      ${escapeXml(val)}
+    </text>`
+  );
+}
+
 
   overlay.push(`</g>`);
   const overlayBlock = overlay.join("");
 
-  const out = svg.replace(/<\/svg>\s*$/i, `${overlayBlock}</svg>`);
-  return ensureXmlSpace(out);
+  const debugGrid = data?.__grid === true ? gridOverlay() : "";
+  const out = svg.replace(/<\/svg>\s*$/i, `${overlayBlock}${debugGrid}</svg>`);
+
+  return out;
 }
 
 /* ---------------------------- BROWSER ---------------------------- */
@@ -249,4 +259,17 @@ const html = `
     await page.close().catch(() => {});
     await browser.close().catch(() => {});
   }
+  function gridOverlay() {
+  const lines = [];
+  for (let x = 0; x <= 612; x += 25) {
+    lines.push(`<line x1="${x}" y1="0" x2="${x}" y2="792" stroke="#00f" stroke-opacity="0.15" />`);
+    if (x % 50 === 0) lines.push(`<text x="${x+2}" y="10" font-size="6">${x}</text>`);
+  }
+  for (let y = 0; y <= 792; y += 25) {
+    lines.push(`<line x1="0" y1="${y}" x2="612" y2="${y}" stroke="#00f" stroke-opacity="0.15" />`);
+    if (y % 50 === 0) lines.push(`<text x="2" y="${y-2}" font-size="6">${y}</text>`);
+  }
+  return `<g id="grid-overlay">${lines.join("")}</g>`;
+ }
+
 }
