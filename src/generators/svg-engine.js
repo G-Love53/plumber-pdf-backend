@@ -171,21 +171,28 @@ function applyMapping(svg, pageMap, data) {
 
 /* ---------------------------- MAIN ENTRY ---------------------------- */
 
-export async function generate(jobData) {
-  const { requestRow = {}, templatePath } = jobData;
+/* ---------------------------- MAIN ENTRY ---------------------------- */
 
-  function gridOverlay() {
+/** debug grid (only when requestRow.__grid === true) */
+function gridOverlay() {
   const lines = [];
   for (let x = 0; x <= 612; x += 25) {
-    lines.push(`<line x1="${x}" y1="0" x2="${x}" y2="792" stroke="#00f" stroke-opacity="0.15" />`);
-    if (x % 50 === 0) lines.push(`<text x="${x+2}" y="10" font-size="6">${x}</text>`);
+    lines.push(
+      `<line x1="${x}" y1="0" x2="${x}" y2="792" stroke="#00f" stroke-opacity="0.15" />`
+    );
+    if (x % 50 === 0) lines.push(`<text x="${x + 2}" y="10" font-size="6">${x}</text>`);
   }
   for (let y = 0; y <= 792; y += 25) {
-    lines.push(`<line x1="0" y1="${y}" x2="612" y2="${y}" stroke="#00f" stroke-opacity="0.15" />`);
-    if (y % 50 === 0) lines.push(`<text x="2" y="${y-2}" font-size="6">${y}</text>`);
+    lines.push(
+      `<line x1="0" y1="${y}" x2="612" y2="${y}" stroke="#00f" stroke-opacity="0.15" />`
+    );
+    if (y % 50 === 0) lines.push(`<text x="2" y="${y - 2}" font-size="6">${y}</text>`);
   }
   return `<g id="grid-overlay">${lines.join("")}</g>`;
- }
+}
+
+export async function generate(jobData) {
+  const { requestRow = {}, templatePath } = jobData || {};
 
   if (!templatePath) throw new Error("[SVG Engine] Missing templatePath");
 
@@ -196,17 +203,12 @@ export async function generate(jobData) {
   const pages = loadSvgPages(assetsDir);
   const mapsByPage = loadMaps(mappingDir);
 
-  // Apply mapping per page
+  // Apply mapping per page (page with no map = blank overlay, no fail)
   const finalPages = pages.map((p) =>
     applyMapping(p.svg, mapsByPage[p.pageId], requestRow)
   );
 
-  // (rest of your HTML wrapper + puppeteer pdf code continues…)
-}
-
-
-
-const html = `
+  const html = `
 <!doctype html>
 <html>
 <head>
@@ -220,15 +222,19 @@ const html = `
   </style>
 </head>
 <body>
-  ${finalPages.map(svg => `<div class="page">${svg}</div>`).join("")}
+  ${finalPages.map((svg) => `<div class="page">${svg}</div>`).join("")}
 </body>
 </html>
 `;
 
-  const browser = await launchBrowser();
-  const page = await browser.newPage();
+  // keep these as lets so finally can always run safely
+  let browser;
+  let page;
 
   try {
+    browser = await launchBrowser();
+    page = await browser.newPage();
+
     await page.setViewport({
       width: PAGE_W,
       height: PAGE_H,
@@ -238,15 +244,13 @@ const html = `
     await page.setContent(html, { waitUntil: "domcontentloaded" });
     await page.evaluateHandle("document.fonts.ready");
 
-   const buffer = await page.pdf({
-  width: "8.5in",
-  height: "11in",
-  printBackground: true,
-  margin: { top: 0, right: 0, bottom: 0, left: 0 },
-  scale: 1,
-});
-
-
+    const buffer = await page.pdf({
+      width: "8.5in",
+      height: "11in",
+      printBackground: true,
+      margin: { top: 0, right: 0, bottom: 0, left: 0 },
+      scale: 1,
+    });
 
     if (buffer.subarray(0, 4).toString() !== "%PDF") {
       throw new Error("[SVG Engine] Invalid PDF output");
@@ -260,9 +264,7 @@ const html = `
       },
     };
   } finally {
-    await page.close().catch(() => {});
-    await browser.close().catch(() => {});
+    await page?.close().catch(() => {});
+    await browser?.close().catch(() => {});
   }
-  
-
-
+}
