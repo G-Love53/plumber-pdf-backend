@@ -111,67 +111,62 @@ function ensureXmlSpace(svg) {
 
 
 
-// Coordinate overlay mapping (matches your mapper output)
+// Coordinate overlay mapping (matches mapper output)
 function applyMapping(svg, pageMap, data) {
+  // no fields? return original SVG (but ensure xml:space)
   if (!pageMap?.fields?.length) return ensureXmlSpace(svg);
 
   const overlay = [];
-  overlay.push(`<g id="cid-overlay" font-family="Arial, Helvetica, sans-serif" fill="#000">`);
+  overlay.push(
+    `<g id="cid-overlay" font-family="Arial, Helvetica, sans-serif" fill="#000">`
+  );
 
   for (const f of pageMap.fields) {
-  const key = f.key || f.name;
-  const raw = data?.[key];
+    const key = f.key || f.name;
+    const raw = data?.[key];
 
-  if (f.type === "checkbox") {
-    if (raw === true || raw === "true" || raw === "X") {
-      overlay.push(
-        `<text x="${f.x}" y="${f.y}" font-size="${f.size || 10}" dominant-baseline="hanging">X</text>`
-      );
+    // --- CHECKBOX ---
+    if (f.type === "checkbox") {
+      const isOn =
+        raw === true ||
+        raw === "true" ||
+        raw === "TRUE" ||
+        raw === "X" ||
+        raw === "x" ||
+        raw === 1 ||
+        raw === "1";
+
+      if (isOn) {
+        overlay.push(
+          `<text x="${Number(f.x || 0)}" y="${Number(f.y || 0)}" font-size="${Number(
+            f.size || 10
+          )}" dominant-baseline="hanging">X</text>`
+        );
+      }
+      continue;
     }
-    continue;
+
+    // --- TEXT ---
+    const val = raw === undefined || raw === null ? "" : String(raw);
+    if (!val) continue;
+
+    overlay.push(
+      `<text x="${Number(f.x || 0)}" y="${Number(f.y || 0)}" font-size="${Number(
+        f.fontSize || 8
+      )}" dominant-baseline="alphabetic">${escapeXml(val)}</text>`
+    );
   }
-
-  const val = raw === undefined || raw === null ? "" : String(raw);
-  if (!val) continue;
-
-  overlay.push(
-    `<text x="${f.x}" y="${f.y}" font-size="${f.fontSize || 8}" dominant-baseline="alphabetic">
-      ${escapeXml(val)}
-    </text>`
-  );
-}
-
 
   overlay.push(`</g>`);
-  const overlayBlock = overlay.join("");
 
+  const overlayBlock = overlay.join("");
   const debugGrid = data?.__grid === true ? gridOverlay() : "";
+
+  // inject overlay + optional grid before </svg>
   const out = svg.replace(/<\/svg>\s*$/i, `${overlayBlock}${debugGrid}</svg>`);
 
-  return out;
-}
-
-/* ---------------------------- BROWSER ---------------------------- */
-
-async function launchBrowser() {
-  const executablePath =
-    process.env.PUPPETEER_EXECUTABLE_PATH ||
-    puppeteer.executablePath?.();
-
-  if (!executablePath) {
-    throw new Error("[SVG Engine] Chrome not found");
-  }
-
-  return puppeteer.launch({
-    executablePath,
-    headless: "new",
-    args: [
-      "--no-sandbox",
-      "--disable-setuid-sandbox",
-      "--disable-gpu",
-      "--font-render-hinting=none",
-    ],
-  });
+  // IMPORTANT: ensure xml:space on the final output
+  return ensureXmlSpace(out);
 }
 
 /* ---------------------------- MAIN ENTRY ---------------------------- */
@@ -179,27 +174,23 @@ async function launchBrowser() {
 export async function generate(jobData) {
   const { requestRow = {}, templatePath } = jobData;
 
-  if (!templatePath) {
-    throw new Error("[SVG Engine] Missing templatePath");
-  }
+  if (!templatePath) throw new Error("[SVG Engine] Missing templatePath");
 
   const templateDir = resolveTemplateDir(templatePath);
   const assetsDir = path.join(templateDir, "assets");
   const mappingDir = path.join(templateDir, "mapping");
 
-
-  // Load assets + maps
-  
   const pages = loadSvgPages(assetsDir);
   const mapsByPage = loadMaps(mappingDir);
-  
-  console.log("[SVG] Pages:", pages.map(p => p.pageId));
-  console.log("[SVG] Maps:", Object.keys(mapsByPage));
-  
+
   // Apply mapping per page
-  const finalPages = pages.map(p =>
-  applyMapping(p.svg, mapsByPage[p.pageId], requestRow)
-);
+  const finalPages = pages.map((p) =>
+    applyMapping(p.svg, mapsByPage[p.pageId], requestRow)
+  );
+
+  // (rest of your HTML wrapper + puppeteer pdf code continues…)
+}
+
 
 
 const html = `
