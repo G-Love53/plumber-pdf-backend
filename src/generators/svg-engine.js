@@ -13,6 +13,17 @@ const PROJECT_ROOT = path.join(__dirname, "..", "..");
 const PAGE_W = 612;
 const PAGE_H = 792;
 
+async function launchBrowser() {
+  return puppeteer.launch({
+    headless: "new",
+    args: [
+      "--no-sandbox",
+      "--disable-setuid-sandbox",
+      "--font-render-hinting=medium",
+    ],
+  });
+}
+
 
 /* ---------------------------- PATH RESOLUTION ---------------------------- */
 
@@ -168,8 +179,6 @@ function applyMapping(svg, pageMap, data) {
   // IMPORTANT: ensure xml:space on the final output
   return ensureXmlSpace(out);
 }
-
-/* ---------------------------- MAIN ENTRY ---------------------------- */
 
 /* ---------------------------- MAIN ENTRY ---------------------------- */
 
