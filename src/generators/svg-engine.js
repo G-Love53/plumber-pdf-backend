@@ -173,12 +173,13 @@ export async function generate(jobData) {
     throw new Error("[SVG Engine] Missing templatePath");
   }
 
-  
+  const templateDir = resolveTemplateDir(templatePath);
   const assetsDir = path.join(templateDir, "assets");
   const mappingDir = path.join(templateDir, "mapping");
 
 
   // Load assets + maps
+  
   const pages = loadSvgPages(assetsDir);
   const mapsByPage = loadMaps(mappingDir);
   
