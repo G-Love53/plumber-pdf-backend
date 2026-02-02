@@ -51,14 +51,19 @@ function loadSvgPages(assetsDir) {
 
 function loadMaps(mappingDir) {
   const maps = {};
+
+  // ✅ Mapping is OPTIONAL: allow blank PDFs before mapper work starts
   if (!fs.existsSync(mappingDir)) {
-    throw new Error(`[SVG] mappingDir does not exist: ${mappingDir}`);
+    console.log(`[SVG] mappingDir missing (ok): ${mappingDir}`);
+    return maps;
   }
 
   const files = fs.readdirSync(mappingDir);
 
+  // ✅ Empty mapping folder is OK
   if (!files.length) {
-    throw new Error(`[SVG] mappingDir empty: ${mappingDir}`);
+    console.log(`[SVG] mappingDir empty (ok): ${mappingDir}`);
+    return maps;
   }
 
   for (const file of files) {
@@ -85,12 +90,10 @@ function loadMaps(mappingDir) {
     maps[map.pageId] = map;
   }
 
-  if (!Object.keys(maps).length) {
-    throw new Error(`[SVG] No valid page maps loaded from ${mappingDir}`);
-  }
-
+  console.log(`[SVG] Loaded ${Object.keys(maps).length} map(s) from ${mappingDir}`);
   return maps;
 }
+
 
 function escapeXml(s = "") {
   return String(s)
@@ -184,8 +187,9 @@ export async function generate(jobData) {
   
   // Apply mapping per page
   const finalPages = pages.map(p =>
-    applyMapping(p.svg, mapsByPage[p.pageId], requestRow)
-  );
+  applyMapping(p.svg, mapsByPage[p.pageId], requestRow)
+);
+
 
 const html = `
 <!doctype html>
