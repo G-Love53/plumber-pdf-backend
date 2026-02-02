@@ -1,5 +1,4 @@
 import puppeteer from "puppeteer-core";
-import ejs from "ejs";
 import path from "path";
 import fs from "fs";
 import { fileURLToPath } from "url";
@@ -117,7 +116,8 @@ function applyMapping(svg, pageMap, data) {
   overlay.push(`<g id="cid-overlay" font-family="Arial, Helvetica, sans-serif" fill="#000">`);
 
   for (const f of pageMap.fields) {
-    const raw = data?.[f.name];
+    const k = f.key || f.name;
+    const raw = data?.[k];
     const val = raw === undefined || raw === null ? "" : String(raw);
     if (!val) continue;
 
@@ -170,14 +170,10 @@ export async function generate(jobData) {
     throw new Error("[SVG Engine] Missing templatePath");
   }
 
-  const templateDir = resolveTemplateDir(templatePath);
+  
   const assetsDir = path.join(templateDir, "assets");
   const mappingDir = path.join(templateDir, "mapping");
-  const templateFile = path.join(templateDir, "index.ejs");
 
-  if (!fs.existsSync(templateFile)) {
-    throw new Error(`[SVG Engine] Missing index.ejs in ${templateDir}`);
-  }
 
   // Load assets + maps
   const pages = loadSvgPages(assetsDir);
@@ -191,19 +187,24 @@ export async function generate(jobData) {
     applyMapping(p.svg, mapsByPage[p.pageId], requestRow)
   );
 
-  // Render HTML
-const html = await ejs.renderFile(
-  templateFile,
-  {
-    pages: finalPages,
-    templateName: jobData?.templateName || jobData?.name || path.basename(templateDir),
-    data: requestRow,
-    formData: requestRow,
-    styles: "", // ✅ prevent EJS "styles is not defined"
-  },
-  { async: true, strict: false }
-);
-
+const html = `
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <style>
+    @page { size: 8.5in 11in; margin: 0; }
+    html, body { margin: 0; padding: 0; }
+    .page { width: ${PAGE_W}px; height: ${PAGE_H}px; page-break-after: always; }
+    .page:last-child { page-break-after: auto; }
+    svg { width: ${PAGE_W}px; height: ${PAGE_H}px; display: block; }
+  </style>
+</head>
+<body>
+  ${finalPages.map(svg => `<div class="page">${svg}</div>`).join("")}
+</body>
+</html>
+`;
 
   const browser = await launchBrowser();
   const page = await browser.newPage();
