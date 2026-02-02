@@ -174,6 +174,19 @@ function applyMapping(svg, pageMap, data) {
 export async function generate(jobData) {
   const { requestRow = {}, templatePath } = jobData;
 
+  function gridOverlay() {
+  const lines = [];
+  for (let x = 0; x <= 612; x += 25) {
+    lines.push(`<line x1="${x}" y1="0" x2="${x}" y2="792" stroke="#00f" stroke-opacity="0.15" />`);
+    if (x % 50 === 0) lines.push(`<text x="${x+2}" y="10" font-size="6">${x}</text>`);
+  }
+  for (let y = 0; y <= 792; y += 25) {
+    lines.push(`<line x1="0" y1="${y}" x2="612" y2="${y}" stroke="#00f" stroke-opacity="0.15" />`);
+    if (y % 50 === 0) lines.push(`<text x="2" y="${y-2}" font-size="6">${y}</text>`);
+  }
+  return `<g id="grid-overlay">${lines.join("")}</g>`;
+ }
+
   if (!templatePath) throw new Error("[SVG Engine] Missing templatePath");
 
   const templateDir = resolveTemplateDir(templatePath);
@@ -250,17 +263,6 @@ const html = `
     await page.close().catch(() => {});
     await browser.close().catch(() => {});
   }
-  function gridOverlay() {
-  const lines = [];
-  for (let x = 0; x <= 612; x += 25) {
-    lines.push(`<line x1="${x}" y1="0" x2="${x}" y2="792" stroke="#00f" stroke-opacity="0.15" />`);
-    if (x % 50 === 0) lines.push(`<text x="${x+2}" y="10" font-size="6">${x}</text>`);
-  }
-  for (let y = 0; y <= 792; y += 25) {
-    lines.push(`<line x1="0" y1="${y}" x2="612" y2="${y}" stroke="#00f" stroke-opacity="0.15" />`);
-    if (y % 50 === 0) lines.push(`<text x="2" y="${y-2}" font-size="6">${y}</text>`);
-  }
-  return `<g id="grid-overlay">${lines.join("")}</g>`;
- }
+  
 
-}
+
