@@ -198,11 +198,11 @@ const html = `
 <head>
   <meta charset="utf-8" />
   <style>
-    @page { size: 8.5in 11in; margin: 0; }
+    @page { size: ${PAGE_W}pt ${PAGE_H}pt; margin: 0; }
     html, body { margin: 0; padding: 0; }
-    .page { width: ${PAGE_W}px; height: ${PAGE_H}px; page-break-after: always; }
+    .page { width: ${PAGE_W}pt; height: ${PAGE_H}pt; page-break-after: always; }
     .page:last-child { page-break-after: auto; }
-    svg { width: ${PAGE_W}px; height: ${PAGE_H}px; display: block; }
+    svg { width: ${PAGE_W}pt; height: ${PAGE_H}pt; display: block; }
   </style>
 </head>
 <body>
