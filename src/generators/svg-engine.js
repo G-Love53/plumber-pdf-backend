@@ -13,6 +13,9 @@ const PROJECT_ROOT = path.join(__dirname, "..", "..");
 const PAGE_W = 612;
 const PAGE_H = 792;
 
+const TEXT_PAD_Y = 2;   // pixels in your 612x792 space
+const CHECK_PAD_Y = 1;  // optional, usually not needed
+
 
 /* ---------------------------- PATH RESOLUTION ---------------------------- */
 
@@ -125,8 +128,11 @@ function applyMapping(svg, pageMap, data) {
   if (f.type === "checkbox") {
     if (raw === true || raw === "true" || raw === "X") {
       overlay.push(
-        `<text x="${f.x}" y="${f.y}" font-size="${f.size || 10}" dominant-baseline="hanging">X</text>`
-      );
+  `<text x="${f.x}" y="${f.y}" font-size="${f.fontSize || 8}" dominant-baseline="hanging">
+    ${escapeXml(val)}
+  </text>`
+);
+
     }
     continue;
   }
@@ -135,10 +141,12 @@ function applyMapping(svg, pageMap, data) {
   if (!val) continue;
 
   overlay.push(
-    `<text x="${f.x}" y="${f.y}" font-size="${f.fontSize || 8}" dominant-baseline="alphabetic">
-      ${escapeXml(val)}
-    </text>`
-  );
+  `<text x="${f.x}" y="${f.y + TEXT_PAD_Y}" font-size="${f.fontSize || 8}"
+    dominant-baseline="hanging" text-anchor="start">
+    ${escapeXml(val)}
+  </text>`
+);
+
 }
 
 
