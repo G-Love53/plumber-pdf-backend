@@ -14,7 +14,6 @@ const PAGE_W = 612;
 const PAGE_H = 792;
 
 const TEXT_PAD_Y = 2;   // pixels in your 612x792 space
-const CHECK_PAD_Y = 1;  // optional, usually not needed
 
 
 /* ---------------------------- PATH RESOLUTION ---------------------------- */
@@ -112,6 +111,17 @@ function ensureXmlSpace(svg) {
   return svg.replace(/<svg\b/, '<svg xml:space="preserve"');
 }
 
+function asString(v) {
+  return v === undefined || v === null ? "" : String(v);
+}
+
+function isChecked(v) {
+  if (v === true) return true;
+  if (v === false || v === undefined || v === null) return false;
+
+  const s = String(v).trim().toLowerCase();
+  return s === "x" || s === "true" || s === "yes" || s === "y" || s === "1" || s === "on" || s === "checked";
+}
 
 
 // Coordinate overlay mapping (matches your mapper output)
@@ -124,28 +134,38 @@ function applyMapping(svg, pageMap, data) {
   for (const f of pageMap.fields) {
   const key = f.key || f.name;
   const raw = data?.[key];
+  if (!key) continue;
 
   if (f.type === "checkbox") {
-    if (raw === true || raw === "true" || raw === "X") {
+  if (isChecked(raw)) {
+    const x = Number(f.x);
+    const y = Number(f.y);
+    const size = Number(f.size || f.fontSize || 10);
+
+    // guard: bad map data should never crash rendering
+    if (Number.isFinite(x) && Number.isFinite(y)) {
       overlay.push(
-  `<text x="${f.x}" y="${f.y}" font-size="${f.fontSize || 8}" dominant-baseline="hanging">
-    ${escapeXml(val)}
-  </text>`
-);
-
+        `<text x="${x}" y="${y}" font-size="${size}" dominant-baseline="hanging">X</text>`
+      );
     }
-    continue;
   }
+  continue;
+}
 
-  const val = raw === undefined || raw === null ? "" : String(raw);
+    const val = asString(raw);
   if (!val) continue;
 
+
+  const x = Number(f.x);
+  const y = Number(f.y);
+
+  if (!Number.isFinite(x) || !Number.isFinite(y)) continue;
+
   overlay.push(
-  `<text x="${f.x}" y="${f.y + TEXT_PAD_Y}" font-size="${f.fontSize || 8}"
-    dominant-baseline="hanging" text-anchor="start">
-    ${escapeXml(val)}
-  </text>`
+  `<text x="${x}" y="${y + TEXT_PAD_Y}" font-size="${Number(f.fontSize || 8)}"
+    dominant-baseline="hanging" text-anchor="start">${escapeXml(val)}</text>`
 );
+
 
 }
 
@@ -267,17 +287,31 @@ const html = `
     await page.close().catch(() => {});
     await browser.close().catch(() => {});
   }
-  function gridOverlay() {
-  const lines = [];
-  for (let x = 0; x <= 612; x += 25) {
-    lines.push(`<line x1="${x}" y1="0" x2="${x}" y2="792" stroke="#00f" stroke-opacity="0.15" />`);
-    if (x % 50 === 0) lines.push(`<text x="${x+2}" y="10" font-size="6">${x}</text>`);
-  }
-  for (let y = 0; y <= 792; y += 25) {
-    lines.push(`<line x1="0" y1="${y}" x2="612" y2="${y}" stroke="#00f" stroke-opacity="0.15" />`);
-    if (y % 50 === 0) lines.push(`<text x="2" y="${y-2}" font-size="6">${y}</text>`);
-  }
-  return `<g id="grid-overlay">${lines.join("")}</g>`;
- }
-
 }
+ // --- DEBUG ONLY: grid overlay (do not call in production unless debugging alignment) ---
+function gridOverlay() {
+  const lines = [];
+
+  // Vertical grid lines
+  for (let x = 0; x <= PAGE_W; x += 25) {
+    lines.push(
+      `<line x1="${x}" y1="0" x2="${x}" y2="${PAGE_H}" stroke="#00f" stroke-opacity="0.15" />`
+    );
+    if (x % 50 === 0) {
+      lines.push(`<text x="${x + 2}" y="10" font-size="6">${x}</text>`);
+    }
+  }
+
+  // Horizontal grid lines
+  for (let y = 0; y <= PAGE_H; y += 25) {
+    lines.push(
+      `<line x1="0" y1="${y}" x2="${PAGE_W}" y2="${y}" stroke="#00f" stroke-opacity="0.15" />`
+    );
+    if (y % 50 === 0) {
+      lines.push(`<text x="2" y="${y - 2}" font-size="6">${y}</text>`);
+    }
+  }
+
+  return `<g id="grid-overlay">${lines.join("")}</g>`;
+}
+
