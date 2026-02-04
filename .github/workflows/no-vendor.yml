@@ -1,0 +1,41 @@
+name: No vendor + submodule path guard
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout (with submodules)
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Fail if vendor directory exists
+        run: |
+          if [ -d "vendor" ]; then
+            echo "ERROR: vendor/ directory exists. Not allowed."
+            exit 1
+          fi
+
+      - name: Fail if .gitmodules references vendor
+        run: |
+          if [ -f ".gitmodules" ] && grep -q "vendor/" .gitmodules; then
+            echo "ERROR: .gitmodules references vendor/. Not allowed."
+            cat .gitmodules
+            exit 1
+          fi
+
+      - name: Enforce root CID_HomeBase submodule path
+        run: |
+          if [ ! -f ".gitmodules" ]; then
+            echo "ERROR: .gitmodules missing. CID_HomeBase must remain a root submodule."
+            exit 1
+          fi
+          if ! grep -qE '^[[:space:]]*path[[:space:]]*=[[:space:]]*CID_HomeBase[[:space:]]*$' .gitmodules; then
+            echo "ERROR: CID_HomeBase submodule path must be CID_HomeBase (repo root)."
+            cat .gitmodules
+            exit 1
+          fi
