@@ -39,3 +39,7 @@ ENV PUPPETEER_EXECUTABLE_PATH=/app/chrome/chrome-linux64/chrome
 
 EXPOSE 10000
 CMD ["npm", "start"]
+
+# cache bust
+ARG CACHE_BUST=1770330661
+RUN echo $CACHE_BUST
