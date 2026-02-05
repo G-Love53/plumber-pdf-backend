@@ -29,8 +29,8 @@ RUN /app/chrome/chrome-linux64/chrome --version
 COPY . .
 
 # Ensure CID_HomeBase exists in cloud builds (Render doesn't fetch submodules)
-RUN rm -rf vendor/CID_HomeBase \
- && git clone --depth 1 https://github.com/G-Love53/CID_HomeBase vendor/CID_HomeBase
+RUN rm -rf CID_HomeBase \
+ && git clone --depth 1 https://github.com/G-Love53/CID_HomeBase CID_HomeBase
 
 # Env
 ENV NODE_ENV=production
