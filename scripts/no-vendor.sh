@@ -11,12 +11,9 @@ if [ -f ".gitmodules" ] && grep -q "vendor/" .gitmodules; then
   exit 1
 fi
 
-if grep -R --line-number --fixed-strings "vendor/" . \
-  --exclude-dir=node_modules --exclude-dir=.git \
-  --exclude=scripts/no-vendor.sh \
-  --exclude=.github/workflows/no-vendor.yml \
-  >/dev/null; then
-  echo "ERROR: vendor/ referenced in repo (outside guardrails)"
+if git ls-files -z | xargs -0 grep -n --fixed-strings "vendor/" >/dev/null 2>&1; then
+  echo "ERROR: vendor/ referenced in tracked files"
+  git ls-files -z | xargs -0 grep -n --fixed-strings "vendor/" || true
   exit 1
 fi
 
