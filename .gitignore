@@ -4,4 +4,3 @@
 node_modules/
 OUTPUT_*.pdf
 package-lock.json
-vendor/
