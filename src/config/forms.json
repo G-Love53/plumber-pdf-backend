@@ -1,25 +1,25 @@
 {
-  "acord25_v1": {
+  "ACORD25": {
     "enabled": true,
     "engine": "svg",
     "templatePath": "CID_HomeBase/templates/ACORD25"
   },
-  "acord125_v1": {
+  "ACORD125": {
     "enabled": true,
     "engine": "svg",
     "templatePath": "CID_HomeBase/templates/ACORD125"
   },
-  "acord126_v1": {
+  "ACORD126": {
     "enabled": true,
     "engine": "svg",
     "templatePath": "CID_HomeBase/templates/ACORD126"
   },
-  "acord140_v1": {
+  "ACORD140": {
     "enabled": true,
     "engine": "svg",
     "templatePath": "CID_HomeBase/templates/ACORD140"
   },
-  "supp_plumber_v1": {
+  "SUPP_BERKLEY_PLUMBER": {
     "enabled": true,
     "engine": "svg",
     "templatePath": "CID_HomeBase/templates/SUPP_BERKLEY_PLUMBER"
