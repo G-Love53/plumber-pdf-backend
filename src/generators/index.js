@@ -19,7 +19,7 @@ const forms = JSON.parse(fs.readFileSync(formsPath, "utf8"));
 function getFormConfigOrThrow(formId) {
   if (!formId) {
     throw new Error(
-      "[Factory] Missing form_id on requestRow. Set requestRow.form_id explicitly (e.g., acord25_v1, acord125_v1)."
+      "[Factory] Missing form_id on requestRow. Set requestRow.form_id explicitly (e.g., acord25, acord125)."
     );
   }
 

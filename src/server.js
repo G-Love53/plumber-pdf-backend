@@ -76,13 +76,6 @@ const resolveTemplate = (name) => TEMPLATE_ALIASES[name] || name;
 // Convention-based form_id (no hardcoding required for new ACORD forms)
 function formIdForTemplateFolder(folderName) {
   const m = String(folderName || "").match(/^ACORD(\d+)$/i);
-  if (m) return `acord${m[1]}_v1`; // ACORD125 -> acord125_v1
-  if (/^SUPP_/i.test(folderName)) return `supp_${SEGMENT}_v1`;
-  return null;
-}
-function templateFolderForFormId(formId) {
-  const m = String(formId || "").match(/^acord(\d+)_v1$/i);
-  if (m) return `ACORD${m[1]}`; // acord25_v1 -> ACORD25
   return null;
 }
 
@@ -437,7 +430,7 @@ APP.post("/request-coi", async (req, res) => {
   description_special_text,
 
   // ✅ NEW (safe defaults)
-  bundle_id = "coi_standard_v1",
+  bundle_id = "COI_STANDARD",
   additional_insureds = [],
   special_wording_text = "",
   special_wording_confirmed = false,
@@ -610,7 +603,7 @@ cron.schedule("*/2 * * * *", async () => {
     if (claimErr || !claimed) return;
 
     // Bundle-based COI render (no hardcoded form_id)
-const bundleId = claimed.bundle_id || "coi_standard_v1";
+const bundleId = claimed.bundle_id || "COI_STANDARD";
 const formIds = bundles[bundleId];
 
 if (!Array.isArray(formIds) || formIds.length === 0) {

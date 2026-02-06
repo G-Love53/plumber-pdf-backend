@@ -24,7 +24,6 @@ function resolveTemplateDir(templatePath = "") {
   if (!tp) throw new Error("[SVG Engine] templatePath is required");
 
   if (tp.startsWith("/")) return tp;
-  if (tp.toLowerCase().startsWith("vendor/"))
     return path.join(PROJECT_ROOT, tp);
   if (tp.toLowerCase().startsWith("templates/"))
     return path.join(PROJECT_ROOT, tp);
