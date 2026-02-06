@@ -25,6 +25,9 @@ import { triggerCarrierBind } from "./bind-processor.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+
+const PROJECT_ROOT = path.join(__dirname, "..", "..");
+const TPL_DIR = path.join(PROJECT_ROOT, "CID_HomeBase", "templates");
 /* ============================================================
    📦 LOAD BUNDLES (NOW SAFE)
    ============================================================ */
@@ -76,9 +79,10 @@ const resolveTemplate = (name) => TEMPLATE_ALIASES[name] || name;
 // Convention-based form_id (no hardcoding required for new ACORD forms)
 function formIdForTemplateFolder(folderName) {
   const m = String(folderName || "").match(/^ACORD(\d+)$/i);
+  if (m) return `acord${m[1]}`;
+  if (/^SUPP_/i.test(folderName)) return `supp_${SEGMENT}`;
   return null;
 }
-
 async function renderTemplatesToAttachments(templateFolders, data) {
   const results = [];
 
