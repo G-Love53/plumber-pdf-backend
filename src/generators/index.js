@@ -24,7 +24,7 @@ function resolveFormsKey(formId, segment) {
   if (/^supp_/i.test(id)) return "SUPP_BERKLEY_PLUMBER";
   return id;
 }
-function getFormConfigOrThrow(formId) {
+function getFormConfigOrThrow(formId, segment) {
   if (!formId) {
     throw new Error(
       "[Factory] Missing form_id on requestRow. Set requestRow.form_id explicitly (e.g., acord25, acord125)."
@@ -50,7 +50,7 @@ function getFormConfigOrThrow(formId) {
 
 export async function generateDocument(requestRow) {
   const formId = requestRow?.form_id; // NO FALLBACK. Prevents wrong-template routing.
-  const formConfig = getFormConfigOrThrow(formId);
+  const formConfig = getFormConfigOrThrow(formId, requestRow?.segment);
 
   const assets = getSegmentAssets(requestRow?.segment);
 
