@@ -4,7 +4,6 @@ import express from "express";
 import path from "path";
 import fsSync from "fs";
 import fs from "fs/promises";
-import fssync from "fs";
 import { fileURLToPath } from "url";
 
 import cron from "node-cron";
