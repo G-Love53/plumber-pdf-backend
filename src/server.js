@@ -2,7 +2,7 @@
 
 import express from "express";
 import path from "path";
-import fs from "fs";
+import fsSync from "fs";
 import fs from "fs/promises";
 import fssync from "fs";
 import { fileURLToPath } from "url";
@@ -85,13 +85,6 @@ async function renderTemplatesToAttachments(templateFolders, data) {
 
   for (const folderName of templateFolders) {
     const name = resolveTemplate(folderName);
-
-    try {
-      await fs.access(path.join(TPL_DIR, name));
-    } catch {
-      results.push({ status: "rejected", reason: `Template ${name} not found` });
-      continue;
-    }
 
     const unified = await maybeMapData(name, data);
 
@@ -187,13 +180,6 @@ async function renderBundleAndRespond({ templates, email, debug = false }, res) 
   for (const t of templates) {
     const name = resolveTemplate(t.name);
 
-    // Template folder must exist
-    try {
-      await fs.access(path.join(TPL_DIR, name));
-    } catch {
-      results.push({ status: "rejected", reason: `Template ${name} not found` });
-      continue;
-    }
 
     const rawData = t.data || {};
 const unified = await maybeMapData(name, rawData);
