@@ -31,7 +31,7 @@ function getFormConfigOrThrow(formId, segment) {
     );
   }
 
-  const cfg = forms[resolveFormsKey(formId, segment)];
+  const cfg = forms[resolveFormsKey(formId)];
 
   if (!cfg) throw new Error(`[Factory] Configuration missing for form_id: ${formId}`);
   if (cfg.enabled === false) throw new Error(`[Factory] Form ${formId} is disabled.`);
