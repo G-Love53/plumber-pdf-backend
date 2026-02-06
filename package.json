@@ -5,7 +5,8 @@
   "type": "module",
   "main": "src/server.js",
   "scripts": {
-    "start": "node src/server.js"
+    "start": "node src/server.js",
+    "prestart": "node scripts/gen-forms-registry.mjs"
   },
   "dependencies": {
     "@google/genai": "^0.15.0",
