@@ -22,7 +22,7 @@ function resolveFormsKey(formId, segment) {
   let m = id.match(/^acord(\d+)$/i);
   if (m) return `ACORD${m[1]}`;
   if (/^supp_/i.test(id)) return "SUPP_BERKLEY_PLUMBER";
-  return id;
+  return id.toUpperCase();
 }
 function getFormConfigOrThrow(formId, segment) {
   if (!formId) {
