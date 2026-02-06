@@ -20,16 +20,20 @@ const TEXT_PAD_Y = 2;   // pixels in your 612x792 space
 
 function resolveTemplateDir(templatePath = "") {
   const tp = String(templatePath ?? "").replace(/\\/g, "/").trim();
-
   if (!tp) throw new Error("[SVG Engine] templatePath is required");
 
+  // absolute path
   if (tp.startsWith("/")) return tp;
-    return path.join(PROJECT_ROOT, tp);
-  if (tp.toLowerCase().startsWith("templates/"))
-    return path.join(PROJECT_ROOT, tp);
 
+  // already a repo-relative path we support
+  if (tp.startsWith("CID_HomeBase/")) return path.join(PROJECT_ROOT, tp);
+  if (tp.startsWith("templates/")) return path.join(PROJECT_ROOT, tp);
+
+  // convenience: if caller passes "ACORD125" or "SUPP_XYZ"
+  // assume it's a local segment template under /templates
   return path.join(PROJECT_ROOT, "templates", tp);
 }
+
 
 /* ---------------------------- SVG + MAPPING ---------------------------- */
 
