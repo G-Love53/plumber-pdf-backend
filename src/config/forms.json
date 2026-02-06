@@ -24,12 +24,6 @@
     "engine": "svg",
     "templatePath": "CID_HomeBase/templates/ACORD140"
   },
-  "LESSOR_A129S": {
-  "enabled": true,
-  "engine": "svg",
-  "templatePath": "CID_HomeBase/templates/LESSOR_A129S"
-  },
-
   "SUPP_BAR": {
     "enabled": true,
     "engine": "svg",
