@@ -117,8 +117,6 @@ async function renderTemplatesToAttachments(templateFolders, data) {
 
 
 // --- Paths (HomeBase mounted as vendor) ---
-const HOMEBASE_DIR = path.join(__dirname, "..", "vendor", "CID_HomeBase");
-const TPL_DIR = path.join(HOMEBASE_DIR, "templates");
 
 
 /* ============================================================
