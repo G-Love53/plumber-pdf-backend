@@ -14,19 +14,29 @@
     "engine": "svg",
     "templatePath": "CID_HomeBase/templates/ACORD126"
   },
+  "ACORD130": {
+    "enabled": true,
+    "engine": "svg",
+    "templatePath": "CID_HomeBase/templates/ACORD130"
+  },
   "ACORD140": {
     "enabled": true,
     "engine": "svg",
     "templatePath": "CID_HomeBase/templates/ACORD140"
+  },
+  "SUPP_BAR": {
+    "enabled": true,
+    "engine": "svg",
+    "templatePath": "CID_HomeBase/templates/SUPP_BAR"
   },
   "SUPP_BERKLEY_PLUMBER": {
     "enabled": true,
     "engine": "svg",
     "templatePath": "CID_HomeBase/templates/SUPP_BERKLEY_PLUMBER"
   },
-  "ACORD130": {
+  "SUPP_CONTRACTOR": {
     "enabled": true,
     "engine": "svg",
-    "templatePath": "CID_HomeBase/templates/ACORD130"
+    "templatePath": "CID_HomeBase/templates/SUPP_CONTRACTOR"
   }
 }
