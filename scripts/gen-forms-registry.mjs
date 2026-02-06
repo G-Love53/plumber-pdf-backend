@@ -16,8 +16,8 @@ const dirs = fs
   .map(d => d.name);
 
 const keys = dirs
-  .filter(n => /^ACORD\d+$/i.test(n) || /^SUPP_/i.test(n))
-  .map(n => (n.toUpperCase().startsWith("ACORD") ? n.toUpperCase() : n))
+  .filter(n => !n.startsWith("."))
+  .map(n => n.toUpperCase())
   .sort((a,b) => a.localeCompare(b, undefined, { numeric: true }));
 
 const forms = {};

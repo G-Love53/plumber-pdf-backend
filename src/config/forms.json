@@ -1,4 +1,9 @@
 {
+  "_SHARED": {
+    "enabled": true,
+    "engine": "svg",
+    "templatePath": "CID_HomeBase/templates/_SHARED"
+  },
   "ACORD25": {
     "enabled": true,
     "engine": "svg",
@@ -23,6 +28,16 @@
     "enabled": true,
     "engine": "svg",
     "templatePath": "CID_HomeBase/templates/ACORD140"
+  },
+  "LESSOR_A129S": {
+    "enabled": true,
+    "engine": "svg",
+    "templatePath": "CID_HomeBase/templates/LESSOR_A129S"
+  },
+  "LOGOS": {
+    "enabled": true,
+    "engine": "svg",
+    "templatePath": "CID_HomeBase/templates/LOGOS"
   },
   "SUPP_BAR": {
     "enabled": true,
