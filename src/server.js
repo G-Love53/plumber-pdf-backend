@@ -78,11 +78,19 @@ const resolveTemplate = (name) => TEMPLATE_ALIASES[name] || name;
 
 // Convention-based form_id (no hardcoding required for new ACORD forms)
 function formIdForTemplateFolder(folderName) {
-  const m = String(folderName || "").match(/^ACORD(\d+)$/i);
+  const n = String(folderName || "").trim();
+
+  // ACORD130 → acord130
+  const m = n.match(/^ACORD(\d+)$/i);
   if (m) return `acord${m[1]}`;
-  if (/^SUPP_/i.test(folderName)) return `supp_${SEGMENT}`;
-  return null;
+
+  // SUPP_BERKLEY_PLUMBER → supp_<segment>
+  if (/^SUPP_/i.test(n)) return `supp_${SEGMENT}`;
+
+  // EVERYTHING ELSE (LESSOR_A129S, HVAC_SUPP_01, etc.)
+  return n.toLowerCase();
 }
+
 async function renderTemplatesToAttachments(templateFolders, data) {
   const results = [];
 
