@@ -1,3 +1,15 @@
 {
-  "COI_STANDARD": ["ACORD25"]
+  "COI_STANDARD": [
+    "ACORD25"
+  ],
+  "LESSOR_PACKET": [
+    "LESSOR_A129S"
+  ],
+  "PLUMBER_INTAKE": [
+    "SUPP_CONTRACTOR",
+    "ACORD125",
+    "ACORD126",
+    "ACORD130",
+    "ACORD140"
+  ]
 }
