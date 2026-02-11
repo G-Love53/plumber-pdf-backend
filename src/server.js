@@ -374,37 +374,76 @@ if (
   }
 });
 
-// Submit Quote Endpoint (LEG 1)
+// Submit Quote Endpoint (LEG 1) — CID RSS CANONICAL
 APP.post("/submit-quote", async (req, res) => {
   try {
-    const { formData = {}, segments = [], email } = req.body || {};
+    const body = req.body || {};
+    const formData = body.formData || {};
+    const bundle_id = body.bundle_id;
+    const segments = Array.isArray(body.segments) ? body.segments : [];
+    const segment = String(body.segment || process.env.SEGMENT || "").trim().toLowerCase();
 
-    const templates = (segments || []).map((name) => ({
-      name,
-      filename: FILENAME_MAP[resolveTemplate(name)] || `${name}.pdf`,
-      data: formData,
-    }));
+    // 1) Resolve template list from bundle_id (preferred) OR segments[] (legacy)
+    let templateNames = [];
 
-    if (templates.length === 0) {
-      return res
-        .status(400)
-        .json({ ok: false, success: false, error: "NO_VALID_SEGMENTS" });
+    if (bundle_id) {
+      const bundlesPath = path.join(__dirname, "config", "bundles.json");
+      const bundles = JSON.parse(fsSync.readFileSync(bundlesPath, "utf8"));
+      const list = bundles[bundle_id];
+
+      if (!Array.isArray(list) || list.length === 0) {
+        return res.status(400).json({ ok: false, success: false, error: "UNKNOWN_BUNDLE" });
+      }
+
+      templateNames = list;
+    } else {
+      templateNames = segments;
     }
 
-    const defaultTo = process.env.CARRIER_EMAIL || process.env.GMAIL_USER;
-    const emailBlock = email?.to?.length
-      ? email
-      : {
-          to: [defaultTo].filter(Boolean),
-          subject: `New Submission — ${formData.applicant_name || ""}`.trim(),
-          formData,
-        };
+    if (!templateNames.length) {
+      return res.status(400).json({ ok: false, success: false, error: "NO_VALID_SEGMENTS" });
+    }
 
+    // 2) Build templates[] for renderBundleAndRespond
+    const templates = templateNames.map((name) => {
+      const resolved = resolveTemplate(name); // keeps your aliasing logic consistent
+      return {
+        name,
+        filename: FILENAME_MAP[resolved] || `${name}.pdf`,
+        data: formData,
+      };
+    });
+
+    // 3) Email block (canonical)
+    const defaultTo = process.env.CARRIER_EMAIL || process.env.GMAIL_USER;
+    const to =
+      body.email?.to?.length ? body.email.to
+      : body.email_to ? [body.email_to] // optional backward compat
+      : [defaultTo].filter(Boolean);
+
+    const applicant = (formData.applicant_name || formData.insured_name || "").trim();
+    const segLabel = segment ? segment.toUpperCase() : "CID";
+    const subject =
+      body.email?.subject?.trim()
+      || `CID Submission Packet — ${segLabel}${applicant ? " — " + applicant : ""}`;
+
+    const emailBlock = {
+      to,
+      subject,
+      formData,
+      ...((body.email && typeof body.email === "object") ? body.email : {}),
+      to,       // ensure canonical wins
+      subject,  // ensure canonical wins
+      formData, // ensure canonical wins
+    };
+
+    // 4) One call does it all (render + attach + email)
     await renderBundleAndRespond({ templates, email: emailBlock }, res);
   } catch (e) {
     res.status(500).json({ ok: false, success: false, error: e.message });
   }
 });
+
 
 // COI Request Endpoint (LEG 3 entry)
 APP.post("/request-coi", async (req, res) => {
