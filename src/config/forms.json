@@ -1,10 +1,4 @@
-{
-  "_SHARED": {
-    "enabled": true,
-    "engine": "svg",
-    "templatePath": "CID_HomeBase/templates/_SHARED"
-  },
-  "ACORD25": {
+{  "ACORD25": {
     "enabled": true,
     "engine": "svg",
     "templatePath": "CID_HomeBase/templates/ACORD25"
