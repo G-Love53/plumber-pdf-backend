@@ -6,11 +6,12 @@ import { randomUUID } from 'crypto';
 import { loadPrompts } from "./services/promptLoader.js"; 
 import { createClient } from '@supabase/supabase-js';
 
-// ✅ Initialize Supabase
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-);
+// ✅ Supabase (guarded): do not crash if env missing
+const supabase =
+  process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY
+    ? createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY)
+    : null;
+
 
 /* ---------------- Configuration ---------------- */
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY; 
@@ -82,23 +83,28 @@ export async function processInbox(authClient) {
       const aiContent = JSON.parse(aiResponse.choices[0].message.content);
 
       // 🟢 6. DATA BRIDGE: Save Quote to Supabase
-      const { error: dbError } = await supabase
-        .from('quote_opportunities')
-        .insert({
-          id: quoteId,
-          segment: SEGMENT, // Uses the safe 'plumber' variable
-          carrier_name: aiContent.carrier,
-          premium_amount: aiContent.premium, 
-          extracted_data: aiContent,
-          status: 'pending_bind',
-          original_pdf_text: rawText
-        });
+      if (supabase) {
+  const { error: dbError } = await supabase
+    .from('quote_opportunities')
+    .insert({
+      id: quoteId,
+      segment: SEGMENT,
+      carrier_name: aiContent.carrier,
+      premium_amount: aiContent.premium,
+      extracted_data: aiContent,
+      status: 'pending_bind',
+      original_pdf_text: rawText
+    });
 
-      if (dbError) {
-        console.error("❌ CRITICAL: Failed to save quote to DB:", dbError);
-      } else {
-        console.log(`✅ Quote saved to DB: ${quoteId}`);
-      }
+  if (dbError) {
+    console.error("❌ CRITICAL: Failed to save quote to DB:", dbError);
+  } else {
+    console.log(`✅ Quote saved to DB: ${quoteId}`);
+  }
+} else {
+  console.warn("⚠️ Supabase ENV missing — skipping DB save (local render-only mode)");
+}
+
 
       // 7. Construct the Email
       const hostname = process.env.RENDER_EXTERNAL_HOSTNAME || 'localhost:10000';
