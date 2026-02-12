@@ -262,11 +262,36 @@ unified.segment = SEGMENT;
 // Render Bundle Endpoint
 APP.post("/render-bundle", async (req, res) => {
   try {
-    await renderBundleAndRespond(req.body || {}, res);
+    const body = req.body || {};
+
+    // Accept either templates[] OR bundle_id (+ data/formData)
+    if ((!Array.isArray(body.templates) || body.templates.length === 0) && body.bundle_id) {
+      const bundlesPath = path.join(__dirname, "config", "bundles.json");
+      const formsPath = path.join(__dirname, "config", "forms.json");
+
+      const bundles = JSON.parse(fsSync.readFileSync(bundlesPath, "utf8"));
+      const forms = JSON.parse(fsSync.readFileSync(formsPath, "utf8"));
+
+      const list = bundles[body.bundle_id];
+      if (!Array.isArray(list) || list.length === 0) {
+        return res.status(400).json({ ok: false, error: "UNKNOWN_BUNDLE" });
+      }
+
+      const mergedData = (body.formData && typeof body.formData === "object") ? body.formData
+        : (body.data && typeof body.data === "object") ? body.data
+        : {};
+
+      body.templates = list
+        .filter((name) => forms[name]?.enabled !== false)
+        .map((name) => ({ name, data: mergedData }));
+    }
+
+    await renderBundleAndRespond(body, res);
   } catch (e) {
     res.status(500).json({ ok: false, error: e.message });
   }
 });
+
 
 // Render PDF Endpoint (returns binary PDF for curl > file.pdf)
 APP.post("/render-pdf", async (req, res) => {
