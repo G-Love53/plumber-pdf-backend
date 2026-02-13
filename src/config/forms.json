@@ -48,5 +48,15 @@
     "enabled": true,
     "engine": "svg",
     "templatePath": "CID_HomeBase/templates/SUPP_CONTRACTOR"
+  },
+  "SUPP_PLUMBER": {
+    "enabled": true,
+    "engine": "svg",
+    "templatePath": "CID_HomeBase/templates/SUPP_PLUMBER"
+  },
+  "SUPP_ROOFER": {
+    "enabled": true,
+    "engine": "svg",
+    "templatePath": "CID_HomeBase/templates/SUPP_ROOFER"
   }
 }

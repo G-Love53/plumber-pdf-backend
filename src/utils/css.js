@@ -7,7 +7,8 @@ const __dirname = path.dirname(__filename);
 
 export function loadGlobalCss() {
   try {
-    const cssPath = path.join(__dirname, "../../templates/assets/common/global-print.css");
+    const repoRoot = path.join(__dirname, "../..");
+    const cssPath = path.join(repoRoot, "CID_HomeBase", "templates", "_shared", "styles.css");
     return fs.existsSync(cssPath) ? fs.readFileSync(cssPath, "utf8") : "";
   } catch (err) {
     console.error("Error loading global CSS:", err);

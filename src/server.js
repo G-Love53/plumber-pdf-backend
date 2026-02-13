@@ -617,18 +617,23 @@ const PORT = process.env.PORT || 8080;
 APP.listen(PORT, () => console.log(`PDF service listening on ${PORT}`));
 
 /* ============================================================
-   🤖 COI SCHEDULER
+   🤖 COI SCHEDULER (only when Supabase env set — skip when missing)
    ============================================================ */
 
 let COI_TICK_RUNNING = false;
 
-cron.schedule("*/2 * * * *", async () => {
-  if (COI_TICK_RUNNING) return;
-  COI_TICK_RUNNING = true;
+const HAS_SUPABASE = !!(process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY);
+if (!HAS_SUPABASE) console.log("[Cron] Supabase env missing — COI & Librarian crons disabled");
 
-  try {
-    const tenMinAgo = new Date(Date.now() - 10 * 60 * 1000).toISOString();
-    await supabase
+if (HAS_SUPABASE) {
+  cron.schedule("*/2 * * * *", async () => {
+    if (!supabase) return;
+    if (COI_TICK_RUNNING) return;
+    COI_TICK_RUNNING = true;
+
+    try {
+      const tenMinAgo = new Date(Date.now() - 10 * 60 * 1000).toISOString();
+      await supabase
       .from("coi_requests")
       .update({
         status: "pending",
@@ -732,15 +737,18 @@ if (!attachments.length) {
   } finally {
     COI_TICK_RUNNING = false;
   }
-});
+  });
+}
 
 /* ============================================================
-   📚 LIBRARIAN
+   📚 LIBRARIAN (only when Supabase env set)
    ============================================================ */
 
-cron.schedule("*/10 * * * *", async () => {
-  try {
-    const { data: docs, error } = await supabase
+if (HAS_SUPABASE) {
+  cron.schedule("*/10 * * * *", async () => {
+    if (!supabase) return;
+    try {
+      const { data: docs, error } = await supabase
       .from("carrier_resources")
       .select("*")
       .eq("is_indexed", false)
@@ -760,4 +768,5 @@ cron.schedule("*/10 * * * *", async () => {
   } catch (e) {
     console.error("❌ Librarian Error:", e?.message || e);
   }
-});
+  });
+}

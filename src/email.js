@@ -4,20 +4,21 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-const { GMAIL_USER, GMAIL_APP_PASSWORD } = process.env;
+let transporter = null;
 
-if (!GMAIL_USER || !GMAIL_APP_PASSWORD) {
-  throw new Error("GMAIL_USER and GMAIL_APP_PASSWORD environment variables required");
+function getTransporter() {
+  const { GMAIL_USER, GMAIL_APP_PASSWORD } = process.env;
+  if (!GMAIL_USER || !GMAIL_APP_PASSWORD) {
+    throw new Error("GMAIL_USER and GMAIL_APP_PASSWORD environment variables required for sending email");
+  }
+  if (!transporter) {
+    transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: { user: GMAIL_USER, pass: GMAIL_APP_PASSWORD },
+    });
+  }
+  return transporter;
 }
-
-// Create transporter once
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: GMAIL_USER,
-    pass: GMAIL_APP_PASSWORD,
-  },
-});
 
 // Helper: force anything into a Buffer safely
 function toBuffer(raw) {
@@ -32,6 +33,8 @@ function asRecipientString(to) {
 }
 
 export async function sendWithGmail({ to, subject, html, text, attachments = [] }) {
+  const transport = getTransporter();
+  const { GMAIL_USER } = process.env;
   const toStr = asRecipientString(to);
 
   // ✅ Provable top-level logging
@@ -66,7 +69,7 @@ export async function sendWithGmail({ to, subject, html, text, attachments = [] 
   });
 
   try {
-    const info = await transporter.sendMail({
+    const info = await transport.sendMail({
       from: `"CID Service" <${GMAIL_USER}>`,
       to: toStr,
       subject,
