@@ -16,22 +16,24 @@ const PAGE_H = 792;
 const TEXT_PAD_Y = 2;   // pixels in your 612x792 space
 
 
-/* ---------------------------- PATH RESOLUTION ---------------------------- */
+/* ---------------------------- PATH RESOLUTION (RSS LOCKED) ----------------------------
+ * Canonical path — same for everything (ACORD*, SUPP_*, etc.):
+ *   - Templates live ONLY in:  CID_HomeBase/templates/<TemplateName>/
+ *   - Assets:                  CID_HomeBase/templates/<TemplateName>/assets/
+ *   - Per-template mapping:    CID_HomeBase/templates/<TemplateName>/mapping/
+ *   - Mapping files:           page-1.map.json, page-2.map.json, ... (mapper output)
+ * All SUPP_* and ACORD* templates live in HomeBase; segment repos do NOT duplicate.
+ * --------------------------------------------------------------------------------------- */
 
 function resolveTemplateDir(templatePath = "") {
   const tp = String(templatePath ?? "").replace(/\\/g, "/").trim();
   if (!tp) throw new Error("[SVG Engine] templatePath is required");
 
-  // absolute path
   if (tp.startsWith("/")) return tp;
-
-  // already a repo-relative path we support
   if (tp.startsWith("CID_HomeBase/")) return path.join(PROJECT_ROOT, tp);
-  if (tp.startsWith("templates/")) return path.join(PROJECT_ROOT, tp);
 
-  // convenience: if caller passes "ACORD125" or "SUPP_XYZ"
-  // assume it's a local segment template under /templates
-  return path.join(PROJECT_ROOT, "templates", tp);
+  // Template name only → CID_HomeBase/templates/<Name> (same for all segments)
+  return path.join(PROJECT_ROOT, "CID_HomeBase", "templates", tp);
 }
 
 
@@ -216,8 +218,7 @@ export async function generate(jobData) {
 
   const templateDir = resolveTemplateDir(templatePath);
   const assetsDir = path.join(templateDir, "assets");
-  const mappingDir = path.join(templateDir, "mapping");
-
+  const mappingDir = path.join(templateDir, "mapping"); // LOCKED: always <template>/mapping/ (page-X.map.json)
 
   // Load assets + maps
   

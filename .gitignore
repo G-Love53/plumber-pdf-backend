@@ -1,6 +1,14 @@
-
+# macOS junk
 .DS_Store
+**/.DS_Store
+
+# local pdf outputs and artifacts (RSS clean)
 *.pdf
+*.log
+*.png
+tmp/
+output/
+
+# deps
 node_modules/
-OUTPUT_*.pdf
-package-lock.json
+.env

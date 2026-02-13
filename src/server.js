@@ -41,7 +41,7 @@ console.log("[BOOT] commit=", process.env.RENDER_GIT_COMMIT, "file=src/server.js
    🟢 CONFIG
    ============================================================ */
 
-const SEGMENT = process.env.SEGMENT || "plumber";
+const SEGMENT = String(process.env.SEGMENT || "plumber").trim().toLowerCase();
 
 // Netlify/front-end inbound -> template folder name
 const TEMPLATE_ALIASES = {
@@ -399,11 +399,18 @@ if (
   }
 });
 
-// Submit Quote Endpoint (LEG 1) — CID RSS CANONICAL
+// Submit Quote Endpoint (LEG 1) — CID RSS CANONICAL (same contract as Bar/Roofer)
 APP.post("/submit-quote", async (req, res) => {
   try {
     const body = req.body || {};
-    const formData = body.formData || {};
+    const formData =
+      body.data ||
+      body.formData ||
+      body.fields ||
+      body.requestRow?.data ||
+      body.requestRow?.fields ||
+      body.requestRow ||
+      {};
     const bundle_id = body.bundle_id;
     const segments = Array.isArray(body.segments) ? body.segments : [];
     const segment = String(body.segment || process.env.SEGMENT || "").trim().toLowerCase();

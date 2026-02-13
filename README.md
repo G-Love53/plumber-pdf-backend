@@ -1,22 +1,9 @@
-# contractor-supp-pdf-service
+# plumber-pdf-backend (Plumber segment)
 
-Updated: 2025-11-11
+**CID Leg 2 — Plumber segment.** Renders ACORD + supplemental PDFs from CID_HomeBase templates (Plumber uses SUPP_CONTRACTOR), emails via Gmail API. Same RSS pattern as Bar and Roofer.
 
-**One-to-one mapping** with normalized keys. POST JSON to `/pdf/contractor-supp` and the service streams back a Letter PDF.
+* **Segment:** `plumber` (set via `SEGMENT` env; default `plumber`).
+* **Canonical bundle:** `PLUMBER_INTAKE` = SUPP_CONTRACTOR + ACORD125, 126, 130, 140. Config in `src/config/bundles.json`.
+* **Templates:** CID_HomeBase submodule. No local template duplication.
 
-## Files
-- `src/server.js` — Express server (no CLI needed). Binds `PORT` (defaults `10000` for Render).
-- `templates/contractor-supp.ejs` — multi-page EJS template.
-- `styles/print.css` — print CSS inlined by the server.
-- `mapping/normalized.json` — section roster + version.
-- `samples/data.json` — minimal sample shape.
-
-## Deploy
-- Connect this repo to Render as a **Web Service**.
-- Build command: _(none required; Render will run `npm install` automatically)_
-- Start command: `npm start`
-
-## Use
-- POST JSON body (normalized keys) to `/pdf/contractor-supp`.
-- Response: `application/pdf` (inline).
-
+Deploy: Docker (Render). Build clones CID_HomeBase when submodules are not available.
