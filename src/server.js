@@ -51,17 +51,17 @@ const TEMPLATE_ALIASES = {
   WCForm: "ACORD130",
   Accord25: "ACORD25",
   ACORD25: "ACORD25",
-  Supplemental: "SUPP_BERKLEY_PLUMBER",
+  Supplemental: "SUPP_CONTRACTOR",
 
   PlumberAccord125: "ACORD125",
   PlumberAccord126: "ACORD126",
-  PlumberSupp: "SUPP_BERKLEY_PLUMBER",
+  PlumberSupp: "SUPP_CONTRACTOR",
 
   ACORD125: "ACORD125",
   ACORD126: "ACORD126",
   ACORD130: "ACORD130",
   ACORD140: "ACORD140",
-  SUPP_BERKLEY_PLUMBER: "SUPP_BERKLEY_PLUMBER",
+  SUPP_CONTRACTOR: "SUPP_CONTRACTOR",
 };
 
 // Template folder -> output filename
@@ -71,7 +71,7 @@ const FILENAME_MAP = {
   ACORD130: "ACORD-130.pdf",
   ACORD140: "ACORD-140.pdf",
   ACORD25: "ACORD-25.pdf",
-  SUPP_BERKLEY_PLUMBER: "Supplemental-Application.pdf",
+  SUPP_CONTRACTOR: "Supplemental-Application.pdf",
 };
 
 const resolveTemplate = (name) => TEMPLATE_ALIASES[name] || name;
@@ -84,7 +84,7 @@ function formIdForTemplateFolder(folderName) {
   const m = n.match(/^ACORD(\d+)$/i);
   if (m) return `acord${m[1]}`;
 
-  // SUPP_BERKLEY_PLUMBER → supp_<segment>
+  // SUPP_CONTRACTOR / SUPP_ROOFER / SUPP_BAR → supp_<segment>
   if (/^SUPP_/i.test(n)) return `supp_${SEGMENT}`;
 
   // EVERYTHING ELSE (LESSOR_A129S, HVAC_SUPP_01, etc.)

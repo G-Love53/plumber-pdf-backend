@@ -44,11 +44,6 @@
     "engine": "svg",
     "templatePath": "CID_HomeBase/templates/SUPP_BAR"
   },
-  "SUPP_BERKLEY_PLUMBER": {
-    "enabled": true,
-    "engine": "svg",
-    "templatePath": "CID_HomeBase/templates/SUPP_BERKLEY_PLUMBER"
-  },
   "SUPP_CONTRACTOR": {
     "enabled": true,
     "engine": "svg",
