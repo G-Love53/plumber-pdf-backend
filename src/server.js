@@ -179,7 +179,7 @@ if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
    🧾 RENDER / EMAIL (SVG FACTORY)
    ============================================================ */
 
-async function renderBundleAndRespond({ templates, email, debug = false }, res) {
+async function renderBundleAndRespond({ templates, email, debug = false, requestRow }, res) {
   if (!Array.isArray(templates) || templates.length === 0) {
     return res.status(400).json({ ok: false, error: "NO_TEMPLATES" });
   }
