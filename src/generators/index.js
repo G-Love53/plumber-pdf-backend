@@ -21,7 +21,7 @@ function resolveFormsKey(formId, segment) {
   const id = String(formId || "");
   let m = id.match(/^acord(\d+)$/i);
   if (m) return `ACORD${m[1]}`;
-  if (/^supp_/i.test(id)) return "SUPP_CONTRACTOR";
+  if (/^supp_/i.test(id)) return id.toUpperCase();
   return id.toUpperCase();
 }
 function getFormConfigOrThrow(formId, segment) {
