@@ -51,17 +51,17 @@ const TEMPLATE_ALIASES = {
   WCForm: "ACORD130",
   Accord25: "ACORD25",
   ACORD25: "ACORD25",
-  Supplemental: "SUPP_CONTRACTOR",
+  Supplemental: "SUPP_PLUMBER",
 
   PlumberAccord125: "ACORD125",
   PlumberAccord126: "ACORD126",
-  PlumberSupp: "SUPP_CONTRACTOR",
+  PlumberSupp: "SUPP_PLUMBER",
 
   ACORD125: "ACORD125",
   ACORD126: "ACORD126",
   ACORD130: "ACORD130",
   ACORD140: "ACORD140",
-  SUPP_CONTRACTOR: "SUPP_CONTRACTOR",
+  SUPP_PLUMBER: "SUPP_PLUMBER",
 };
 
 // Template folder -> output filename

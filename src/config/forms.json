@@ -44,11 +44,6 @@
     "engine": "svg",
     "templatePath": "CID_HomeBase/templates/SUPP_BAR"
   },
-  "SUPP_CONTRACTOR": {
-    "enabled": true,
-    "engine": "svg",
-    "templatePath": "CID_HomeBase/templates/SUPP_CONTRACTOR"
-  },
   "SUPP_PLUMBER": {
     "enabled": true,
     "engine": "svg",

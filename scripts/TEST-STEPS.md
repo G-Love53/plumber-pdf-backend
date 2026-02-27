@@ -1,6 +1,6 @@
-# Plumber test — step-by-step (ACORD125 + SUPP_CONTRACTOR, etc.)
+# Plumber test — step-by-step (ACORD125 + SUPP_PLUMBER, etc.)
 
-Get all 5 PDFs (Supplemental + ACORD125/126/130/140) rendering and emailed so they print as nicely as ACORD125.
+Get all 5 PDFs (SUPP_PLUMBER + ACORD125/126/130/140) rendering and emailed so they print as nicely as ACORD125.
 
 ## Prereqs
 
@@ -76,17 +76,17 @@ Open `plumber-bundle.pdf` — it will be the **first** form (Supplemental-Applic
 
 ---
 
-## Option 2b — Open just SUPP_CONTRACTOR + ACORD125 (no intake change)
+## Option 2b — Open just SUPP_PLUMBER + ACORD125 (no intake change)
 
 Intake stays as-is (all 5). These two curls generate only the two forms you want to open. Server must be running on 8080.
 
-**Supplemental (SUPP_CONTRACTOR) only:**
+**Supplemental (SUPP_PLUMBER) only:**
 ```bash
 curl -s -X POST http://localhost:8080/render-bundle \
   -H "Content-Type: application/json" \
   -d '{
     "templates": [
-      { "name": "SUPP_CONTRACTOR", "data": {
+      { "name": "SUPP_PLUMBER", "data": {
         "applicant_name": "Test",
         "insured_name": "Test",
         "physical_address_1": "123 Main",

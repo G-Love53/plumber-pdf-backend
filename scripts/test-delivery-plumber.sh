@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Plumber segment — test delivery and printing
-# Sends PLUMBER_INTAKE bundle (SUPP_CONTRACTOR + ACORD125/126/130/140) to segment quote email
-# formData keys aligned with CID_HomeBase/templates/SUPP_CONTRACTOR/mapping/page-1.map.json (and ACORD)
+# Sends PLUMBER_INTAKE bundle (SUPP_PLUMBER + ACORD125/126/130/140) to segment quote email
+# formData keys aligned with CID_HomeBase/templates/SUPP_PLUMBER/mapping/page-1.map.json (and ACORD)
 # Usage: ./scripts/test-delivery-plumber.sh   (or set BASE_URL if different)
 
 set -e
