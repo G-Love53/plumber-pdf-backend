@@ -1,6 +1,6 @@
 import puppeteer from "puppeteer-core";
 import path from "path";
-import fs from "fs";
+import fsSync from "fs";
 import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -29,7 +29,10 @@ function resolveTemplateDir(templatePath = "") {
   const tp = String(templatePath ?? "").replace(/\\/g, "/").trim();
   if (!tp) throw new Error("[SVG Engine] templatePath is required");
 
+  // absolute path
   if (tp.startsWith("/")) return tp;
+
+  // already a repo-relative path we support
   if (tp.startsWith("CID_HomeBase/")) return path.join(PROJECT_ROOT, tp);
 
   // Template name only → CID_HomeBase/templates/<Name> (same for all segments)
@@ -40,9 +43,9 @@ function resolveTemplateDir(templatePath = "") {
 /* ---------------------------- SVG + MAPPING ---------------------------- */
 
 function loadSvgPages(assetsDir) {
-  if (!fs.existsSync(assetsDir)) return [];
+  if (!fsSync.existsSync(assetsDir)) return [];
 
-  return fs
+  return fsSync
     .readdirSync(assetsDir)
     .filter(f => /^page-\d+\.svg$/i.test(f))
     .sort((a, b) => {
@@ -52,7 +55,7 @@ function loadSvgPages(assetsDir) {
     })
     .map(f => ({
       pageId: f.replace(".svg", ""),
-      svg: fs.readFileSync(path.join(assetsDir, f), "utf8"),
+      svg: fsSync.readFileSync(path.join(assetsDir, f), "utf8"),
     }));
 }
 
@@ -60,12 +63,12 @@ function loadMaps(mappingDir) {
   const maps = {};
 
   // ✅ Mapping is OPTIONAL: allow blank PDFs before mapper work starts
-  if (!fs.existsSync(mappingDir)) {
+  if (!fsSync.existsSync(mappingDir)) {
     console.log(`[SVG] mappingDir missing (ok): ${mappingDir}`);
     return maps;
   }
 
-  const files = fs.readdirSync(mappingDir);
+  const files = fsSync.readdirSync(mappingDir);
 
   // ✅ Empty mapping folder is OK
   if (!files.length) {
@@ -77,7 +80,7 @@ function loadMaps(mappingDir) {
     if (!file.endsWith(".map.json")) continue;
 
     const full = path.join(mappingDir, file);
-    const raw = fs.readFileSync(full, "utf8");
+    const raw = fsSync.readFileSync(full, "utf8");
 
     if (!raw || !raw.trim()) {
       throw new Error(`[SVG] EMPTY MAP FILE: ${full}`);
@@ -130,21 +133,15 @@ function isChecked(v) {
 
 
 // Coordinate overlay mapping (matches your mapper output)
-function applyMapping(svg, pageMap, data) {
+function applyMapping(svg, pageMap, data, pageId = "", templatePath = "") {
   svg = ensureXmlSpace(svg);
-  if (!pageMap?.fields?.length && data?.__grid !== true) return svg;
+  if (!pageMap?.fields?.length) return svg;
 
   const overlay = [];
+  
   overlay.push(`<g id="cid-overlay" font-family="Arial, Helvetica, sans-serif" fill="#000">`);
 
-  // Extra debug text when __grid is true so we can visually confirm overlay is active
-  if (data?.__grid === true) {
-    overlay.push(
-      `<text x="40" y="40" font-size="24" fill="#f00" dominant-baseline="hanging">DEBUG SUPP PLUMBER</text>`
-    );
-  }
-
-  for (const f of pageMap?.fields || []) {
+  for (const f of pageMap.fields) {
     const key = f.key || f.name;
     const raw = data?.[key];
     if (!key) continue;
@@ -178,6 +175,7 @@ function applyMapping(svg, pageMap, data) {
     dominant-baseline="hanging" text-anchor="start">${escapeXml(val)}</text>`
     );
   }
+
 
   overlay.push(`</g>`);
   const overlayBlock = overlay.join("");
@@ -224,17 +222,24 @@ export async function generate(jobData) {
   const assetsDir = path.join(templateDir, "assets");
   const mappingDir = path.join(templateDir, "mapping"); // LOCKED: always <template>/mapping/ (page-X.map.json)
 
+
   // Load assets + maps
   
   const pages = loadSvgPages(assetsDir);
+  
+  if (!pages.length) {
+  throw new Error(`[SVG Engine] No SVG pages found in assetsDir: ${assetsDir}`);
+}
   const mapsByPage = loadMaps(mappingDir);
   
+  if (requestRow?.debug === true) {
   console.log("[SVG] Pages:", pages.map(p => p.pageId));
   console.log("[SVG] Maps:", Object.keys(mapsByPage));
-  
-  // Apply mapping per page
+}
+
+  // Apply mapping per page (pass pageId + templatePath for overlay clipping on SUPP_BAR page-2)
   const finalPages = pages.map(p =>
-  applyMapping(p.svg, mapsByPage[p.pageId], requestRow)
+  applyMapping(p.svg, mapsByPage[p.pageId], requestRow, p.pageId, templatePath)
 );
 
 
@@ -322,4 +327,3 @@ function gridOverlay() {
 
   return `<g id="grid-overlay">${lines.join("")}</g>`;
 }
-
