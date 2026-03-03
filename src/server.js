@@ -447,11 +447,19 @@ APP.post("/submit-quote", async (req, res) => {
     });
 
     // 3) Email block (canonical)
-    const defaultTo = process.env.CARRIER_EMAIL || process.env.GMAIL_USER;
+    const defaultTo = process.env.CARRIER_EMAIL || process.env.GMAIL_USER || process.env.EMAIL_USER;
     const to =
       body.email?.to?.length ? body.email.to
       : body.email_to ? [body.email_to] // optional backward compat
       : [defaultTo].filter(Boolean);
+
+    if (!to.length) {
+      return res.status(400).json({
+        ok: false,
+        success: false,
+        error: "Missing email destination. Set CARRIER_EMAIL on the server or send email.to in the request.",
+      });
+    }
 
     const applicant = (formData.applicant_name || formData.insured_name || "").trim();
     const segLabel = segment ? segment.toUpperCase() : "CID";
@@ -563,7 +571,7 @@ if (special_wording_text && !special_wording_confirmed) {
 APP.post("/check-quotes", async (req, res) => {
   const rawKey = process.env.GOOGLE_PRIVATE_KEY || "";
   const serviceEmail = (process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL || "").trim();
-  const impersonatedUser = (process.env.GMAIL_USER || "").trim();
+  const impersonatedUser = (process.env.GMAIL_USER || process.env.EMAIL_USER || "").trim();
   const privateKey = rawKey.replace(/\\n/g, "\n");
 
   if (!serviceEmail || !impersonatedUser || !rawKey || !process.env.OPENAI_API_KEY) {

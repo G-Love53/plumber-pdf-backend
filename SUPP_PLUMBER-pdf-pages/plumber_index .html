@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta charset="utf-8"/>
+<title>Plumber Insurance Direct - Contractor Quote</title>
+<style>
+    /* --- CSS FROM ROOFER FORM (Optimized for Look & Feel) --- */
+    body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+        background-color: #f8f8f8;
+        color: #333;
+        margin: 0;
+    }
+    .form-container {
+        max-width: 800px;
+        margin: 20px auto;
+        padding: 30px;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+        color: #ea580c; /* Plumber Orange/Red tint */
+        text-align: center;
+        margin-bottom: 10px;
+        font-size: 2em;
+        font-weight: bold;
+    }
+    .subtitle {
+        text-align: center;
+        color: #666;
+        margin-bottom: 30px;
+    }
+    
+    /* ACCORDION STYLES */
+    details {
+        border: 1px solid #ddd;
+        background: #fff;
+        margin: 15px 0;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    
+    summary {
+        list-style: none;
+        cursor: pointer;
+        padding: 18px 20px;
+        background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+        color: #fff;
+        font-weight: bold;
+        font-size: 1.2em;
+        user-select: none;
+        -webkit-user-select: none;
+        transition: background 0.2s ease;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    summary:after {
+        content: '+';
+        font-size: 1.5em;
+        font-weight: bold;
+    }
+    
+    details[open] summary:after {
+        content: '-';
+    }
+    
+    summary::-webkit-details-marker {
+        display: none;
+    }
+    
+    details > div {
+        padding: 25px 20px;
+        background: #fff;
+    }
+    
+    /* FORM ELEMENTS */
+    label {
+        display: block;
+        margin-top: 18px;
+        margin-bottom: 5px;
+        font-weight: 600;
+        color: #374151;
+        font-size: 0.95em;
+    }
+    label.required::after {
+        content: " *";
+        color: #ef4444;
+    }
+    
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    input[type="date"],
+    input[type="number"],
+    select,
+    textarea {
+        width: 100%;
+        padding: 12px 14px;
+        margin-top: 5px;
+        border: 2px solid #e5e7eb;
+        border-radius: 6px;
+        font-size: 1em;
+        box-sizing: border-box;
+        transition: all 0.2s ease;
+        font-family: inherit;
+    }
+    
+    input:focus, select:focus, textarea:focus {
+        border-color: #ea580c;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.1);
+    }
+    
+    textarea {
+        min-height: 100px;
+        resize: vertical;
+    }
+
+    /* LAYOUT UTILS */
+    .two-column {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        margin: 10px 0;
+    }
+    .three-column {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 15px;
+        margin: 10px 0;
+    }
+    
+    @media (max-width: 600px) {
+        .two-column, .three-column {
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+        .form-container {
+            padding: 15px;
+        }
+    }
+
+    /* CONDITIONAL LOGIC */
+    .conditional-section {
+        display: none;
+        background-color: #fff7ed;
+        border-left: 4px solid #ea580c;
+        padding: 20px;
+        margin: 15px 0;
+        border-radius: 4px;
+        animation: slideIn 0.3s ease-in-out;
+    }
+    .conditional-section.show {
+        display: block !important;
+    }
+    @keyframes slideIn {
+        from { opacity: 0; transform: translateY(-5px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* BUTTONS */
+    button {
+        margin-top: 40px;
+        padding: 16px 32px;
+        font-size: 1.15em;
+        background: linear-gradient(135deg, #ea580c 0%, #f97316 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        width: 100%;
+        transition: all 0.3s ease;
+        font-weight: 600;
+        box-shadow: 0 4px 15px rgba(234, 88, 12, 0.3);
+    }
+    button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(234, 88, 12, 0.4);
+    }
+    button:disabled {
+        background: #9ca3af;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+
+    /* RADIO BUTTON GROUPS (Nice styling) */
+    .radio-group, .checkbox-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin-top: 8px;
+    }
+    .radio-group label, .checkbox-group label {
+        display: flex;
+        align-items: center;
+        margin: 0;
+        font-weight: 500;
+        cursor: pointer;
+        padding: 10px 16px;
+        border: 2px solid #e5e7eb;
+        border-radius: 8px;
+        background: #fff;
+        transition: all 0.2s ease;
+    }
+    .radio-group label:hover, .checkbox-group label:hover {
+        border-color: #ea580c;
+        background-color: #fff7ed;
+    }
+    .radio-group input, .checkbox-group input {
+        width: auto;
+        margin-right: 8px;
+        margin-top: 0;
+    }
+
+    .helper-text {
+        font-size: 0.85em;
+        color: #6b7280;
+        margin-top: 4px;
+        font-style: italic;
+    }
+    .footer-text {
+        text-align: center;
+        margin-top: 40px;
+        color: #888;
+        font-size: 0.85em;
+    }
+    
+    /* TOTALS WARNING */
+    .warning-box {
+        background-color: #fff3e0;
+        border: 1px solid #ff9800;
+        border-radius: 5px;
+        padding: 10px;
+        margin: 15px 0;
+        font-size: 0.9em;
+        color: #e65100;
+        font-weight: bold;
+        display: none;
+    }
+</style>
+</head>
+<body>
+
+<div class="form-container">
+    <h1>🔧 Plumber Insurance Direct</h1>
+    <p class="subtitle">Get your quote in minutes. No agent calls. No back-and-forth.</p>
+
+    <form id="quoteForm" name="plumber-contractor-quote">
+        
+        <details open>
+            <summary>Business Information</summary>
+            <div>
+                <label class="required">Applicant Name</label>
+                <input name="applicant_name" required type="text" placeholder="Full Name"/>
+
+                <label>Business / Entity Name</label>
+                <input name="insured_name" type="text" placeholder="DBA or Company Name"/>
+
+                <label class="required">Business Address</label>
+                <input name="physical_address_1" required type="text"/>
+                
+                <div class="three-column">
+                    <div>
+                        <label class="required">City</label>
+                        <input name="physical_city" required type="text"/>
+                    </div>
+                    <div>
+                        <label class="required">State</label>
+                        <input name="physical_state" required type="text"/>
+                    </div>
+                    <div>
+                        <label class="required">Zip Code</label>
+                        <input name="physical_zip" required type="text" pattern="[0-9]{5}"/>
+                    </div>
+                </div>
+
+                <div class="two-column">
+                    <div>
+                        <label class="required">Business Phone</label>
+                        <input name="business_phone" required type="tel"/>
+                    </div>
+                    <div>
+                        <label class="required">Contact Email</label>
+                        <input name="contact_email" required type="email"/>
+                    </div>
+                </div>
+
+                <div class="two-column">
+                    <div>
+                        <label class="required">Years in Business</label>
+                        <input name="years_in_business" required type="number" min="0"/>
+                    </div>
+                    <div>
+                        <label class="required">Years of Experience in Plumbing</label>
+                        <input name="years_experience" required type="number" min="0"/>
+                    </div>
+                </div>
+
+                <label class="required">Business Structure</label>
+                <select name="business_structure" required>
+                    <option value="">-- Select --</option>
+                    <option value="Individual">Individual</option>
+                    <option value="Partnership">Partnership</option>
+                    <option value="Corporation">Corporation</option>
+                    <option value="LLC">LLC</option>
+                    <option value="Joint Venture">Joint Venture</option>
+                </select>
+
+                <div class="two-column">
+                    <div>
+                        <label>Are you licensed?</label>
+                        <select name="is_licensed">
+                            <option value="">-- Select --</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>Contractor's License Number</label>
+                        <input name="license_number" type="text"/>
+                    </div>
+                </div>
+            </div>
+        </details>
+
+        <details>
+            <summary>Financial Overview</summary>
+            <div>
+                <div class="three-column">
+                    <div>
+                        <label class="required">Projected Gross Revenue</label>
+                        <input name="projected_gross_revenue" required type="text" class="currency-input"/>
+                        <div class="helper-text">Upcoming policy term</div>
+                    </div>
+                    <div>
+                        <label class="required"># Active Owners</label>
+                        <input name="number_active_owners" required type="number" min="0"/>
+                    </div>
+                    <div>
+                        <label class="required">Employee Payroll</label>
+                        <input name="annual_payroll_excl_owners" required type="text" class="currency-input"/>
+                        <div class="helper-text">Excluding owners</div>
+                    </div>
+                </div>
+
+                <label>Estimated Annual Subcontracting Cost</label>
+                <input name="estimated_annual_subcontract_cost" type="text" class="currency-input"/>
+            </div>
+        </details>
+
+        <details id="details-operations">
+            <summary>Plumbing Operations & Specifics</summary>
+            <div>
+                <label class="required">Breakdown of Work Type (Must equal 100%)</label>
+                <div class="three-column">
+                    <div>
+                        <label>% Residential</label>
+                        <input name="pct_residential" type="number" min="0" max="100" class="pct-input" placeholder="0"/>
+                    </div>
+                    <div>
+                        <label>% Commercial</label>
+                        <input name="pct_commercial" type="number" min="0" max="100" class="pct-input" placeholder="0"/>
+                    </div>
+                    <div>
+                        <label>% Industrial</label>
+                        <input name="pct_industrial" type="number" min="0" max="100" class="pct-input" placeholder="0"/>
+                    </div>
+                </div>
+                <div class="warning-box" id="pctWarning">Total percentage must equal 100%. Current: <span id="currentTotal">0</span>%</div>
+
+                <div class="two-column">
+                    <div>
+                        <label>% General Contractor</label>
+                        <input name="pct_gc" type="number" min="0" max="100"/>
+                    </div>
+                    <div>
+                        <label>% Subcontractor</label>
+                        <input name="pct_sub" type="number" min="0" max="100"/>
+                    </div>
+                </div>
+
+                <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
+
+                <label class="required">Do you perform any gas line work or hook-ups?</label>
+                <select name="gas_line_work" data-conditional="gas_line_work" required>
+                    <option value="">-- Select --</option>
+                    <option value="Yes">Yes</option>
+                    <option value="No">No</option>
+                </select>
+
+                <div class="conditional-section" data-show-when="gas_line_work=Yes">
+                    <p style="margin-top: 0; font-weight: 600; color: #ea580c;">Gas Line Follow-up:</p>
+                    <div class="two-column">
+                        <div>
+                            <label>Any boiler work related to gas lines?</label>
+                            <select name="boiler_work_gas"><option value="No">No</option><option value="Yes">Yes</option></select>
+                        </div>
+                        <div>
+                            <label>Any welding operations?</label>
+                            <select name="welding_operations_gas"><option value="No">No</option><option value="Yes">Yes</option></select>
+                        </div>
+                    </div>
+                    <label>High-pressure steam pipe work related to gas lines?</label>
+                    <select name="high_pressure_steam_gas"><option value="No">No</option><option value="Yes">Yes</option></select>
+                </div>
+
+                <div class="two-column">
+                    <div>
+                        <label class="required">Any boiler work? (install/service/repair)</label>
+                        <select name="boiler_work" required>
+                            <option value="">-- Select --</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="required">Any high-pressure steam pipe work?</label>
+                        <select name="high_pressure_steam_work" required>
+                            <option value="">-- Select --</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
+                    </div>
+                </div>
+
+                <label>If you indicated Industrial work, what type of clients?</label>
+                <textarea name="industrial_plumbing_clients" placeholder="e.g., Factories, Processing Plants..."></textarea>
+
+                <label class="required">Does your work involve repair or remodeling?</label>
+                <select name="work_repair_remodel" data-conditional="work_repair_remodel" required>
+                    <option value="">-- Select --</option>
+                    <option value="Yes">Yes</option>
+                    <option value="No">No</option>
+                </select>
+
+                <div class="conditional-section" data-show-when="work_repair_remodel=Yes">
+                    <div class="two-column">
+                        <div>
+                            <label>What % of total operations?</label>
+                            <input name="pct_repair_remodel" type="number" min="0" max="100"/>
+                        </div>
+                        <div>
+                            <label>Any condo conversions?</label>
+                            <select name="condo_conversions"><option value="No">No</option><option value="Yes">Yes</option></select>
+                        </div>
+                    </div>
+                    <label>Any remodeling for condos/HOAs?</label>
+                    <select name="remodel_condos_hoas" data-conditional="remodel_condos_hoas"><option value="">-- Select --</option><option value="Yes">Yes</option><option value="No">No</option></select>
+                    
+                    <div class="conditional-section" data-show-when="remodel_condos_hoas=Yes">
+                        <label>Is this for the association or individual owners?</label>
+                        <input name="remodel_condos_hoas_for_whom" type="text"/>
+                    </div>
+                </div>
+            </div>
+        </details>
+
+        <details>
+            <summary>Subcontractor Management</summary>
+            <div>
+                <div class="two-column">
+                    <div>
+                        <label class="required">Do you hire subcontractors?</label>
+                        <select name="hire_subs" required><option value="No">No</option><option value="Yes">Yes</option></select>
+                    </div>
+                    <div>
+                        <label class="required">Require COIs before starting?</label>
+                        <select name="subs_require_coi" required><option value="Yes">Yes</option><option value="No">No</option></select>
+                    </div>
+                </div>
+
+                <label>Do you utilize written contracts with all subs including indemnification/hold harmless in your favor?</label>
+                <select name="subs_contracts_holdharmless" required><option value="Yes">Yes</option><option value="No">No</option></select>
+
+                <div class="two-column">
+                    <div>
+                        <label class="required">Use 1099 laborers?</label>
+                        <select name="use_independent_contractors" data-conditional="use_independent_contractors" required><option value="No">No</option><option value="Yes">Yes</option></select>
+                    </div>
+                    <div>
+                        <label class="required">Carry Workers Comp?</label>
+                        <select name="carry_workers_comp" required><option value="Yes">Yes</option><option value="No">No</option></select>
+                    </div>
+                </div>
+                
+                <div class="conditional-section" data-show-when="use_independent_contractors=Yes">
+                    <label>What specific jobs are they hired for?</label>
+                    <textarea name="independent_contractors_jobs"></textarea>
+                </div>
+            </div>
+        </details>
+
+        <details>
+            <summary>Risk & Cross-Trade Questions</summary>
+            <div>
+                <label>Any known loss/claim involving mold or construction defect?</label>
+                <select name="mold_defect_losses" data-conditional="mold_defect_losses">
+                    <option value="No">No</option>
+                    <option value="Yes">Yes</option>
+                </select>
+                <div class="conditional-section" data-show-when="mold_defect_losses=Yes">
+                    <label>Please describe:</label>
+                    <textarea name="mold_defect_losses_details"></textarea>
+                </div>
+
+                <div class="two-column">
+                    <div>
+                        <label>Perform fire/water restoration?</label>
+                        <select name="fire_water_restoration"><option value="No">No</option><option value="Yes">Yes</option></select>
+                    </div>
+                    <div>
+                        <label>Handle hazardous materials?</label>
+                        <select name="hazardous_materials_handling"><option value="No">No</option><option value="Yes">Yes</option></select>
+                    </div>
+                </div>
+
+                <div class="two-column">
+                    <div>
+                        <label>Perform Roofing?</label>
+                        <select name="roofing_operations"><option value="No">No</option><option value="Yes">Yes</option></select>
+                    </div>
+                    <div>
+                        <label>Perform HVAC work?</label>
+                        <select name="hvac_operations"><option value="No">No</option><option value="Yes">Yes</option></select>
+                    </div>
+                </div>
+
+                <label>Maximum building height (feet):</label>
+                <input name="max_building_height" type="number" min="0"/>
+
+                <label class="required">What States do you perform work in?</label>
+                <input name="states_work_in" required type="text"/>
+            </div>
+        </details>
+
+        <details>
+            <summary>Quote Options</summary>
+            <div>
+                <label>Current GL Carrier (if any)</label>
+                <input name="current_carrier" type="text"/>
+
+                <label>Any GL claims in the last 3 years?</label>
+                <select name="claims_3_years" data-conditional="claims_3_years">
+                    <option value="No">No</option>
+                    <option value="Yes">Yes</option>
+                </select>
+                <div class="conditional-section" data-show-when="claims_3_years=Yes">
+                    <label>Please describe claims:</label>
+                    <textarea name="claims_details"></textarea>
+                </div>
+
+                <label>Would you like a Workers Comp Quote?</label>
+                <select name="workers_comp_quote" data-conditional="workers_comp_quote">
+                    <option value="No">No</option>
+                    <option value="Yes">Yes</option>
+                </select>
+                <div class="conditional-section" data-show-when="workers_comp_quote=Yes">
+                    <div class="two-column">
+                        <div><label># Full-Time Employees</label><input name="wc_employees_ft" type="number"/></div>
+                        <div><label># Part-Time Employees</label><input name="wc_employees_pt" type="number"/></div>
+                    </div>
+                    <label>Estimated WC Payroll</label><input name="wc_annual_payroll" type="text" class="currency-input"/>
+                </div>
+
+                <label>Preferred Payment Plan</label>
+                <div class="radio-group">
+                    <label><input type="radio" name="payment_plan" value="Monthly"/> Monthly</label>
+                    <label><input type="radio" name="payment_plan" value="Annual"/> Annual</label>
+                </div>
+            </div>
+        </details>
+
+        <input type="hidden" name="segment" value="plumber"/>
+        <input type="hidden" name="brand" value="PlumberInsuranceDirect"/>
+        <input type="hidden" name="site_domain" value="plumberinsurancedirect.com"/>
+
+        <button type="submit">Get My Quote</button>
+    </form>
+
+    <div class="footer-text">
+        © Commercial Insurance Direct LLC, 2025. All rights reserved.<br>
+        Your information is secure and will never be shared.
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    
+    // --- 1. CONDITIONAL LOGIC (Robust for all sections) ---
+    function setupConditionalLogic() {
+        const conditionalElements = document.querySelectorAll('[data-conditional]');
+        
+        function checkCondition(element) {
+            const triggerName = element.getAttribute('data-conditional');
+            const selectedValue = element.type === 'checkbox' ? (element.checked ? 'Yes' : 'No') : element.value;
+            
+            // Find all sections that depend on this trigger
+            const targets = document.querySelectorAll(`.conditional-section[data-show-when^="${triggerName}="]`);
+            
+            targets.forEach(section => {
+                const conditionStr = section.getAttribute('data-show-when');
+                const conditionValue = conditionStr.split('=')[1];
+                
+                if (selectedValue === conditionValue) {
+                    section.classList.add('show');
+                    // Ensure parent details is open
+                    const parentDetails = section.closest('details');
+                    if(parentDetails && !parentDetails.open) parentDetails.open = true;
+                } else {
+                    section.classList.remove('show');
+                    // Clear inputs when hidden
+                    section.querySelectorAll('input, select, textarea').forEach(input => {
+                        if (input.type === 'checkbox' || input.type === 'radio') input.checked = false;
+                        else input.value = '';
+                    });
+                }
+            });
+        }
+
+        conditionalElements.forEach(element => {
+            element.addEventListener('change', () => checkCondition(element));
+            // Run on load
+            checkCondition(element);
+        });
+    }
+    setupConditionalLogic();
+
+    // --- 2. CURRENCY FORMATTING ---
+    document.querySelectorAll('.currency-input').forEach(input => {
+        input.addEventListener('blur', (e) => {
+            let val = e.target.value.replace(/[^0-9.]/g, '');
+            if(val) e.target.value = '$' + parseFloat(val).toLocaleString('en-US', {maximumFractionDigits:0});
+        });
+        input.addEventListener('focus', (e) => {
+            let val = e.target.value.replace(/[^0-9.]/g, '');
+            if(val) e.target.value = val;
+        });
+    });
+
+    // --- 3. PERCENTAGE VALIDATION ---
+    const pctInputs = document.querySelectorAll('.pct-input');
+    const pctWarning = document.getElementById('pctWarning');
+    const currentTotalSpan = document.getElementById('currentTotal');
+
+    function checkPercentages() {
+        let total = 0;
+        pctInputs.forEach(input => total += parseInt(input.value || 0));
+        currentTotalSpan.textContent = total;
+        
+        if(total > 0 && total !== 100) {
+            pctWarning.style.display = 'block';
+            return false;
+        } else {
+            pctWarning.style.display = 'none';
+            return true;
+        }
+    }
+    
+    pctInputs.forEach(input => input.addEventListener('input', checkPercentages));
+
+    // --- 4. FORM SUBMISSION ---
+    const form = document.getElementById("quoteForm");
+    const submitButton = form.querySelector('button[type="submit"]');
+    let isSubmitting = false;
+
+    form.addEventListener("submit", async function (event) {
+        event.preventDefault();
+        
+        if(!checkPercentages()) {
+            alert("Please ensure work type percentages equal 100%.");
+            document.getElementById('details-operations').open = true;
+            return;
+        }
+
+        if (isSubmitting) return;
+        isSubmitting = true;
+        submitButton.disabled = true;
+        submitButton.textContent = "Submitting Your Quote...";
+
+        try {
+            const formData = new FormData(form);
+            const rawData = Object.fromEntries(formData.entries());
+            
+            // Clean currency
+            for(let key in rawData) {
+                if(rawData[key] && typeof rawData[key] === 'string' && rawData[key].includes('$')) {
+                    rawData[key] = rawData[key].replace(/[^0-9.]/g, '');
+                }
+            }
+
+            // Build mailing_address for ACORD/compatibility (use physical_* — aligned with SUPP_PLUMBER mapping)
+            if (rawData.physical_address_1 || rawData.premise_address) {
+                const addr = rawData.physical_address_1 || rawData.premise_address || '';
+                const city = rawData.physical_city || rawData.premise_city || '';
+                const state = rawData.physical_state || rawData.premise_state || '';
+                const zip = rawData.physical_zip || rawData.premise_zip || '';
+                rawData.mailing_address = [addr, city, state, zip].filter(Boolean).join(', ');
+            }
+            
+            if (rawData.business_phone) {
+                rawData.applicant_phone = rawData.business_phone;
+            }
+
+            // API Config
+            const api_key = "CID9200$";
+            const response = await fetch("https://plumber-pdf-backend.onrender.com/submit-quote", {
+                method: "POST",
+                headers: { "Content-Type": "application/json", "X-API-Key": api_key },
+                body: JSON.stringify({
+                    formData: rawData,
+                    segments: ["PlumberAccord125", "PlumberAccord126", "PlumberSupp"]
+                })
+            });
+
+            if (!response.ok) throw new Error(await response.text());
+
+            const result = await response.json();
+            if (result.success) {
+                submitButton.textContent = "Success!";
+                window.location.href = "thankyou.html";
+            } else {
+                throw new Error(result.error || "Unknown error");
+            }
+
+        } catch (err) {
+            console.error(err);
+            alert("Submission failed: " + err.message);
+            isSubmitting = false;
+            submitButton.disabled = false;
+            submitButton.textContent = "Get My Quote";
+        }
+    });
+});
+</script>
+</body>
+</html>
