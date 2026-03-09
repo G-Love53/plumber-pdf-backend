@@ -576,6 +576,69 @@
             </div>
         </details>
 
+        <details>
+            <summary>Additional Insured & Certificates</summary>
+            <div>
+                <label>Do you have any Additional Insureds?
+                    <select name="additional_insureds_present" data-conditional="additional_insureds_present">
+                        <option value="">-- Select --</option>
+                        <option value="Yes">Yes</option>
+                        <option value="No">No</option>
+                    </select>
+                </label>
+                <div class="conditional-section" data-show-when="additional_insureds_present=Yes">
+                    <div class="checkbox-group">
+                        <label><input type="checkbox" name="ai_loss_payee" value="Yes"/> Loss Payee</label>
+                        <label><input type="checkbox" name="ai_lienholder" value="Yes"/> Lienholder</label>
+                        <label><input type="checkbox" name="ai_mortgagee" value="Yes"/> Mortgagee</label>
+                        <label><input type="checkbox" name="ai_additional_insured" value="Yes"/> Additional Insured</label>
+                    </div>
+                    <label>Name:<input name="ai_name_1" type="text"/></label>
+                    <label>Address:<input name="ai_address_1" type="text"/></label>
+                    <div class="three-column">
+                        <div>
+                            <label>City:<input name="ai_city_1" type="text"/></label>
+                        </div>
+                        <div>
+                            <label>State:<input name="ai_state_1" type="text"/></label>
+                        </div>
+                        <div>
+                            <label>Zip:<input name="ai_zip_1" type="text"/></label>
+                        </div>
+                    </div>
+                    
+                    <label>Do you have additional Names?
+                        <select name="additional_names" data-conditional="additional_names">
+                            <option value="">-- Select --</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
+                    </label>
+                    <div class="conditional-section" data-show-when="additional_names=Yes">
+                        <div class="checkbox-group">
+                            <label><input type="checkbox" name="ai_loss_payee_2" value="Yes"/> Loss Payee</label>
+                            <label><input type="checkbox" name="ai_lienholder_2" value="Yes"/> Lienholder</label>
+                            <label><input type="checkbox" name="ai_mortgagee_2" value="Yes"/> Mortgagee</label>
+                            <label><input type="checkbox" name="ai_additional_insured_2" value="Yes"/> Additional Insured</label>
+                        </div>
+                        <label>Name:<input name="ai_name_2" type="text"/></label>
+                        <label>Address:<input name="ai_address_2" type="text"/></label>
+                        <div class="three-column">
+                            <div>
+                                <label>City:<input name="ai_city_2" type="text"/></label>
+                            </div>
+                            <div>
+                                <label>State:<input name="ai_state_2" type="text"/></label>
+                            </div>
+                            <div>
+                                <label>Zip:<input name="ai_zip_2" type="text"/></label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </details>
+
         <input type="hidden" name="segment" value="plumber"/>
         <input type="hidden" name="brand" value="PlumberInsuranceDirect"/>
         <input type="hidden" name="site_domain" value="plumberinsurancedirect.com"/>
