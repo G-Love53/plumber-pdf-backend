@@ -243,15 +243,100 @@
         font-weight: bold;
         display: none;
     }
+
+    /* Creative hero block (segment-specific, Instantly-friendly) */
+    .creative-hero {
+        max-width: 800px;
+        margin: 10px auto 10px;
+        padding: 18px 24px 12px;
+        background: linear-gradient(135deg, #0f172a, #1e293b);
+        border-radius: 12px;
+        color: #f9fafb;
+        box-shadow: 0 8px 30px rgba(15, 23, 42, 0.6);
+    }
+    .creative-hero-title {
+        font-size: 1.6em;
+        font-weight: 800;
+        margin-bottom: 4px;
+    }
+    .creative-hero-title span {
+        color: #38bdf8;
+    }
+    .creative-hero-subtitle {
+        font-size: 0.9em;
+        color: #e5e7eb;
+        margin-bottom: 12px;
+    }
+    .creative-value-props {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+        gap: 6px 14px;
+        margin-bottom: 6px;
+    }
+    .creative-value-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 6px;
+        font-size: 0.85em;
+        color: #e5e7eb;
+    }
+    .creative-value-item span.check {
+        color: #22c55e;
+        font-weight: 700;
+        margin-top: 1px;
+    }
+    .creative-bridge {
+        font-size: 0.8em;
+        color: #9ca3af;
+        margin-top: 4px;
+    }
+
+    /* Prefilled field indicator from Instantly links */
+    .prefilled {
+        background-color: #f0f9f0;
+        border-left: 3px solid #4CAF50;
+    }
 </style>
 </head>
 <body>
 
 <div class="form-container">
+    <div class="creative-hero">
+        <div class="creative-hero-title">
+            Protect Your Crew. <span>Protect Your Work.</span>
+        </div>
+        <p class="creative-hero-subtitle">
+            Plumbing contractor insurance that actually matches how you work — GL, workers comp, and tools coverage dialed in for your jobs.
+        </p>
+        <div class="creative-value-props">
+            <div class="creative-value-item">
+                <span class="check">&#10003;</span>
+                <span>GL + Workers Comp in one quote</span>
+            </div>
+            <div class="creative-value-item">
+                <span class="check">&#10003;</span>
+                <span>Water damage liability covered</span>
+            </div>
+            <div class="creative-value-item">
+                <span class="check">&#10003;</span>
+                <span>Tools &amp; equipment protection</span>
+            </div>
+            <div class="creative-value-item">
+                <span class="check">&#10003;</span>
+                <span>Quotes in 48 hours</span>
+            </div>
+        </div>
+        <p class="creative-bridge" id="creative-bridge-text">
+            One quick form. Multiple carrier quotes. Your best rate.
+        </p>
+    </div>
+
     <h1>🔧 Plumber Insurance Direct</h1>
     <p class="subtitle">Get your quote in minutes. No agent calls. No back-and-forth.</p>
 
     <form id="quoteForm" name="plumber-contractor-quote">
+        <input type="hidden" name="traffic_source" id="traffic_source" value="direct"/>
+        <input type="hidden" name="campaign_id" id="campaign_id" value=""/>
         
         <details open>
             <summary>Business Information</summary>
@@ -654,6 +739,61 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
+    const form = document.getElementById("quoteForm");
+
+    // --- 0. INSTANTLY PREFILL + TRACKING (segment-agnostic) ---
+    (function setupPrefill() {
+        if (!form) return;
+        const params = new URLSearchParams(window.location.search);
+        let prefilledCount = 0;
+
+        const prefillMap = {
+            bn: "insured_name",
+            em: "contact_email",
+            ph: "business_phone",
+            ad: "physical_address_1",
+            ct: "physical_city",
+            st: "physical_state",
+            zp: "physical_zip"
+        };
+
+        Object.entries(prefillMap).forEach(([param, fieldName]) => {
+            const value = params.get(param);
+            if (!value) return;
+            const field = form.querySelector(`[name="${fieldName}"]`);
+            if (field) {
+                field.value = decodeURIComponent(value);
+                field.classList.add("prefilled");
+                prefilledCount++;
+            }
+        });
+
+        // Applicant name from fn/ln if present
+        const fn = params.get("fn");
+        const ln = params.get("ln");
+        if (fn || ln) {
+            const applicantField = form.querySelector('[name="applicant_name"]');
+            if (applicantField && !applicantField.value) {
+                applicantField.value = [fn, ln].filter(Boolean).join(" ");
+                applicantField.classList.add("prefilled");
+                prefilledCount++;
+            }
+        }
+
+        // Tracking fields
+        const srcField = document.getElementById("traffic_source");
+        const cidField = document.getElementById("campaign_id");
+        if (srcField) srcField.value = params.get("src") || "direct";
+        if (cidField) cidField.value = params.get("cid") || "";
+
+        // Bridge text update if we have good prefill coverage
+        if (prefilledCount >= 3) {
+            const bridgeEl = document.getElementById("creative-bridge-text");
+            if (bridgeEl) {
+                bridgeEl.textContent = "We've loaded your info — just confirm a few details and submit.";
+            }
+        }
+    })();
     
     // --- 1. CONDITIONAL LOGIC (Robust for all sections) ---
     function setupConditionalLogic() {
@@ -728,7 +868,6 @@ document.addEventListener("DOMContentLoaded", function () {
     pctInputs.forEach(input => input.addEventListener('input', checkPercentages));
 
     // --- 4. FORM SUBMISSION ---
-    const form = document.getElementById("quoteForm");
     const submitButton = form.querySelector('button[type="submit"]');
     let isSubmitting = false;
 
