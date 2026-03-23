@@ -795,6 +795,31 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     })();
     
+    function normalizeYesNoSelectDefaults() {
+        document.querySelectorAll("select").forEach((select) => {
+            const options = Array.from(select.options || []);
+            if (options.length !== 2) return;
+
+            const values = options.map((o) => String(o.value || "").trim().toLowerCase());
+            const isYesNoOnly =
+                values.includes("yes") &&
+                values.includes("no") &&
+                !values.includes("");
+
+            if (!isYesNoOnly) return;
+
+            const placeholder = document.createElement("option");
+            placeholder.value = "";
+            placeholder.textContent = "-- Select --";
+            select.insertBefore(placeholder, select.firstChild);
+
+            // Default to explicit selection for new forms.
+            if (!select.value || values.includes(String(select.value).toLowerCase())) {
+                select.value = "";
+            }
+        });
+    }
+
     // --- 1. CONDITIONAL LOGIC (Robust for all sections) ---
     function setupConditionalLogic() {
         const conditionalElements = document.querySelectorAll('[data-conditional]');
@@ -832,6 +857,7 @@ document.addEventListener("DOMContentLoaded", function () {
             checkCondition(element);
         });
     }
+    normalizeYesNoSelectDefaults();
     setupConditionalLogic();
 
     // --- 2. CURRENCY FORMATTING ---
