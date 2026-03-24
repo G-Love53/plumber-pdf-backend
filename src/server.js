@@ -486,10 +486,16 @@ APP.post("/submit-quote", async (req, res) => {
     }
 
     const applicant = (formData.applicant_name || formData.insured_name || "").trim();
-    const segLabel = segment ? segment.toUpperCase() : "CID";
-    const subject =
-      body.email?.subject?.trim()
-      || `CID Submission Packet — ${segLabel}${applicant ? " — " + applicant : ""}`;
+    const submissionPublicId = String(
+      formData.submission_public_id ||
+      body.submission_public_id ||
+      body.submissionPublicId ||
+      "",
+    ).trim();
+    const baseSubject =
+      body.email?.subject?.trim() ||
+      `GL Quote Request - ${applicant || "New Submission"}`;
+    const subject = submissionPublicId ? `[${submissionPublicId}] ${baseSubject}` : baseSubject;
 
     const emailBlock = {
       to,
@@ -505,7 +511,7 @@ APP.post("/submit-quote", async (req, res) => {
     let extraAttachments = [];
     const submissionAttachment = await buildClientSubmissionAttachment({
       segment,
-      submissionPublicId: formData.submission_public_id,
+      submissionPublicId,
       formData,
     });
     if (submissionAttachment) {
