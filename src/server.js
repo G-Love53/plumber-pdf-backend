@@ -13,6 +13,7 @@ import { google } from "googleapis";
 import { sendWithGmail } from "./email.js";
 import { generateDocument } from "./generators/index.js";
 import { normalizeEndorsements } from "./services/endorsements/endorsementNormalizer.js";
+import { getPool, recordSubmission } from "./db.js";
 
 // --- LEG 2 / LEG 3 IMPORTS ---
 import { processInbox } from "./quote-processor.js";
@@ -124,14 +125,29 @@ async function renderTemplatesToAttachments(templateFolders, data) {
 }
 
 async function buildClientSubmissionAttachment({ segment, submissionPublicId, formData }) {
+  if (!submissionPublicId || !segment) {
+    console.log(
+      "[submit-quote] client_submission skipped (missing submissionPublicId or segment)",
+      { submissionPublicId, segment },
+    );
+    return null;
+  }
   try {
     const requestRow = {
       ...(formData || {}),
       segment: segment || SEGMENT,
-      submission_public_id: submissionPublicId || formData?.submission_public_id || "",
+      submission_public_id: submissionPublicId,
       form_id: "CLIENT_SUBMISSION",
     };
+    console.log("[submit-quote] client_submission start", {
+      submissionPublicId,
+      segment: requestRow.segment,
+    });
     const { buffer } = await generateDocument(requestRow);
+    console.log("[submit-quote] client_submission rendered", {
+      submissionPublicId,
+      bytes: buffer?.length || 0,
+    });
     return {
       filename: "Client-Submission.pdf",
       buffer,
@@ -423,7 +439,7 @@ if (
   }
 });
 
-// Submit Quote Endpoint (LEG 1) — CID RSS CANONICAL (same contract as Bar/Roofer)
+// Submit Quote Endpoint (LEG 1) — CID RSS CANONICAL (same DB + subject + PDF contract as Bar)
 APP.post("/submit-quote", async (req, res) => {
   try {
     const body = req.body || {};
@@ -438,6 +454,144 @@ APP.post("/submit-quote", async (req, res) => {
     const bundle_id = body.bundle_id;
     const segments = Array.isArray(body.segments) ? body.segments : [];
     const segment = String(body.segment || process.env.SEGMENT || "").trim().toLowerCase();
+    const forceResubmit = body.force_resubmit === true;
+    const submissionIntent =
+      body.submission_intent === "corrected" || body.submission_intent === "new"
+        ? body.submission_intent
+        : null;
+
+    const pool = getPool();
+    let submissionPublicId = null;
+    let dbResult = null;
+    try {
+      const primaryEmail =
+        formData.contact_email ||
+        formData.email ||
+        formData.applicant_email ||
+        null;
+
+      const businessName =
+        formData.insured_name ||
+        formData.premises_name ||
+        formData.business_name ||
+        null;
+
+      const postalCode =
+        formData.premise_zip ||
+        formData.physical_zip ||
+        formData.zip ||
+        null;
+
+      if (!forceResubmit && pool && (primaryEmail || (businessName && postalCode))) {
+        const dupRes = await pool.query(
+          `
+            SELECT submission_id, submission_public_id
+            FROM submissions
+            WHERE segment = $1::segment_type
+              AND (
+                ($2::text IS NOT NULL AND lower(raw_submission_json->>'contact_email') = lower($2))
+                OR (
+                  $3::text IS NOT NULL
+                  AND $4::text IS NOT NULL
+                  AND lower(COALESCE(raw_submission_json->>'insured_name', raw_submission_json->>'premises_name', raw_submission_json->>'business_name')) = lower($3)
+                  AND COALESCE(raw_submission_json->>'premise_zip', raw_submission_json->>'physical_zip', raw_submission_json->>'zip') = $4
+                )
+              )
+            ORDER BY submission_id DESC
+            LIMIT 1
+          `,
+          [segment || "bar", primaryEmail, businessName, postalCode],
+        );
+
+        if (dupRes.rows.length > 0) {
+          const existing = dupRes.rows[0];
+          submissionPublicId = existing.submission_public_id;
+
+          try {
+            await pool.query(
+              `
+                INSERT INTO timeline_events (
+                  client_id,
+                  submission_id,
+                  event_type,
+                  event_label,
+                  event_payload_json,
+                  created_by
+                )
+                VALUES (
+                  NULL,
+                  $1,
+                  'submission.duplicate_detected',
+                  'Duplicate submission detected (no new outreach triggered)',
+                  $2,
+                  'system'
+                )
+              `,
+              [existing.submission_id, formData],
+            );
+          } catch (timelineErr) {
+            console.error(
+              "[submit-quote] duplicate timeline error:",
+              timelineErr.message || timelineErr,
+            );
+          }
+
+          return res.json({
+            ok: true,
+            success: true,
+            duplicate: true,
+            submission_public_id: submissionPublicId,
+          });
+        }
+      }
+
+      if (primaryEmail) {
+        const sourceDomain =
+          body.site_domain ||
+          req.headers.origin ||
+          req.headers.host ||
+          "unknown";
+
+        const sourceForm = bundle_id || "submit-quote";
+
+        const rawSubmission = {
+          ...formData,
+          segment,
+          bundle_id,
+          site_domain: body.site_domain,
+          submission_intent: submissionIntent,
+        };
+
+        dbResult = await recordSubmission({
+          segment,
+          sourceDomain,
+          sourceForm,
+          rawSubmission,
+          primaryEmail,
+          primaryPhone:
+            formData.business_phone ||
+            formData.applicant_phone ||
+            formData.phone ||
+            null,
+          firstName: formData.first_name || null,
+          lastName: formData.last_name || null,
+        });
+
+        if (dbResult?.submissionPublicId) {
+          submissionPublicId = dbResult.submissionPublicId;
+          console.log("[submit-quote] recorded submission", submissionPublicId);
+        } else {
+          console.log("[submit-quote] recordSubmission returned null (no DB write)");
+        }
+      }
+    } catch (dbErr) {
+      console.error("[submit-quote] DB write failed:", dbErr.message || dbErr);
+    }
+
+    const mergedFormData =
+      submissionPublicId != null
+        ? { ...formData, submission_public_id: submissionPublicId }
+        : { ...formData };
 
     // 1) Resolve template list from bundle_id (preferred) OR segments[] (legacy)
     let templateNames = [];
@@ -462,19 +616,19 @@ APP.post("/submit-quote", async (req, res) => {
 
     // 2) Build templates[] for renderBundleAndRespond
     const templates = templateNames.map((name) => {
-      const resolved = resolveTemplate(name); // keeps your aliasing logic consistent
+      const resolved = resolveTemplate(name);
       return {
         name,
         filename: FILENAME_MAP[resolved] || `${name}.pdf`,
-        data: formData,
+        data: mergedFormData,
       };
     });
 
-    // 3) Email block (canonical)
+    // 3) Email block (canonical — match Bar: default subject + bracket ID suffix)
     const defaultTo = process.env.CARRIER_EMAIL || process.env.GMAIL_USER || process.env.EMAIL_USER;
     const to =
       body.email?.to?.length ? body.email.to
-      : body.email_to ? [body.email_to] // optional backward compat
+      : body.email_to ? [body.email_to]
       : [defaultTo].filter(Boolean);
 
     if (!to.length) {
@@ -485,38 +639,43 @@ APP.post("/submit-quote", async (req, res) => {
       });
     }
 
-    const applicant = (formData.applicant_name || formData.insured_name || "").trim();
-    const submissionPublicId = String(
-      formData.submission_public_id ||
-      body.submission_public_id ||
-      body.submissionPublicId ||
-      "",
-    ).trim();
+    const applicant = (mergedFormData.applicant_name || mergedFormData.insured_name || "").trim();
+    const segLabel = segment ? segment.toUpperCase() : "CID";
     const baseSubject =
       body.email?.subject?.trim() ||
-      `GL Quote Request - ${applicant || "New Submission"}`;
-    const subject = submissionPublicId ? `[${submissionPublicId}] ${baseSubject}` : baseSubject;
+      `CID Submission Packet — ${segLabel}${applicant ? " — " + applicant : ""}`;
+
+    const subject = submissionPublicId
+      ? `${baseSubject} [${submissionPublicId}]`
+      : baseSubject;
 
     const emailBlock = {
       to,
       subject,
-      formData,
+      formData: mergedFormData,
       ...((body.email && typeof body.email === "object") ? body.email : {}),
-      to,       // ensure canonical wins
-      subject,  // ensure canonical wins
-      formData, // ensure canonical wins
+      to,
+      subject,
+      formData: mergedFormData,
     };
 
-    // 4) One call does it all (render + attach + email)
     let extraAttachments = [];
-    const submissionAttachment = await buildClientSubmissionAttachment({
-      segment,
-      submissionPublicId,
-      formData,
-    });
-    if (submissionAttachment) {
-      extraAttachments.push(submissionAttachment);
+    if (submissionPublicId) {
+      const submissionAttachment = await buildClientSubmissionAttachment({
+        segment,
+        submissionPublicId,
+        formData: mergedFormData,
+      });
+      if (submissionAttachment) {
+        extraAttachments.push(submissionAttachment);
+      }
     }
+
+    console.log("[submit-quote] dispatch render/email", {
+      submissionPublicId,
+      templateCount: templates.length,
+      extraAttachmentsCount: extraAttachments.length,
+    });
 
     await renderBundleAndRespond({ templates, email: emailBlock, extraAttachments }, res);
   } catch (e) {

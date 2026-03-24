@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Client Submission <%= data.submission_public_id || "" %></title>
+    <style>
+      body {
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        font-size: 12px;
+        color: #111827;
+        margin: 0;
+        padding: 24px;
+        background: #f9fafb;
+      }
+      h1 {
+        font-size: 18px;
+        margin: 0 0 4px;
+      }
+      h2 {
+        font-size: 14px;
+        margin: 16px 0 6px;
+        border-bottom: 1px solid #e5e7eb;
+        padding-bottom: 2px;
+      }
+      .meta {
+        font-size: 11px;
+        color: #6b7280;
+        margin-bottom: 12px;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: 160px 1fr;
+        gap: 2px 12px;
+      }
+      .label {
+        font-weight: 600;
+        color: #374151;
+      }
+      .value {
+        color: #111827;
+        word-break: break-word;
+      }
+      .section {
+        margin-top: 8px;
+        padding: 8px 10px;
+        background: #ffffff;
+        border-radius: 4px;
+        border: 1px solid #e5e7eb;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Client Submission</h1>
+    <div class="meta">
+      Submission ID:
+      <strong><%= data.submission_public_id || "N/A" %></strong><br />
+      Segment:
+      <strong><%= (data.segment || "bar").toUpperCase() %></strong><br />
+      Captured at:
+      <strong><%= new Date().toISOString() %></strong>
+    </div>
+
+    <div class="section">
+      <h2>Primary Contact</h2>
+      <div class="grid">
+        <div class="label">Business / Premises Name</div>
+        <div class="value">
+          <%= data.premises_name || data.business_name || "" %>
+        </div>
+
+        <div class="label">Contact Name</div>
+        <div class="value">
+          <%= data.contact_name || data.applicant_name || "" %>
+        </div>
+
+        <div class="label">Email</div>
+        <div class="value"><%= data.contact_email || data.email || "" %></div>
+
+        <div class="label">Phone</div>
+        <div class="value">
+          <%= data.business_phone || data.applicant_phone || data.phone || "" %>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Traffic & Source</h2>
+      <div class="grid">
+        <div class="label">Traffic Source</div>
+        <div class="value"><%= data.traffic_source || "" %></div>
+
+        <div class="label">Campaign ID</div>
+        <div class="value"><%= data.campaign_id || "" %></div>
+
+        <div class="label">Site Domain</div>
+        <div class="value"><%= data.site_domain || "" %></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>All Submitted Fields</h2>
+      <div class="grid">
+        <% Object.keys(data || {}).sort().forEach(function(key) { if (key ===
+        "site_domain" || key === "segment" || key === "submission_public_id")
+        return; const value = data[key]; if (value === undefined || value ===
+        null || value === "") return; %>
+        <div class="label"><%= key %></div>
+        <div class="value"><%= String(value) %></div>
+        <% }) %>
+      </div>
+    </div>
+  </body>
+</html>
