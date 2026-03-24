@@ -29,5 +29,12 @@ for (const k of keys) {
   };
 }
 
+// Not under CID_HomeBase/templates; required for /submit-quote Client-Submission.pdf (Bar parity).
+forms.CLIENT_SUBMISSION = {
+  enabled: true,
+  engine: "html",
+  templatePath: "src/templates/submissions/client-submission",
+};
+
 fs.writeFileSync(OUT, JSON.stringify(forms, null, 2) + "\n");
-console.log("OK: wrote", OUT, "keys=", keys.length);
+console.log("OK: wrote", OUT, "keys=", Object.keys(forms).length);
