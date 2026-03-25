@@ -51,6 +51,21 @@ export async function recordSubmission({
   try {
     await client.query("BEGIN");
 
+    // Operator UI prefers a business/entity name; Plumber Netlify forms often do not
+    // submit `first_name`/`last_name`, so fall back to the business-like field.
+    // (We store that as `clients.first_name` so COALESCE(b.business_name, CONCAT_WS(...)) works.)
+    const hasClientName = Boolean(firstName || lastName);
+    const derivedBusinessName = hasClientName
+      ? null
+      : rawSubmission?.business_name ||
+        rawSubmission?.insured_name ||
+        rawSubmission?.premises_name ||
+        rawSubmission?.applicant_name ||
+        null;
+
+    const clientFirst = firstName || derivedBusinessName || null;
+    const clientLast = lastName || null;
+
     const clientRes = await client.query(
       `
         INSERT INTO clients (primary_email, primary_phone, first_name, last_name)
@@ -61,7 +76,7 @@ export async function recordSubmission({
           updated_at    = NOW()
         RETURNING client_id
       `,
-      [primaryEmail, primaryPhone || null, firstName || null, lastName || null],
+      [primaryEmail, primaryPhone || null, clientFirst, clientLast],
     );
 
     const clientId = clientRes.rows[0]?.client_id;
