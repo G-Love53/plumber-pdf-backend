@@ -489,9 +489,30 @@ APP.post("/submit-quote", async (req, res) => {
             FROM submissions
             WHERE segment = $1::segment_type
               AND (
-                ($2::text IS NOT NULL AND lower(raw_submission_json->>'contact_email') = lower($2))
-                OR (
+                (
                   $3::text IS NOT NULL
+                  AND (
+                    lower(COALESCE(raw_submission_json->>'insured_name', raw_submission_json->>'premises_name', raw_submission_json->>'business_name')) = lower($3)
+                    OR lower(COALESCE(raw_submission_json->>'business_name', raw_submission_json->>'insured_name', raw_submission_json->>'premises_name')) = lower($3)
+                  )
+                  AND (
+                    $2::text IS NULL
+                    OR lower(
+                      COALESCE(
+                        raw_submission_json->>'contact_email',
+                        raw_submission_json->>'email',
+                        raw_submission_json->>'applicant_email'
+                      )
+                    ) = lower($2)
+                  )
+                  AND (
+                    $4::text IS NULL
+                    OR COALESCE(raw_submission_json->>'premise_zip', raw_submission_json->>'physical_zip', raw_submission_json->>'zip') = $4
+                  )
+                )
+                OR (
+                  $2::text IS NULL
+                  AND $3::text IS NOT NULL
                   AND $4::text IS NOT NULL
                   AND lower(COALESCE(raw_submission_json->>'insured_name', raw_submission_json->>'premises_name', raw_submission_json->>'business_name')) = lower($3)
                   AND COALESCE(raw_submission_json->>'premise_zip', raw_submission_json->>'physical_zip', raw_submission_json->>'zip') = $4
