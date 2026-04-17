@@ -552,25 +552,45 @@
                 <div class="two-column">
                     <div>
                         <label class="required">Do you hire subcontractors?</label>
-                        <select name="hire_subs" required><option value="No">No</option><option value="Yes">Yes</option></select>
+                        <select name="hire_subs" required>
+                            <option value="">-- Select --</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
                     </div>
                     <div>
                         <label class="required">Require COIs before starting?</label>
-                        <select name="subs_require_coi" required><option value="Yes">Yes</option><option value="No">No</option></select>
+                        <select name="subs_require_coi" required>
+                            <option value="">-- Select --</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
                     </div>
                 </div>
 
                 <label>Do you utilize written contracts with all subs including indemnification/hold harmless in your favor?</label>
-                <select name="subs_contracts_holdharmless" required><option value="Yes">Yes</option><option value="No">No</option></select>
+                <select name="subs_contracts_holdharmless" required>
+                    <option value="">-- Select --</option>
+                    <option value="Yes">Yes</option>
+                    <option value="No">No</option>
+                </select>
 
                 <div class="two-column">
                     <div>
                         <label class="required">Use 1099 laborers?</label>
-                        <select name="use_independent_contractors" data-conditional="use_independent_contractors" required><option value="No">No</option><option value="Yes">Yes</option></select>
+                        <select name="use_independent_contractors" data-conditional="use_independent_contractors" required>
+                            <option value="">-- Select --</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
                     </div>
                     <div>
                         <label class="required">Carry Workers Comp?</label>
-                        <select name="carry_workers_comp" required><option value="Yes">Yes</option><option value="No">No</option></select>
+                        <select name="carry_workers_comp" required>
+                            <option value="">-- Select --</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
                     </div>
                 </div>
                 
@@ -586,8 +606,9 @@
             <div>
                 <label>Any known loss/claim involving mold or construction defect?</label>
                 <select name="mold_defect_losses" data-conditional="mold_defect_losses">
-                    <option value="No">No</option>
+                    <option value="">-- Select --</option>
                     <option value="Yes">Yes</option>
+                    <option value="No">No</option>
                 </select>
                 <div class="conditional-section" data-show-when="mold_defect_losses=Yes">
                     <label>Please describe:</label>
@@ -597,22 +618,38 @@
                 <div class="two-column">
                     <div>
                         <label>Perform fire/water restoration?</label>
-                        <select name="fire_water_restoration"><option value="No">No</option><option value="Yes">Yes</option></select>
+                        <select name="fire_water_restoration">
+                            <option value="">-- Select --</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
                     </div>
                     <div>
                         <label>Handle hazardous materials?</label>
-                        <select name="hazardous_materials_handling"><option value="No">No</option><option value="Yes">Yes</option></select>
+                        <select name="hazardous_materials_handling">
+                            <option value="">-- Select --</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
                     </div>
                 </div>
 
                 <div class="two-column">
                     <div>
                         <label>Perform Roofing?</label>
-                        <select name="roofing_operations"><option value="No">No</option><option value="Yes">Yes</option></select>
+                        <select name="roofing_operations">
+                            <option value="">-- Select --</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
                     </div>
                     <div>
                         <label>Perform HVAC work?</label>
-                        <select name="hvac_operations"><option value="No">No</option><option value="Yes">Yes</option></select>
+                        <select name="hvac_operations">
+                            <option value="">-- Select --</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
                     </div>
                 </div>
 
@@ -632,8 +669,9 @@
 
                 <label>Any GL claims in the last 3 years?</label>
                 <select name="claims_3_years" data-conditional="claims_3_years">
-                    <option value="No">No</option>
+                    <option value="">-- Select --</option>
                     <option value="Yes">Yes</option>
+                    <option value="No">No</option>
                 </select>
                 <div class="conditional-section" data-show-when="claims_3_years=Yes">
                     <label>Please describe claims:</label>
@@ -642,8 +680,9 @@
 
                 <label>Would you like a Workers Comp Quote?</label>
                 <select name="workers_comp_quote" data-conditional="workers_comp_quote">
-                    <option value="No">No</option>
+                    <option value="">-- Select --</option>
                     <option value="Yes">Yes</option>
+                    <option value="No">No</option>
                 </select>
                 <div class="conditional-section" data-show-when="workers_comp_quote=Yes">
                     <div class="two-column">
