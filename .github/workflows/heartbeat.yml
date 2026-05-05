@@ -6,10 +6,33 @@ on:
     - cron: '*/10 * * * *'
   workflow_dispatch:
 
+concurrency:
+  group: heartbeat-wake-up-service
+  cancel-in-progress: false
+
 jobs:
   wake-up-service:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - name: Poke the Robot
-        # REPLACE THIS with your specific Render URL
-        run: curl -X POST https://plumber-pdf-backend.onrender.com/check-quotes
+        env:
+          HEARTBEAT_URL: https://plumber-pdf-backend.onrender.com/check-quotes
+        run: |
+          set -euo pipefail
+
+          echo "Sending heartbeat to ${HEARTBEAT_URL}"
+          # Harden against transient network/cold-start hiccups:
+          # - fail on HTTP 4xx/5xx
+          # - cap total request time
+          # - retry with backoff before failing the workflow
+          curl --request POST "${HEARTBEAT_URL}" \
+            --fail \
+            --silent \
+            --show-error \
+            --connect-timeout 10 \
+            --max-time 60 \
+            --retry 3 \
+            --retry-delay 5 \
+            --retry-max-time 90 \
+            --retry-all-errors
