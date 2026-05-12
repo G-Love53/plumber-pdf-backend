@@ -95,6 +95,7 @@
     input[type="text"],
     input[type="email"],
     input[type="tel"],
+    input[type="url"],
     input[type="date"],
     input[type="number"],
     select,
@@ -229,6 +230,10 @@
         margin-top: 40px;
         color: #888;
         font-size: 0.85em;
+    }
+    .footer-text a {
+        color: #ea580c;
+        font-weight: 600;
     }
     
     /* TOTALS WARNING */
@@ -375,6 +380,8 @@
                         <input name="contact_email" required type="email"/>
                     </div>
                 </div>
+                <label>Web Address</label>
+                <input name="web_address" type="url"/>
 
                 <div class="two-column">
                     <div>
@@ -772,7 +779,8 @@
 
     <div class="footer-text">
         © Commercial Insurance Direct LLC, 2025. All rights reserved.<br>
-        Your information is secure and will never be shared.
+        Your information is secure and will never be shared.<br>
+        <a href="https://barinsurancedirect.com/privacy" rel="noopener noreferrer">Privacy Policy</a>
     </div>
 </div>
 
@@ -1015,5 +1023,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 </script>
+<!-- Connect renewal: load prior intake from CID-PDF-API when ?renewal_token= is present -->
+<script src="https://cid-pdf-api.onrender.com/static/renewal-intake-prefill.js" defer></script>
 </body>
 </html>
