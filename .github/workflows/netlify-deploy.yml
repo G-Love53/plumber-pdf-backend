@@ -1,0 +1,39 @@
+# RSS: git push → Netlify publish Netlify/ (same as fitness-pdf-backend).
+# One-time setup in GitHub repo Settings → Secrets:
+#   NETLIFY_AUTH_TOKEN — Netlify user settings → OAuth / personal access token
+#   NETLIFY_SITE_ID    — Site configuration → Site details → API ID
+name: Deploy Netlify intake
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "Netlify/**"
+      - "netlify.toml"
+  workflow_dispatch:
+
+concurrency:
+  group: netlify-plumber-intake
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy to Netlify
+        uses: nwtgck/actions-netlify@v3.0
+        with:
+          publish-dir: ./Netlify
+          production-branch: main
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          deploy-message: "GitHub Actions deploy ${{ github.sha }}"
+          enable-pull-request-comment: false
+          enable-commit-comment: false
+          overwrites-pull-request-comment: false
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+        timeout-minutes: 5

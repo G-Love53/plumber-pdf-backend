@@ -1,8 +1,3 @@
-# Plumber segment Netlify: publish dir (matches electrical / fitness)
+# Plumber segment Netlify — git-connected auto-deploy (RSS: same as fitness / electrical)
 [build]
   publish = "Netlify"
-
-[[redirects]]
-  from = "/connectquote.html"
-  to = "https://cid-pdf-api.onrender.com/connectquote/plumber.html"
-  status = 302
