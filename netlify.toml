@@ -1,0 +1,3 @@
+# Plumber segment Netlify: publish dir (matches electrical / fitness)
+[build]
+  publish = "Netlify"
