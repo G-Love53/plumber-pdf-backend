@@ -1,3 +1,8 @@
 # Plumber segment Netlify: publish dir (matches electrical / fitness)
 [build]
   publish = "Netlify"
+
+[[redirects]]
+  from = "/connectquote.html"
+  to = "https://cid-pdf-api.onrender.com/connectquote/plumber.html"
+  status = 302
