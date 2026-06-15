@@ -1,3 +1,15 @@
-# Plumber segment Netlify — git-connected auto-deploy (RSS: same as fitness / electrical)
+# ConnectQuote-first: root and /quote → instant intake (long-form stays at /index.html)
 [build]
   publish = "Netlify"
+
+[[redirects]]
+  from = "/"
+  to = "/connectquote.html"
+  status = 302
+  force = true
+
+[[redirects]]
+  from = "/quote"
+  to = "/connectquote.html"
+  status = 302
+  query = ":query"
