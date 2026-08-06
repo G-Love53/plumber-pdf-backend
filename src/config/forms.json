@@ -58,5 +58,10 @@
     "enabled": true,
     "engine": "svg",
     "templatePath": "CID_HomeBase/templates/SUPP_ROOFER"
+  },
+  "CLIENT_SUBMISSION": {
+    "enabled": true,
+    "engine": "html",
+    "templatePath": "src/templates/submissions/client-submission"
   }
 }
