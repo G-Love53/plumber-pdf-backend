@@ -4,22 +4,24 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>Plumber Insurance Direct — Instant Quote (ConnectQuote)</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23ea580c'/%3E%3Ctext x='16' y='22' text-anchor='middle' font-size='18' fill='white'%3E🔧%3C/text%3E%3C/svg%3E"/>
   <script src="https://js.stripe.com/v3/"></script>
-  <link rel="stylesheet" href="https://cid-pdf-api.onrender.com/static/connectquote-intake.css?v=20260806a"/>
+  <link rel="stylesheet" href="https://cid-pdf-api.onrender.com/static/connectquote-intake.css?v=20260817a"/>
   <style>
-    :root { --brand: #2563eb; --brand-dark: #1d4ed8; --navy: #1B3A5F; }
+    :root { --brand: #ea580c; --brand-dark: #c2410c; --brand-cta: #ff8c1a; --navy: #1B3A5F; }
     * { box-sizing: border-box; }
-    body { font-family: Arial, sans-serif; margin: 0; background: #f3f4f6; color: #111; }
+    body { font-family: Arial, sans-serif; margin: 0; background: #f8f8f8; color: #333; }
     .wrap { max-width: 720px; margin: 0 auto; padding: 20px; }
-    .card { background: #fff; border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,.08); padding: 24px; margin-bottom: 16px; }
-    h1 { color: var(--brand); margin: 0 0 8px; font-size: 1.75rem; }
-    .sub { color: #555; margin-bottom: 20px; }
+    .card { background: #fff; border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,.08); padding: 24px; margin-bottom: 16px; overflow: hidden; }
+    .brand-banner { display: block; width: calc(100% + 48px); max-width: none; margin: -24px -24px 20px; height: auto; }
+    h1 { color: var(--brand); margin: 0 0 8px; font-size: 1.75rem; text-align: center; }
+    .sub { color: #666; margin-bottom: 20px; text-align: center; }
     label { display: block; font-weight: 600; margin: 12px 0 4px; font-size: .9rem; }
     input, select { width: 100%; padding: 10px 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1rem; }
-    input.prefilled { background: #eff6ff; border-color: #93c5fd; }
+    input.prefilled, select.prefilled { background: #fff7ed; border-color: #fdba74; }
     .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     @media (max-width: 600px) { .row { grid-template-columns: 1fr; } }
-    button { background: linear-gradient(135deg, #3b82f6, var(--brand)); color: #fff; border: 0; padding: 14px 20px; border-radius: 8px; font-size: 1rem; font-weight: 700; cursor: pointer; width: 100%; margin-top: 16px; }
+    button { background: linear-gradient(135deg, #f97316, var(--brand)); color: #fff; border: 0; padding: 14px 20px; border-radius: 8px; font-size: 1rem; font-weight: 700; cursor: pointer; width: 100%; margin-top: 16px; }
     button:disabled { opacity: .6; cursor: not-allowed; }
     button.secondary { background: var(--navy); margin-top: 8px; }
     .quote-box { background: #f0fdf4; border: 2px solid #86efac; border-radius: 10px; padding: 16px; display: none; }
@@ -39,7 +41,8 @@
 <body>
 <div class="wrap">
   <div class="card">
-    <h1>Plumber Insurance Direct</h1>
+    <img class="brand-banner" src="/email/archive/2026-08-connect-v1/CID_Plumber_Creative.jpg" width="720" alt="Plumber Insurance Direct — Quote in 30 seconds. Covered in under a minute."/>
+    <h1>🔧 Plumber Insurance Direct</h1>
     <p class="sub" id="bridge-text">Colorado plumbing business owners — instant quote in minutes.</p>
 
     <form id="cq-form">
@@ -139,6 +142,6 @@ window.CONNECTQUOTE = {
   api: "https://cid-pdf-api.onrender.com"
 };
 </script>
-<script src="https://cid-pdf-api.onrender.com/static/connectquote-intake.js?v=20260806a"></script>
+<script src="https://cid-pdf-api.onrender.com/static/connectquote-intake.js?v=20260817a"></script>
 </body>
 </html>
