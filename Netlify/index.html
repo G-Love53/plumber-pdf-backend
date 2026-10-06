@@ -830,7 +830,7 @@ document.addEventListener("DOMContentLoaded", function () {
         // Tracking fields
         const srcField = document.getElementById("traffic_source");
         const cidField = document.getElementById("campaign_id");
-        if (srcField) srcField.value = params.get("src") || "direct";
+        if (srcField) srcField.value = params.get("ch") || params.get("src") || "direct";
         if (cidField) cidField.value = params.get("cid") || "";
 
         // Bridge text update if we have good prefill coverage
